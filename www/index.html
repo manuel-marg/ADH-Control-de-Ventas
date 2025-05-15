@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+    <head>
+        <meta charset="utf-8">
+        <!--
+        Customize this policy to fit your own app's needs. For more guidance, please refer to the docs:
+            https://cordova.apache.org/docs/en/latest/
+        Some notes:
+            * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+            * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+                * Enable inline JS: add 'unsafe-inline' to default-src
+        -->
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="lib/sweetalert2/sweetalert2.min.css">
+    <title>ADH Control de Ventas</title>
+</head>
+<body>
+    <div id="app"> <!-- Este ID #app es usado por el CSS para centrar el contenido de login/registro -->
+        <!-- Login Section -->
+        <div id="login-section">
+                <div class="logo-container">
+                    <img src="img/Logo.png" alt="Logo ADH" id="login-logo">
+                </div>
+                <h2>Login</h2>
+                <input type="text" id="username" placeholder="Usuario"><br>
+                <input type="password" id="password" placeholder="Contraseña"><br>
+                <button id="login-button">Iniciar Sesión</button>
+                <p><a href="registro.html" id="register-link">Registrarse</a></p>
+            </div>
+
+            <!-- Menu Section -->
+            <div id="menu-section" style="display:none;">
+                <h2>Menú</h2>
+                <button id="ventas-button">Registrar Ventas</button><br>
+                <button id="inventario-button">Ver Inventario</button><br>
+                <button id="tasa-button">Fijar Tasa $</button>
+                <button id="gestionar-inventario-button">Gestionar Inventario</button>
+                <button id="logout-button">Cerrar Sesión</button>
+            </div>
+
+            <!-- Ventas Section -->
+            <div id="ventas-section" style="display:none;">
+                <h2>Registrar Ventas</h2>
+                <div id="tasa-display-ventas" style="text-align: right; margin-bottom: 10px;">Tasa $: <span>N/A</span></div>
+                <div id="productos-disponibles-ventas" style="height: 60vh; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+                    <!-- Los productos disponibles se cargarán aquí -->
+                    <p>Cargando productos...</p>
+                </div>
+                <div id="productos-seleccionados-ventas" style="height: 20vh; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                    <h3>Productos Seleccionados</h3>
+                    <ul id="lista-productos-seleccionados">
+                        <!-- Los productos seleccionados se mostrarán aquí -->
+                    </ul>
+                </div>
+                <div id="total-venta" style="text-align: right; margin-top: 10px; font-weight: bold;">
+                    Total $: <span id="total-venta-usd">0.00</span> | Total Bs: <span id="total-venta-bs">0.00</span>
+                </div>
+                <div style="margin-top: 10px;">
+                    <label for="metodo-pago">Método de Pago:</label>
+                    <select id="metodo-pago">
+                        <option value="usd">$ USD</option>
+                        <option value="bs">Bs</option>
+                    </select>
+                </div>
+                <button id="registrar-venta-button" style="margin-top: 15px;">Registrar Venta</button>
+                <button id="volver-menu-ventas-button" style="margin-top: 10px; background-color: #777;">Volver al Menú</button>
+            </div>
+
+            <!-- Inventario Section -->
+            <div id="inventario-section" style="display:none;">
+                <h2>Ver Inventario</h2>
+                <!-- Inventory display will go here -->
+            </div>
+
+            <!-- Gestionar Inventario Section -->
+            <div id="gestionar-inventario-section" style="display:none;">
+                <h2>Gestionar Inventario</h2>
+                <!-- Add, Edit, Delete inventory items will go here -->
+            </div>
+
+            <!-- Tasa Section -->
+            <div id="tasa-section" style="display:none;">
+                <h2>Fijar Tasa $</h2>
+                <input type="number" id="tasa-input" placeholder="Tasa del Dólar"><br>
+                <button id="tasa-button-save">Guardar Tasa</button>
+            </div>
+        </div>
+        <script src="cordova.js"></script>
+        <script src="lib/sweetalert2/sweetalert2.min.js"></script>
+        <script src="js/index.js"></script>
+    </body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!-- CSP actualizada para fuentes locales -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https:; style-src 'self' 'unsafe-inline'; media-src *">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="lib/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="lib/sweetalert2/sweetalert2.min.css">
+    <title>Registrar Venta - ADH Control de Ventas</title>
+</head>
+<body>
+    <div id="app-container">
+        <!-- Ventas Section -->
+        <div id="ventas-section">
+            <!-- <h2 class="navbar-h2">Registrar Ventas</h2> Título eliminado -->
+            <div id="tasa-display-ventas" style="text-align: center; margin-bottom: 10px; padding-top: 10px; margin-left: 65%;font-weight: bold;">Tasa $: <span>N/A</span></div> <!-- Añadido padding-top para compensar el espacio del h2 -->
+            <div id="productos-disponibles-ventas" style="height: 60vh; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+                <p>Cargando productos...</p>
+            </div>
+            <div id="productos-seleccionados-ventas" style="height: 20vh; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                <h3>Productos Seleccionados</h3>
+                <ul id="lista-productos-seleccionados">
+                </ul>
+            </div>
+            <div id="total-venta" style="text-align: right; margin-top: 10px; font-weight: bold;">
+                Total $: <span id="total-venta-usd">0.00</span> | Total Bs: <span id="total-venta-bs">0.00</span>
+            </div>
+            <div style="margin-top: 10px;">
+                <label for="metodo-pago">Método de Pago:</label>
+                <select id="metodo-pago">
+                    <option value="Efectivo ($)">Efectivo ($)</option>
+                    <option value="Punto de venta (Bs)">Punto de venta (Bs)</option>
+                </select>
+            </div>
+                <button id="registrar-venta-button" style="margin-top: 15px;">Registrar Venta</button>
+                <!-- Botón Volver al Menú eliminado -->
+        </div>
+    </div>
+    <script src="cordova.js"></script>
+    <script src="lib/sweetalert2/sweetalert2.min.js"></script>
+    <script src="js/ventas.js"></script>
+</body>
+</html>

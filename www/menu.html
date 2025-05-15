@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!-- CSP actualizada para fuentes locales -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; font-src 'self'; media-src *; img-src 'self' data: content:;">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="lib/font-awesome/css/font-awesome.min.css">
+    <title>Menú - ADH Control de Ventas</title>
+    <style>
+        #menu-section {
+            /* padding-top: 20px; */ /* Eliminado */
+        }
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* Dos columnas */
+            gap: 15px; /* Espacio entre botones */
+            margin-bottom: 15px;
+        }
+        .menu-button {
+            display: flex;
+            flex-direction: column; /* Icono arriba, texto abajo */
+            align-items: center; /* Centrar contenido horizontalmente */
+            justify-content: center; /* Centrar contenido verticalmente */
+            padding: 20px 10px; /* Más padding vertical */
+            font-size: 0.9em; /* Ajustar tamaño de fuente del texto si es necesario */
+            text-align: center;
+            border: 1px solid #1c3a8a; /* Borde azul oscuro */
+            border-radius: 8px;
+            background-color: #20429a; /* Fondo azul principal */
+            color: white; /* Texto blanco */
+            cursor: pointer;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            min-height: 120px; /* Altura mínima para botones grandes */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Sombra sutil */
+        }
+        .menu-button:hover {
+            background-color: #1c3a8a; /* Azul más oscuro al pasar el mouse */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .menu-button .fa {
+            font-size: 3.5em; /* Iconos más grandes */
+            margin-bottom: 10px; /* Espacio entre icono y texto */
+            color: white; /* Icono blanco */
+        }
+        .menu-button span {
+            display: block; /* Asegurar que el texto esté en su propia línea */
+        }
+        /* Botón de logout puede ocupar todo el ancho o ser estilizado diferente si es necesario */
+        #logout-button-container {
+            margin-top: 10px; /* Espacio antes del botón de logout */
+        }
+        #logout-button {
+             background-color: #d9534f; /* Color rojo para logout */
+             border-color: #d43f3a;
+             color: white;
+             width: 100%; /* Ocupa todo el ancho */
+             padding: 15px;
+             font-size: 1em;
+        }
+        #logout-button .fa {
+            margin-right: 8px;
+            color: white;
+        }
+        #logout-button:hover {
+            background-color: #c9302c;
+        }
+
+        /* Responsive: para pantallas muy pequeñas, una columna */
+        @media (max-width: 360px) {
+            .menu-grid {
+                grid-template-columns: 1fr; /* Una columna */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <div id="menu-section">
+            <h2 class="navbar-h2">Menú Principal</h2>
+            
+            <div class="menu-grid">
+                <button id="ventas-link-button" class="menu-button">
+                    <i class="fa fa-cart-plus"></i>
+                    <span>Registrar Ventas</span>
+                </button>
+                <button id="tasa-link-button" class="menu-button">
+                    <i class="fa fa-dollar"></i>
+                    <span>Fijar Tasa</span>
+                </button>
+                <button id="gestionar-inventario-link-button" class="menu-button">
+                    <i class="fa fa-archive"></i>
+                    <span>Gestionar Inventario</span>
+                </button>
+                <button id="historial-ventas-link-button" class="menu-button">
+                    <i class="fa fa-history"></i>
+                    <span>Historial de Ventas</span>
+                </button>
+            </div>
+
+            <div id="logout-button-container">
+                <button id="logout-button">
+                    <i class="fa fa-sign-out"></i>
+                    <span>Cerrar Sesión</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+    <script src="cordova.js"></script>
+    <script src="js/menu.js"></script>
+</body>
+</html>

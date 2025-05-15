@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
+    <link rel="stylesheet" href="css/index.css">
+    <title>Ver Inventario - ADH Control de Ventas</title>
+</head>
+<body>
+    <div id="app-container">
+        <div id="inventario-section">
+            <h2>Ver Inventario</h2>
+            <div id="lista-inventario" style="padding: 10px; border: 1px solid #ccc; margin-bottom: 10px; min-height: 50vh; overflow-y: auto;">
+                <!-- Inventory items will be listed here -->
+            </div>
+            <button id="volver-menu-inventario-button" style="margin-top: 10px; background-color: #777;">Volver al Menú</button>
+        </div>
+    </div>
+    <script src="cordova.js"></script>
+    <script src="js/inventario.js"></script>
+</body>
+</html>
