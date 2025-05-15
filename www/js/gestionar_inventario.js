@@ -233,10 +233,39 @@ if (guardarProductoButtonPage) {
             limpiarFormularioProductoPage();
         };
 
+        const resizeImage = (base64, maxWidth = 100, maxHeight = 100) => {
+            return new Promise((resolve) => {
+                let img = new Image();
+                img.src = base64;
+                img.onload = () => {
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxWidth) {
+                        height *= maxWidth / width;
+                        width = maxWidth;
+                    }
+
+                    if (height > maxHeight) {
+                        width *= maxHeight / height;
+                        height = maxHeight;
+                    }
+
+                    let canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    let ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/png'));
+                }
+            });
+        };
+
         if (fotoFile) {
             const reader = new FileReader();
-            reader.onloadend = function() {
-                guardarProductoConFoto(reader.result);
+            reader.onloadend = async function() {
+                const resizedImage = await resizeImage(reader.result);
+                guardarProductoConFoto(resizedImage);
             }
             reader.readAsDataURL(fotoFile);
         } else {
