@@ -16,4 +16,12 @@
     <allow-intent href="geo:*" />
     <allow-intent href="https://docs.google.com/*" />
     <allow-navigation href="*" />
+    <platform name="android">
+        <icon src="www/img/android/icon-36-ldpi.png" density="ldpi" />
+        <icon src="www/img/android/icon-48-mdpi.png" density="mdpi" />
+        <icon src="www/img/android/icon-72-hdpi.png" density="hdpi" />
+        <icon src="www/img/android/icon-96-xhdpi.png" density="xhdpi" />
+        <icon src="www/img/android/icon-144-xxhdpi.png" density="xxhdpi" />
+        <icon src="www/img/android/icon-192-xxxhdpi.png" density="xxxhdpi" />
+    </platform>
 </widget>
