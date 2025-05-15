@@ -146,49 +146,67 @@ if (registrarVentaButtonPage) {
         });
         localStorage.setItem('productos', JSON.stringify(ventasProductosDisponibles));
 
-        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+const currentUser = JSON.parse(localStorage.getItem('currentUser'));
         const usuarioVenta = currentUser ? currentUser.username : 'Desconocido';
 
-        let ventasRegistradas = JSON.parse(localStorage.getItem('ventasRegistradas')) || [];
+        let ventasTemp = JSON.parse(localStorage.getItem('ventasTemp')) || [];
         const nuevaVenta = {
             fecha: new Date().toISOString(),
-            usuario: usuarioVenta, // Añadir el usuario que registra la venta
+            usuario: usuarioVenta,
             items: [...ventasProductosSeleccionados],
             totalUSD: parseFloat(totalVentaUsdSpanPage.textContent),
             totalBS: parseFloat(totalVentaBsSpanPage.textContent),
             metodoPago: metodoPago
         };
-        ventasRegistradas.push(nuevaVenta);
-        try {
-            localStorage.setItem('ventasRegistradas', JSON.stringify(ventasRegistradas));
-        } catch (e) {
-            if (e instanceof DOMException && e.name === 'QuotaExceededError') {
-                console.error('Error: Se excedió la cuota de almacenamiento local.');
-            }
-        }
 
-        // Construir la cadena de productos
-        const productosString = nuevaVenta.items.map(item => `${item.nombre} x ${item.cantidad}`).join(', ');
-
-        // Construir la URL de la petición GET
-        const url = `https://docs.google.com/forms/d/e/1FAIpQLSc2F9aUxdAUatdoUM6L-f92eh9W4SX5n3M0XuRt76guyt-UHQ/formResponse?usp=pp_url&entry.625195464=${nuevaVenta.fecha}&entry.1134916832=${usuarioVenta}&entry.773060726=${nuevaVenta.metodoPago}&entry.2067765280=${productosString}&entry.1267682030=${nuevaVenta.totalUSD}&entry.1216241302=${nuevaVenta.totalBS}`;
-
-        // Reemplazar la URL original con la URL a través del proxy
-        const proxyUrl = "https://corsproxy.io/?url=" + encodeURIComponent(url);
-
-        // Realizar la petición GET con fetch nativo
-        fetch(proxyUrl)
-            .then(response => {
-                console.log('Venta enviada a Google Forms correctamente.');
-                console.log(response.status);
-                return response.text(); // Obtener el cuerpo de la respuesta como texto
+        // Intentar enviar la venta a Google Forms
+        enviarVentaAGoogleForms(nuevaVenta)
+            .then(() => {
+                // Si la venta se envía correctamente, no se guarda en ventasTemp
+                console.log('Venta enviada correctamente a Google Forms.');
             })
-            .then(body => {
-                console.log(body); // Mostrar el cuerpo de la respuesta (puede ser HTML, texto, etc.)
-            })
-            .catch(error => {
+            .catch((error) => {
+                // Si hay un error al enviar la venta, se guarda en ventasTemp
                 console.error('Error al enviar la venta a Google Forms:', error);
+                ventasTemp.push(nuevaVenta);
+                localStorage.setItem('ventasTemp', JSON.stringify(ventasTemp));
             });
+
+        // Mostrar mensaje de éxito
+        Swal.fire({
+            icon: 'success',
+            title: '¡Venta Registrada!',
+            text: `$${totalVentaUsdSpanPage.textContent}`,
+            confirmButtonColor: '#20429a'
+        });
+        initializeVentas(); // Reset the sales page
+
+function enviarVentaAGoogleForms(venta) {
+    // Construir la cadena de productos
+    const productosString = venta.items.map(item => `${item.nombre} x ${item.cantidad}`).join(', ');
+
+    // Construir la URL de la petición GET
+    const url = `https://docs.google.com/forms/d/e/1FAIpQLSc2F9aUxdAUatdoUM6L-f92eh9W4SX5n3M0XuRt76guyt-UHQ/formResponse?usp=pp_url&entry.625195464=${venta.fecha}&entry.1134916832=${venta.usuario}&entry.773060726=${venta.metodoPago}&entry.2067765280=${productosString}&entry.1267682030=${venta.totalUSD}&entry.1216241302=${venta.totalBS}`;
+
+    // Reemplazar la URL original con la URL a través del proxy
+    const proxyUrl = "https://corsproxy.io/?url=" + encodeURIComponent(url);
+
+    // Realizar la petición GET con fetch nativo
+    return fetch(proxyUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.text(); // Obtener el cuerpo de la respuesta como texto
+        })
+        .then(body => {
+            console.log(body); // Mostrar el cuerpo de la respuesta (puede ser HTML, texto, etc.)
+        })
+        .catch(error => {
+            console.error('Error al enviar la venta a Google Forms:', error);
+            throw error; // Re-lanzar el error para que el llamado pueda manejarlo
+        });
+}
 
         // Mostrar mensaje de éxito
         Swal.fire({

@@ -10,16 +10,16 @@ function onDeviceReadyHistorial() {
 
 const listaHistorialVentasDiv = document.getElementById('lista-historial-ventas');
 const eliminarHistorialButton = document.getElementById('eliminar-historial-button');
-// const volverMenuHistorialButton = document.getElementById('volver-menu-historial-button'); // Botón eliminado
+// const volverMenuHistorialButton = document.getElementById('volver-menu-historial-button'); // Botón eliminado del HTML
 
 function cargarHistorialVentas() {
     if (!listaHistorialVentasDiv) return;
     listaHistorialVentasDiv.innerHTML = ''; // Limpiar contenido previo
 
-    const ventasRegistradas = JSON.parse(localStorage.getItem('ventasRegistradas')) || [];
+    const ventasTemp = JSON.parse(localStorage.getItem('ventasTemp')) || [];
 
-    if (ventasRegistradas.length === 0) {
-        listaHistorialVentasDiv.innerHTML = '<p>No hay ventas registradas.</p>';
+if (ventasTemp.length === 0) {
+        listaHistorialVentasDiv.innerHTML = '<p style="text-align: center;">Si no ve ninguna venta aquí, ¡felicidades! Significa que todas las ventas temporales se han subido exitosamente a la hoja de Google.</p>';
         return;
     }
 
@@ -28,7 +28,7 @@ function cargarHistorialVentas() {
     ul.style.padding = '0';
 
     // Mostrar ventas en orden cronológico inverso (más recientes primero)
-    ventasRegistradas.slice().reverse().forEach((venta, index) => {
+    ventasTemp.slice().reverse().forEach((venta, index) => {
         const li = document.createElement('li');
         li.style.borderBottom = '1px solid #eee';
         li.style.padding = '10px 0';
@@ -72,30 +72,79 @@ function cargarHistorialVentas() {
 //     });
 // }
 
-if (eliminarHistorialButton) {
-    eliminarHistorialButton.addEventListener('click', () => {
+const subirHistorialButton = document.getElementById('subir-historial-button');
+if (subirHistorialButton) {
+    subirHistorialButton.addEventListener('click', () => {
         Swal.fire({
             title: '¿Estás seguro?',
-            text: "¡No podrás revertir esto!",
-            icon: 'warning',
+            text: "¿Deseas intentar subir las ventas temporales a Google Forms?",
+            icon: 'info',
             showCancelButton: true,
             confirmButtonColor: '#20429a', // Azul de marca
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Sí, ¡eliminarlo!',
+            confirmButtonText: 'Subir',
             cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
-                localStorage.removeItem('ventasRegistradas');
-                cargarHistorialVentas(); 
+                subirVentasTemporales();
                 Swal.fire(
-                    '¡Eliminado!',
-                    'El historial de ventas ha sido eliminado.',
-                    'success'
+                    '¡Subiendo!',
+                    'Intentando subir las ventas temporales a Google Forms.',
+                    'info'
                 );
             }
         });
     });
 }
 
-// Llamar a la función de carga al inicio, después de que el DOM esté listo
-document.addEventListener('DOMContentLoaded', cargarHistorialVentas);
+function subirVentasTemporales() {
+    const ventasTemp = JSON.parse(localStorage.getItem('ventasTemp')) || [];
+    if (ventasTemp.length === 0) {
+        Swal.fire(
+            '¡Nada que subir!',
+            'No hay ventas temporales para subir.',
+            'info'
+        );
+        return;
+    }
+
+    ventasTemp.forEach(venta => {
+        enviarVentaAGoogleForms(venta);
+    });
+
+    // Simulación de envío exitoso
+    localStorage.removeItem('ventasTemp');
+    cargarHistorialVentas();
+    Swal.fire(
+        '¡Subido!',
+        'Las ventas temporales han sido subidas exitosamente.',
+        'success'
+    );
+}
+
+function enviarVentaAGoogleForms(venta) {
+    // Construir la cadena de productos
+    const productosString = venta.items.map(item => `${item.nombre} x ${item.cantidad}`).join(', ');
+
+    // Construir la URL de la petición GET
+    const url = `https://docs.google.com/forms/d/e/1FAIpQLSc2F9aUxdAUatdoUM6L-f92eh9W4SX5n3M0XuRt76guyt-UHQ/formResponse?usp=pp_url&entry.625195464=${venta.fecha}&entry.1134916832=${venta.usuario}&entry.773060726=${venta.metodoPago}&entry.2067765280=${productosString}&entry.1267682030=${venta.totalUSD}&entry.1216241302=${venta.totalBS}`;
+
+    // Reemplazar la URL original con la URL a través del proxy
+    const proxyUrl = "https://corsproxy.io/?url=" + encodeURIComponent(url);
+
+    // Realizar la petición GET con fetch nativo
+    return fetch(proxyUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.text(); // Obtener el cuerpo de la respuesta como texto
+        })
+        .then(body => {
+            console.log(body); // Mostrar el cuerpo de la respuesta (puede ser HTML, texto, etc.)
+        })
+        .catch(error => {
+            console.error('Error al enviar la venta a Google Forms:', error);
+            throw error; // Re-lanzar el error para que el llamado pueda manejarlo
+        });
+}

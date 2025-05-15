@@ -14,7 +14,7 @@ const ventasLinkButton = document.getElementById('ventas-link-button');
 // const inventarioLinkButton = document.getElementById('inventario-link-button'); // Eliminado
 const tasaLinkButton = document.getElementById('tasa-link-button');
 const gestionarInventarioLinkButton = document.getElementById('gestionar-inventario-link-button');
-const historialVentasLinkButton = document.getElementById('historial-ventas-link-button'); // Nuevo botón
+const historialVentasTemporalesLinkButton = document.getElementById('historial-ventas-link-button'); // Nuevo botón
 const logoutButtonMenu = document.getElementById('logout-button');
 
 if (ventasLinkButton) {
@@ -41,8 +41,8 @@ if (gestionarInventarioLinkButton) {
     });
 }
 
-if (historialVentasLinkButton) { // Nuevo event listener
-    historialVentasLinkButton.addEventListener('click', () => {
+if (historialVentasTemporalesLinkButton) { // Nuevo event listener
+    historialVentasTemporalesLinkButton.addEventListener('click', () => {
         window.location.href = "historial_ventas.html";
     });
 }
