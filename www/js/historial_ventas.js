@@ -17,10 +17,20 @@ function cargarHistorialVentas() {
     listaHistorialVentasDiv.innerHTML = ''; // Limpiar contenido previo
 
     const ventasTemp = JSON.parse(localStorage.getItem('ventasTemp')) || [];
+    const subirButton = document.getElementById('subir-historial-button');
 
-if (ventasTemp.length === 0) {
-        listaHistorialVentasDiv.innerHTML = '<p style="text-align: center;">Si no ve ninguna venta aquí, ¡felicidades! Significa que todas las ventas temporales se han subido exitosamente a la hoja de Google.</p>';
+    if (!ventasTemp || ventasTemp.length === 0) {
+        listaHistorialVentasDiv.innerHTML = '<p style="text-align: center;">No hay ventas pendientes por subir.</p>';
+        if (subirButton) {
+            subirButton.disabled = true;
+            subirButton.style.backgroundColor = '#cccccc'; // Set to gray when disabled
+        }
         return;
+    }
+
+    if (subirButton) {
+        subirButton.disabled = false;
+        subirButton.style.backgroundColor = '#20429a'; // Set to blue when enabled
     }
 
     const ul = document.createElement('ul');
@@ -87,11 +97,13 @@ if (subirHistorialButton) {
         }).then((result) => {
             if (result.isConfirmed) {
                 subirVentasTemporales();
-                Swal.fire(
-                    '¡Subiendo!',
-                    'Intentando subir las ventas temporales a Google Forms.',
-                    'info'
-                );
+                Swal.fire({
+                    title: '¡Subiendo!',
+                    text: 'Intentando subir las ventas temporales a Google Forms.',
+                    icon: 'info',
+                    confirmButtonColor: '#20429a',
+                    confirmButtonText: "Aceptar"
+                });
             }
         });
     });
@@ -99,12 +111,16 @@ if (subirHistorialButton) {
 
 async function subirVentasTemporales() {
     const ventasTemp = JSON.parse(localStorage.getItem('ventasTemp')) || [];
-    if (ventasTemp.length === 0) {
-        Swal.fire(
-            '¡Nada que subir!',
-            'No hay ventas temporales para subir.',
-            'info'
-        );
+    console.log(ventasTemp)
+    if (ventasTemp.length == 0) {
+        console.log(ventasTemp)
+        Swal.fire({
+            title: '¡Nada que subir!',
+            text: 'No hay ventas temporales para subir.',
+            icon: 'info',
+            confirmButtonColor: '#20429a',
+            confirmButtonText: "Aceptar"
+        });
         return;
     }
 
@@ -116,11 +132,13 @@ async function subirVentasTemporales() {
         } catch (error) {
             console.error('Error al subir una venta:', error);
             allSuccessful = false;
-            Swal.fire(
-                'Error al subir ventas',
-                'Ocurrió un error al intentar subir las ventas. Por favor, revise su conexión a Internet y vuelva a intentarlo.',
-                'error'
-            );
+            Swal.fire({
+                title: 'Error al subir ventas',
+                text: 'Ocurrió un error al intentar subir las ventas. Por favor, revise su conexión a Internet y vuelva a intentarlo.',
+                icon: 'error',
+                confirmButtonColor: '#20429a',
+                confirmButtonText: "Aceptar"
+            });
             break; // Detener el proceso en caso de error
         }
     }
@@ -128,11 +146,13 @@ async function subirVentasTemporales() {
     if (allSuccessful) {
         localStorage.removeItem('ventasTemp');
         cargarHistorialVentas();
-        Swal.fire(
-            '¡Subido!',
-            'Las ventas temporales han sido subidas exitosamente.',
-            'success'
-        );
+        Swal.fire({
+            title: '¡Subido!',
+            text: 'Las ventas temporales han sido subidas exitosamente.',
+            icon: 'success',
+            confirmButtonColor: '#20429a',
+            confirmButtonText: "Aceptar"
+        });
     }
 }
 
