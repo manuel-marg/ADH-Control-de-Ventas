@@ -48,7 +48,7 @@ body {
 /* Estilo de "tarjeta" para las secciones de contenido (login, registro, etc.) */
 #login-section,
 #register-section,
-#menu-section > div, 
+#menu-section > div,
 #ventas-section > div:not(#productos-disponibles-ventas):not(#productos-seleccionados-ventas),
 #tasa-section > div,
 #gestionar-inventario-section > div:not(#lista-gestionar-inventario),
@@ -57,6 +57,7 @@ body {
     border-radius: 8px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     padding: 15px;
+    font-size: 1.1em; /* Increased font size for text in tasa section */
     margin-bottom: 15px;
 }
 
@@ -133,34 +134,40 @@ input[type="text"]:focus,
 input[type="password"]:focus,
 input[type="number"]:focus,
 select#metodo-pago:focus {
-    border-color: #20429a; 
-    box-shadow: 0 0 0 2px rgba(32, 66, 154, 0.2); 
+    border-color: #20429a;
+    box-shadow: 0 0 0 2px rgba(32, 66, 154, 0.2);
+}
+
+#login-section,
+#register-section {
+    font-size: 1.1em; /* Increased font size for text in login/register sections */
 }
 
 button {
-    background-color: #20429a; 
+    background-color: #20429a;
     color: white;
     padding: 12px 20px;
     border: none;
-    border-radius: 6px; 
+    border-radius: 6px;
     cursor: pointer;
     width: 100%;
-    font-size: 1em;
+    font-size: 1.1em; /* Increased font size for buttons */
     font-weight: bold;
 }
 
 button:hover {
-    background-color: #1c3a8a; 
+    background-color: #1c3a8a;
     opacity: 0.9;
 }
 
 #menu-section button {
-    margin-bottom: 10px; 
-    text-align: left; 
+    margin-bottom: 10px;
+    text-align: left;
+    font-size: 1.1em; /* Increased font size */
 }
 
 #menu-section button .fa {
-    margin-right: 10px; 
+    margin-right: 10px;
     color: white; 
     width: 1.2em; 
     text-align: center;
@@ -284,19 +291,19 @@ a:hover {
 #ventas-section {
     display: flex;
     flex-direction: column;
-    flex-grow: 1; 
-    overflow: hidden; 
+    flex-grow: 1;
+    overflow: hidden;
 }
 
 #tasa-display-ventas {
-    flex-shrink: 0; 
-    font-size: 0.9em;
+    flex-shrink: 0;
+    font-size: 1.1em; /* Increased font size */
     color: #55595c;
-    padding-bottom: 5px; 
+    padding-bottom: 5px;
 }
 
 #productos-disponibles-ventas {
-    flex-grow: 3; 
+    flex-grow: 3;
     overflow-y: auto;
     border: 1px solid #dee2e6; 
     border-radius: 4px;
@@ -321,11 +328,18 @@ a:hover {
     text-transform: none;
 }
 
+#tasa-section label {
+    font-weight: bold; /* Make "Nueva Tasa del Dólar" text bold */
+}
 
-#total-venta, 
-#ventas-section div[style*="margin-top: 10px"], 
+#ventas-section label {
+    font-weight: bold; /* Make "Método de Pago" text bold */
+}
+
+#total-venta,
+#ventas-section div[style*="margin-top: 10px"],
 #registrar-venta-button {
-    flex-shrink: 0; 
+    flex-shrink: 0;
 }
 #total-venta {
     font-size: 1.1em;
