@@ -97,7 +97,7 @@ if (subirHistorialButton) {
     });
 }
 
-function subirVentasTemporales() {
+async function subirVentasTemporales() {
     const ventasTemp = JSON.parse(localStorage.getItem('ventasTemp')) || [];
     if (ventasTemp.length === 0) {
         Swal.fire(
@@ -108,21 +108,35 @@ function subirVentasTemporales() {
         return;
     }
 
-    ventasTemp.forEach(venta => {
-        enviarVentaAGoogleForms(venta);
-    });
+    let allSuccessful = true;
 
-    // Simulación de envío exitoso
-    localStorage.removeItem('ventasTemp');
-    cargarHistorialVentas();
-    Swal.fire(
-        '¡Subido!',
-        'Las ventas temporales han sido subidas exitosamente.',
-        'success'
-    );
+    for (const venta of ventasTemp) {
+        try {
+            await enviarVentaAGoogleForms(venta);
+        } catch (error) {
+            console.error('Error al subir una venta:', error);
+            allSuccessful = false;
+            Swal.fire(
+                'Error al subir ventas',
+                'Ocurrió un error al intentar subir las ventas. Por favor, revise su conexión a Internet y vuelva a intentarlo.',
+                'error'
+            );
+            break; // Detener el proceso en caso de error
+        }
+    }
+
+    if (allSuccessful) {
+        localStorage.removeItem('ventasTemp');
+        cargarHistorialVentas();
+        Swal.fire(
+            '¡Subido!',
+            'Las ventas temporales han sido subidas exitosamente.',
+            'success'
+        );
+    }
 }
 
-function enviarVentaAGoogleForms(venta) {
+async function enviarVentaAGoogleForms(venta) {
     // Construir la cadena de productos
     const productosString = venta.items.map(item => `${item.nombre} x ${item.cantidad}`).join(', ');
 
