@@ -43,11 +43,12 @@ if (tasaButtonSavePage) {
                 icon: 'success',
                 title: '¡Actualizado!',
                 text: `Tasa del dólar actualizada a: ${nuevaTasa.toFixed(2)}`,
-                confirmButtonColor: '#20429a'
+                confirmButtonColor: '#20429a',
+                confirmButtonText: "Aceptar"
             });
-            initializeTasaPage(); 
+            initializeTasaPage();
         } else {
-            Swal.fire({ icon: 'error', title: 'Error', text: 'Por favor, ingrese una tasa válida.', confirmButtonColor: '#20429a' });
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Por favor, ingrese una tasa válida.', confirmButtonColor: '#20429a', confirmButtonText: "Aceptar" });
         }
     });
 }

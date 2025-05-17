@@ -82,7 +82,7 @@ if (subirHistorialButton) {
             showCancelButton: true,
             confirmButtonColor: '#20429a', // Azul de marca
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Subir',
+            confirmButtonText: 'Aceptar',
             cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {

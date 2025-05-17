@@ -83,7 +83,7 @@ function agregarProductoAVentaPage(productoId) {
             if (cantidadYaEnCarrito < productoOriginal.inventario) {
                  productoEnVenta.cantidad++;
             } else {
-                Swal.fire({ icon: 'info', title: 'Stock Agotado', text: 'No hay más stock disponible para este producto.', confirmButtonColor: '#20429a' });
+                Swal.fire({ icon: 'info', title: 'Stock Agotado', text: 'No hay más stock disponible para este producto.', confirmButtonColor: '#20429a', confirmButtonText: "Aceptar" });
             }
         } else {
              ventasProductosSeleccionados.push({ ...productoOriginal, cantidad: 1 });
@@ -133,11 +133,11 @@ function calcularTotalVentaPage() {
 if (registrarVentaButtonPage) {
     registrarVentaButtonPage.addEventListener('click', () => {
         if (ventasProductosSeleccionados.length === 0) {
-            Swal.fire({ icon: 'warning', title: 'Venta Vacía', text: 'No hay productos seleccionados para registrar la venta.', confirmButtonColor: '#20429a' });
+            Swal.fire({ icon: 'warning', title: 'Venta Vacía', text: 'No hay productos seleccionados para registrar la venta.', confirmButtonColor: '#20429a', confirmButtonText: "Aceptar" });
             return;
         }
         const metodoPago = document.getElementById('metodo-pago').value;
-        
+
         ventasProductosSeleccionados.forEach(itemVenta => {
             const productoInventario = ventasProductosDisponibles.find(p => p.id === itemVenta.id);
             if (productoInventario) {
@@ -177,7 +177,8 @@ const currentUser = JSON.parse(localStorage.getItem('currentUser'));
             icon: 'success',
             title: '¡Venta Registrada!',
             text: `$${totalVentaUsdSpanPage.textContent}`,
-            confirmButtonColor: '#20429a'
+            confirmButtonColor: '#20429a',
+            confirmButtonText: "Aceptar"
         });
         initializeVentas(); // Reset the sales page
 
@@ -208,13 +209,6 @@ function enviarVentaAGoogleForms(venta) {
         });
 }
 
-        // Mostrar mensaje de éxito
-        Swal.fire({
-            icon: 'success',
-            title: '¡Venta Registrada!',
-            text: `$${totalVentaUsdSpanPage.textContent}`,
-            confirmButtonColor: '#20429a'
-        });
         initializeVentas(); // Reset the sales page
     });
 }

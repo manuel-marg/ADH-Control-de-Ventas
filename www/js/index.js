@@ -53,19 +53,19 @@ if (loginButtonGlobal) {
         const password = passwordInput.value.trim();
 
         if (username === '' || password === '') {
-            Swal.fire({ icon: 'warning', title: 'Atención', text: 'Por favor, ingrese usuario y contraseña.', confirmButtonColor: '#20429a' });
+            Swal.fire({ icon: 'warning', title: 'Atención', text: 'Por favor, ingrese usuario y contraseña.', confirmButtonColor: '#20429a', confirmButtonText: "Aceptar" });
             return;
         }
 
         const user = users_login.find(u => u.username === username && u.password === password);
 
         if (user) {
-            localStorage.setItem('currentUser', JSON.stringify(user)); 
-            window.location.href = "menu.html"; 
-            usernameInput.value = ''; 
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            window.location.href = "menu.html";
+            usernameInput.value = '';
             passwordInput.value = '';
         } else {
-            Swal.fire({ icon: 'error', title: 'Error de Acceso', text: 'Usuario o contraseña incorrectos.', confirmButtonColor: '#20429a' });
+            Swal.fire({ icon: 'error', title: 'Error de Acceso', text: 'Usuario o contraseña incorrectos.', confirmButtonColor: '#20429a', confirmButtonText: "Aceptar" });
         }
     });
 }

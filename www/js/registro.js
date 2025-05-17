@@ -20,33 +20,34 @@ if (registerButton) {
         const adminKey = registerAdminKeyInput.value.trim();
 
         if (username === '' || password === '' || adminKey === '') {
-            Swal.fire({ icon: 'error', title: 'Error', text: 'Por favor, complete todos los campos.' });
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Por favor, complete todos los campos.', confirmButtonColor: '#20429a', confirmButtonText: "Aceptar" });
             return;
         }
 
         if (adminKey !== ADMIN_KEY_REGISTRO) {
-            Swal.fire({ icon: 'error', title: 'Error', text: 'Clave de administrador incorrecta.' });
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Clave de administrador incorrecta.', confirmButtonColor: '#20429a', confirmButtonText: "Aceptar" });
             return;
         }
 
         if (users_registro.find(u => u.username === username)) {
-            Swal.fire({ icon: 'error', title: 'Error', text: 'El nombre de usuario ya existe.' });
+            Swal.fire({ icon: 'error', title: 'Error', text: 'El nombre de usuario ya existe.', confirmButtonColor: '#20429a', confirmButtonText: "Aceptar" });
             return;
         }
 
         users_registro.push({ username, password });
         localStorage.setItem('users', JSON.stringify(users_registro));
-        
+
         Swal.fire({
             icon: 'success',
             title: '¡Registrado!',
             text: 'Usuario registrado exitosamente.',
-            confirmButtonColor: '#20429a'
+            confirmButtonColor: '#20429a',
+            confirmButtonText: "Aceptar"
         }).then(() => {
             registerUsernameInput.value = '';
             registerPasswordInput.value = '';
             registerAdminKeyInput.value = '';
-            window.location.href = "index.html"; 
+            window.location.href = "index.html";
         });
     });
 }

@@ -287,9 +287,9 @@ function eliminarProductoPage(productoId) {
         text: "¡No podrás revertir la eliminación de este producto!",
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6', // Azul para cancelar
-        confirmButtonText: 'Sí, ¡eliminarlo!',
+        confirmButtonColor: '#20429a', // Changed to blue
+        cancelButtonColor: '#d33', // Kept red for cancel
+        confirmButtonText: 'Aceptar', // Changed to "Aceptar"
         cancelButtonText: 'Cancelar'
     }).then((result) => {
         if (result.isConfirmed) {
