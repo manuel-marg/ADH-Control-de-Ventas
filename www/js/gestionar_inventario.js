@@ -296,11 +296,13 @@ function eliminarProductoPage(productoId) {
             gestionarProductosDisponibles = gestionarProductosDisponibles.filter(p => p.id !== productoId);
             localStorage.setItem('productos', JSON.stringify(gestionarProductosDisponibles));
             cargarGestionarInventarioPage();
-            Swal.fire(
-                '¡Eliminado!',
-                'El producto ha sido eliminado.',
-                'success'
-            );
+            Swal.fire({
+                title: '¡Eliminado!',
+                text: 'El producto ha sido eliminado.',
+                icon: 'success',
+                confirmButtonColor: '#20429a',
+                confirmButtonText: "Aceptar"
+            });
         }
     });
 }
