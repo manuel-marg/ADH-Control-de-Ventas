@@ -44,8 +44,18 @@
                     <img src="img/Logo.png" alt="Logo ADH" id="login-logo">
                 </div>
                 <h2>Login</h2>
-                <input type="text" id="username" placeholder="Usuario"><br>
-                <input type="password" id="password" placeholder="Contraseña"><br>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" style="min-width: 70px;">Usuario:</span>
+                    </div>
+                    <input type="text" id="username" class="form-control" placeholder="">
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" style="min-width: 70px;">Clave:</span>
+                    </div>
+                    <input type="password" id="password" class="form-control" placeholder="">
+                </div>
                 <button id="login-button">Iniciar Sesión</button>
                 <p><a href="registro.html" id="register-link">Registrarse</a></p>
             </div>

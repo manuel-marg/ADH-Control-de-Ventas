@@ -89,6 +89,7 @@ h2 {
     margin-bottom: 20px;
     color: #20429a;
     font-size: 1.5em;
+    text-shadow: 1px 1px 2px #ccc;
 }
 
 h3 {
@@ -96,6 +97,7 @@ h3 {
     margin-top: 0;
     margin-bottom: 10px;
     font-size: 1.2em;
+    text-shadow: 1px 1px 2px #ccc;
 }
 
 
@@ -145,7 +147,8 @@ select#metodo-pago {
     border-radius: 6px;
     box-sizing: border-box;
     background-color: #f5f6f7;
-    font-size: 1em;
+    font-size: 1.1em; /* Base font size */
+    color: #000
 }
 
 input[type="text"]:focus,
@@ -155,6 +158,8 @@ select#metodo-pago:focus {
     border-color: #20429a;
     box-shadow: 0 0 0 2px rgba(32, 66, 154, 0.2);
 }
+
+/* Estilos de input duplicados consolidados */
 
 #login-section,
 #register-section {
@@ -173,6 +178,7 @@ button {
     font-size: 1.1em;
     /* Increased font size for buttons */
     font-weight: bold;
+    box-shadow: 0 4px 8px #ccc;
 }
 
 button:hover {
@@ -561,19 +567,6 @@ a:hover {
     border-radius: .25rem;
 }
 
-input[type="text"],
-input[type="password"],
-input[type="number"],
-select#metodo-pago {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ccd0d5;
-    border-radius: 6px;
-    box-sizing: border-box;
-    background-color: #f5f6f7;
-    font-size: 1.1em;
-}
 
 .input-group-append,
 .input-group-prepend {
