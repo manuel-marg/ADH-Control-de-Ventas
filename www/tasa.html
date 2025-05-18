@@ -17,11 +17,15 @@
         <div id="tasa-section">
             <h2 class="navbar-h2">Fijar Tasa $</h2>
             <div style="margin-bottom: 15px; padding: 10px; border-radius: 5px;">
-                <strong>Tasa Actual:</strong> $<span id="tasa-actual-display">N/A</span>
+                <strong>Tasa Actual:</strong> Bs.<span id="tasa-actual-display">N/A</span>
                 <p style="margin-top: 5px; font-size: 0.9em; color: #6c757d;">Esta tasa se utilizará para calcular los precios en Bs en la vista de ventas.</p>
             </div>
             <label for="tasa-input">Nueva Tasa del Dólar:</label>
-            <input type="number" id="tasa-input" placeholder="Tasa del Dólar" step="0.01"><br>
+            <div class="input-group-custom">
+                <span class="input-group-prepend-custom">Bs.</span>
+                <input type="number" id="tasa-input" class="large-input" placeholder="Bs. 100.00" step="0.01">
+            </div>
+            <br>
             <button id="tasa-button-save"><i class="fa fa-save"></i> Guardar Nueva Tasa</button>
             <!-- Botón Volver al Menú eliminado -->
         </div>

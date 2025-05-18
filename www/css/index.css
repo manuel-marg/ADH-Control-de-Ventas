@@ -40,8 +40,8 @@ body {
 #app-container {
     display: flex;
     flex-direction: column;
-    height: 100vh; 
-    padding: 10px; 
+    height: 100vh;
+    padding: 10px;
     box-sizing: border-box;
 }
 
@@ -63,20 +63,20 @@ body {
 
 /* Estilo de Navbar para H2 */
 .navbar-h2 {
-    background-color: white; 
-    color: #20429a; 
+    background-color: white;
+    color: #20429a;
     padding: 15px 20px;
     margin: -10px -10px 20px -10px; /* Compensa padding de #app-container */
     text-align: center;
-    font-size: 1.5em; 
-    border-bottom: 1px solid #ddd; 
+    font-size: 1.5em;
+    border-bottom: 1px solid #ddd;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 h2 { /* Estilo base para h2 si no es navbar-h2 */
     text-align: center;
     margin-bottom: 20px;
-    color: #20429a; 
+    color: #20429a;
     font-size: 1.5em;
 }
 
@@ -93,11 +93,11 @@ h3 {
 #tasa-section,
 #gestionar-inventario-section,
 #historial-ventas-section,
-#ventas-section { 
-    margin-top: 0; 
+#ventas-section {
+    margin-top: 0;
 }
-#register-section, 
-#login-section { 
+#register-section,
+#login-section {
     margin: 20px auto; /* Centrar verticalmente (aproximado) y horizontalmente */
     max-width: 320px; /* Reducir el ancho máximo para pantallas pequeñas */
     width: calc(100% - 40px); /* Asegurar padding lateral de 20px en cada lado */
@@ -112,7 +112,7 @@ h3 {
 }
 
 #login-logo {
-    max-width: 150px; 
+    max-width: 150px;
     height: auto;
 }
 
@@ -124,10 +124,10 @@ select#metodo-pago {
     width: 100%;
     padding: 10px;
     margin-bottom: 15px;
-    border: 1px solid #ccd0d5; 
-    border-radius: 6px; 
+    border: 1px solid #ccd0d5;
+    border-radius: 6px;
     box-sizing: border-box;
-    background-color: #f5f6f7; 
+    background-color: #f5f6f7;
     font-size: 1em;
 }
 input[type="text"]:focus,
@@ -162,49 +162,48 @@ button:hover {
 
 #menu-section button {
     margin-bottom: 10px;
-    text-align: left;
     font-size: 1.1em; /* Increased font size */
 }
 
 #menu-section button .fa {
     margin-right: 10px;
-    color: white; 
-    width: 1.2em; 
+    color: white;
+    width: 1.2em;
     text-align: center;
 }
 
-.agregar-producto-venta-btn { 
-    padding: 8px 12px; 
-    font-size: 1.6em;  
-    line-height: 1;    
-    width: auto; 
-    background-color: #20429a; 
-    color: white; 
+.agregar-producto-venta-btn {
+    padding: 8px 12px;
+    font-size: 1.6em;
+    line-height: 1;
+    width: auto;
+    background-color: #20429a;
+    color: white;
 }
 .agregar-producto-venta-btn:hover {
-    background-color: #1c3a8a; 
+    background-color: #1c3a8a;
 }
 
 .edit-producto-btn,
 .delete-producto-btn {
-    padding: 6px 10px; 
-    font-size: 1.3em;  
-    line-height: 1;   
-    width: auto; 
+    padding: 6px 10px;
+    font-size: 1.3em;
+    line-height: 1;
+    width: auto;
     margin-left: 8px;
     border-radius: 4px;
 }
 
 .edit-producto-btn {
-    background-color: #ffc107; 
-    color: #212529; 
+    background-color: #ffc107;
+    color: #212529;
 }
 .edit-producto-btn:hover {
     background-color: #e0a800;
 }
 
 .delete-producto-btn {
-    background-color: #dc3545; 
+    background-color: #dc3545;
     color: white;
 }
 .delete-producto-btn:hover {
@@ -212,10 +211,10 @@ button:hover {
 }
 
 .quitar-producto-btn {
-    background-color: #dc3545; 
+    background-color: #dc3545;
     padding: 4px 8px;
-    font-size: 0.9em; 
-    width: auto; 
+    font-size: 0.9em;
+    width: auto;
     color: white;
 }
 .quitar-producto-btn:hover {
@@ -224,7 +223,7 @@ button:hover {
 
 a {
     text-decoration: none;
-    color: #20429a; 
+    color: #20429a;
     font-weight: bold;
 }
 a:hover {
@@ -237,37 +236,37 @@ a:hover {
     justify-content: space-between;
     align-items: center;
     padding: 10px 5px;
-    border-bottom: 1px solid #e7e7e7; 
+    border-bottom: 1px solid #e7e7e7;
 }
 #productos-disponibles-ventas .producto-item-venta:last-child,
 #lista-gestionar-inventario li:last-child {
     border-bottom: none;
 }
 
-.producto-info-venta { 
+.producto-info-venta {
     display: flex;
-    flex-direction: column; 
+    flex-direction: column;
     justify-content: center;
-    flex-grow: 1; 
-    margin-right: 10px; 
+    flex-grow: 1;
+    margin-right: 10px;
 }
 
 .producto-nombre-venta {
     font-weight: bold;
-    font-size: 1.15em; 
-    color: #1c1e21; 
-    text-transform: none; 
+    font-size: 1.15em;
+    color: #1c1e21;
+    text-transform: none;
     margin-bottom: 2px;
 }
 
 .producto-precio-venta {
-    font-size: 0.9em; 
+    font-size: 0.9em;
     color: #55595c;
     text-transform: none;
 }
 
 .producto-stock-venta {
-    font-size: 10px; 
+    font-size: 10px;
     color: #6c757d;
     text-transform: none;
 }
@@ -305,15 +304,15 @@ a:hover {
 #productos-disponibles-ventas {
     flex-grow: 3;
     overflow-y: auto;
-    border: 1px solid #dee2e6; 
+    border: 1px solid #dee2e6;
     border-radius: 4px;
     padding: 10px;
     margin-bottom: 10px;
-    background-color: #fff; 
+    background-color: #fff;
 }
 
 #productos-seleccionados-ventas {
-    flex-grow: 1; 
+    flex-grow: 1;
     overflow-y: auto;
     border: 1px solid #dee2e6;
     border-radius: 4px;
@@ -346,18 +345,18 @@ a:hover {
     text-transform: none;
 }
 
-#gestionar-inventario-section > div#lista-gestionar-inventario { 
-    max-height: 35vh; 
-    overflow-y: auto; 
+#gestionar-inventario-section > div#lista-gestionar-inventario {
+    max-height: 35vh;
+    overflow-y: auto;
     border: 1px solid #dee2e6;
     border-radius: 4px;
     padding:10px;
     margin-bottom: 20px;
     background-color: #fff;
 }
-#gestionar-inventario-section > div:nth-of-type(2) { 
-    overflow-y: auto; 
-    padding-bottom: 15px; 
+#gestionar-inventario-section > div:nth-of-type(2) {
+    overflow-y: auto;
+    padding-bottom: 15px;
 }
 
 #gestionar-inventario-section label {
@@ -369,18 +368,18 @@ a:hover {
 }
 
 #gestionar-inventario-section input[type="file"] {
-    margin-bottom: 5px; 
-    padding: 5px; 
+    margin-bottom: 5px;
+    padding: 5px;
 }
 
 #foto-preview {
-    max-width: 60px; 
+    max-width: 60px;
     max-height: 60px;
-    margin-top: 5px; 
-    margin-bottom: 10px; 
+    margin-top: 5px;
+    margin-bottom: 10px;
     border: 1px solid #dee2e6;
     object-fit: cover;
-    display: block; 
+    display: block;
     border-radius: 4px;
 }
 
@@ -418,3 +417,62 @@ a:hover {
     margin-top: 5px;
     text-align: right;
 }
+
+.large-input {
+    padding: 15px; /* Aumentar el padding para hacer el input más grande */
+    font-size: 2em; /* Aumentar el tamaño del texto */
+}
+
+.input-group-custom {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    overflow: hidden;
+}
+
+.input-group-prepend-custom {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    font-size: 2em; /* Keep user's requested font size */
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    text-align: center;
+    white-space: nowrap;
+    background-color: #e9ecef;
+    border-right: 1px solid #ced4da;
+    border-top-left-radius: .25rem;
+    border-bottom-left-radius: .25rem;
+    border: 1px solid #ced4da;
+}
+
+.input-group-custom .large-input {
+    position: relative;
+    display: block;
+    border: 1px solid #ced4da; /* Eliminar el borde del input */
+    margin-bottom: 0; /* Eliminar el margen inferior del input */
+    flex: 1 1 auto; /* Allow input to grow and shrink */
+    width: 1%; /* Required for flex-grow to work correctly */
+    padding: 15px; /* Mantener el padding para el tamaño */
+    font-size: 2em; /* Mantener el tamaño de fuente */
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    box-sizing: border-box; /* Incluir padding en el tamaño */
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: .25rem;
+    border-bottom-right-radius: .25rem;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.input-group-custom .large-input:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
