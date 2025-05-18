@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
@@ -12,31 +14,50 @@
     <link rel="stylesheet" href="lib/sweetalert2/sweetalert2.min.css">
     <title>Gestionar Inventario - ADH Control de Ventas</title>
 </head>
+
 <body>
     <div id="app-container">
         <div id="gestionar-inventario-section">
             <h2 class="navbar-h2">Gestionar Inventario</h2>
-            <div id="lista-gestionar-inventario" style="margin-bottom: 20px; max-height: 40vh; overflow-y: auto; border: 1px solid #ccc; padding:10px;">
+            <div id="lista-gestionar-inventario"
+                style="margin-bottom: 20px; max-height: 40vh; overflow-y: auto; border: 1px solid #ccc; padding:10px;">
                 <!-- Product list for management will be here -->
             </div>
             <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
                 <h3>Agregar/Editar Producto</h3>
                 <input type="hidden" id="edit-producto-id">
-                <label for="gestionar-nombre-producto">Nombre:</label>
-                <input type="text" id="gestionar-nombre-producto" placeholder="Nombre del Producto"><br>
-                <label for="gestionar-precio-producto">Precio USD:</label>
-                <input type="number" id="gestionar-precio-producto" placeholder="Precio USD" step="0.01"><br>
-                <label for="gestionar-stock-producto">Stock:</label>
-                <input type="number" id="gestionar-stock-producto" placeholder="Stock Inicial/Actual" step="1"><br>
-                
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Nombre:</span>
+                    </div>
+                    <input type="text" id="gestionar-nombre-producto" class="form-control" placeholder="">
+                </div>
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Precio ($):</span>
+                    </div>
+                    <input type="number" id="gestionar-precio-producto" class="form-control" placeholder="" step="0.01">
+                </div>
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Stock:</span>
+                    </div>
+                    <input type="number" id="gestionar-stock-producto" class="form-control" placeholder="" step="1">
+                </div>
+
                 <label for="gestionar-foto-producto">Foto del Producto:</label>
                 <input type="file" id="gestionar-foto-producto" accept="image/*"><br>
-                <img id="foto-preview" src="#" alt="Vista previa" style="display: none; margin-top: 5px; margin-bottom: 10px;"/> 
+                <img id="foto-preview" src="#" alt="Vista previa"
+                    style="display: none; margin-top: 5px; margin-bottom: 10px;" />
                 <!-- Estilos de tamaño se manejarán en CSS, pero se añade margen aquí -->
                 <br>
 
                 <button id="guardar-producto-button" style="margin-top:15px;">Guardar Producto</button>
-                <button id="cancelar-edicion-producto-button" style="display:none; background-color: #ccc; margin-top:5px;">Cancelar Edición</button>
+                <button id="cancelar-edicion-producto-button"
+                    style="display:none; background-color: #ccc; margin-top:5px;">Cancelar Edición</button>
             </div>
             <!-- Botón Volver al Menú eliminado -->
         </div>
@@ -45,4 +66,5 @@
     <script src="lib/sweetalert2/sweetalert2.min.js"></script>
     <script src="js/gestionar_inventario.js"></script>
 </body>
+
 </html>

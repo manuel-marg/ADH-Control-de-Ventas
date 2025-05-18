@@ -17,23 +17,31 @@
  * under the License.
  */
 * {
-    -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    /* make transparent link selection, adjust last value opacity 0 to 1.0 */
 }
 
 body {
-    -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
-    -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
-    -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
-    background-color: #f0f2f5; /* Gris claro moderno */
+    -webkit-touch-callout: none;
+    /* prevent callout to copy image, etc when tap to hold */
+    -webkit-text-size-adjust: none;
+    /* prevent webkit from resizing text to fit */
+    -webkit-user-select: none;
+    /* prevent copy paste, to allow, change 'none' to 'text' */
+    background-color: #f0f2f5;
+    /* Gris claro moderno */
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-    font-size: 14px; /* Tamaño base un poco más grande */
+    font-size: 14px;
+    /* Tamaño base un poco más grande */
     line-height: 1.4;
-    color: #1c1e21; /* Texto principal oscuro */
-    margin:0px;
-    padding:0px;
-    height:100vh;
-    width:100%;
-    text-transform: none; /* Quitar uppercase general */
+    color: #1c1e21;
+    /* Texto principal oscuro */
+    margin: 0px;
+    padding: 0px;
+    height: 100vh;
+    width: 100%;
+    text-transform: none;
+    /* Quitar uppercase general */
 }
 
 /* Estilos para el contenedor principal de cada página */
@@ -48,16 +56,17 @@ body {
 /* Estilo de "tarjeta" para las secciones de contenido (login, registro, etc.) */
 #login-section,
 #register-section,
-#menu-section > div,
-#ventas-section > div:not(#productos-disponibles-ventas):not(#productos-seleccionados-ventas),
-#tasa-section > div,
-#gestionar-inventario-section > div:not(#lista-gestionar-inventario),
-#historial-ventas-section > div:not(#lista-historial-ventas) {
+#menu-section>div,
+#ventas-section>div:not(#productos-disponibles-ventas):not(#productos-seleccionados-ventas),
+#tasa-section>div,
+#gestionar-inventario-section>div:not(#lista-gestionar-inventario),
+#historial-ventas-section>div:not(#lista-historial-ventas) {
     background-color: #ffffff;
     border-radius: 8px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     padding: 15px;
-    font-size: 1.1em; /* Increased font size for text in tasa section */
+    font-size: 1.1em;
+    /* Increased font size for text in tasa section */
     margin-bottom: 15px;
 }
 
@@ -66,14 +75,16 @@ body {
     background-color: white;
     color: #20429a;
     padding: 15px 20px;
-    margin: -10px -10px 20px -10px; /* Compensa padding de #app-container */
+    margin: -10px -10px 20px -10px;
+    /* Compensa padding de #app-container */
     text-align: center;
     font-size: 1.5em;
     border-bottom: 1px solid #ddd;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-h2 { /* Estilo base para h2 si no es navbar-h2 */
+h2 {
+    /* Estilo base para h2 si no es navbar-h2 */
     text-align: center;
     margin-bottom: 20px;
     color: #20429a;
@@ -96,13 +107,19 @@ h3 {
 #ventas-section {
     margin-top: 0;
 }
+
 #register-section,
 #login-section {
-    margin: 20px auto; /* Centrar verticalmente (aproximado) y horizontalmente */
-    max-width: 320px; /* Reducir el ancho máximo para pantallas pequeñas */
-    width: calc(100% - 40px); /* Asegurar padding lateral de 20px en cada lado */
-    padding: 20px; /* Padding interno de la tarjeta */
-    box-sizing: border-box; /* Incluir padding y borde en el width/height total */
+    margin: 20px auto;
+    /* Centrar verticalmente (aproximado) y horizontalmente */
+    max-width: 320px;
+    /* Reducir el ancho máximo para pantallas pequeñas */
+    width: calc(100% - 40px);
+    /* Asegurar padding lateral de 20px en cada lado */
+    padding: 20px;
+    /* Padding interno de la tarjeta */
+    box-sizing: border-box;
+    /* Incluir padding y borde en el width/height total */
 }
 
 /* Estilos para el logo en la página de login */
@@ -130,6 +147,7 @@ select#metodo-pago {
     background-color: #f5f6f7;
     font-size: 1em;
 }
+
 input[type="text"]:focus,
 input[type="password"]:focus,
 input[type="number"]:focus,
@@ -140,7 +158,8 @@ select#metodo-pago:focus {
 
 #login-section,
 #register-section {
-    font-size: 1.1em; /* Increased font size for text in login/register sections */
+    font-size: 1.1em;
+    /* Increased font size for text in login/register sections */
 }
 
 button {
@@ -151,7 +170,8 @@ button {
     border-radius: 6px;
     cursor: pointer;
     width: 100%;
-    font-size: 1.1em; /* Increased font size for buttons */
+    font-size: 1.1em;
+    /* Increased font size for buttons */
     font-weight: bold;
 }
 
@@ -162,7 +182,8 @@ button:hover {
 
 #menu-section button {
     margin-bottom: 10px;
-    font-size: 1.1em; /* Increased font size */
+    font-size: 1.1em;
+    /* Increased font size */
 }
 
 #menu-section button .fa {
@@ -180,6 +201,7 @@ button:hover {
     background-color: #20429a;
     color: white;
 }
+
 .agregar-producto-venta-btn:hover {
     background-color: #1c3a8a;
 }
@@ -198,6 +220,7 @@ button:hover {
     background-color: #ffc107;
     color: #212529;
 }
+
 .edit-producto-btn:hover {
     background-color: #e0a800;
 }
@@ -206,6 +229,7 @@ button:hover {
     background-color: #dc3545;
     color: white;
 }
+
 .delete-producto-btn:hover {
     background-color: #c82333;
 }
@@ -217,6 +241,7 @@ button:hover {
     width: auto;
     color: white;
 }
+
 .quitar-producto-btn:hover {
     background-color: #c82333;
 }
@@ -226,6 +251,7 @@ a {
     color: #20429a;
     font-weight: bold;
 }
+
 a:hover {
     text-decoration: underline;
 }
@@ -238,6 +264,7 @@ a:hover {
     padding: 10px 5px;
     border-bottom: 1px solid #e7e7e7;
 }
+
 #productos-disponibles-ventas .producto-item-venta:last-child,
 #lista-gestionar-inventario li:last-child {
     border-bottom: none;
@@ -296,7 +323,8 @@ a:hover {
 
 #tasa-display-ventas {
     flex-shrink: 0;
-    font-size: 1.1em; /* Increased font size */
+    font-size: 1.1em;
+    /* Increased font size */
     color: #55595c;
     padding-bottom: 5px;
 }
@@ -320,6 +348,7 @@ a:hover {
     margin-bottom: 10px;
     background-color: #fff;
 }
+
 #productos-seleccionados-ventas h3 {
     font-size: 1.1em;
     color: #333;
@@ -328,11 +357,13 @@ a:hover {
 }
 
 #tasa-section label {
-    font-weight: bold; /* Make "Nueva Tasa del Dólar" text bold */
+    font-weight: bold;
+    /* Make "Nueva Tasa del Dólar" text bold */
 }
 
 #ventas-section label {
-    font-weight: bold; /* Make "Método de Pago" text bold */
+    font-weight: bold;
+    /* Make "Método de Pago" text bold */
 }
 
 #total-venta,
@@ -340,21 +371,23 @@ a:hover {
 #registrar-venta-button {
     flex-shrink: 0;
 }
+
 #total-venta {
     font-size: 1.1em;
     text-transform: none;
 }
 
-#gestionar-inventario-section > div#lista-gestionar-inventario {
+#gestionar-inventario-section>div#lista-gestionar-inventario {
     max-height: 35vh;
     overflow-y: auto;
     border: 1px solid #dee2e6;
     border-radius: 4px;
-    padding:10px;
+    padding: 10px;
     margin-bottom: 20px;
     background-color: #fff;
 }
-#gestionar-inventario-section > div:nth-of-type(2) {
+
+#gestionar-inventario-section>div:nth-of-type(2) {
     overflow-y: auto;
     padding-bottom: 15px;
 }
@@ -385,15 +418,21 @@ a:hover {
 
 /* Estilos para el ticket */
 .ticket-container {
-    border: 1px solid #000; /* Borde negro */
+    border: 1px solid #000;
+    /* Borde negro */
     padding: 5px;
     margin-bottom: 10px;
-    font-family: monospace; /* Fuente monoespaciada */
-    width: 200px; /* Ancho simulando 58mm */
+    font-family: monospace;
+    /* Fuente monoespaciada */
+    width: 200px;
+    /* Ancho simulando 58mm */
     max-width: 100%;
-    font-size: 0.8em; /* Tamaño de fuente más pequeño */
-    background-color: #fff; /* Fondo blanco */
-    margin: 0 auto; /* Centrar horizontalmente */
+    font-size: 0.8em;
+    /* Tamaño de fuente más pequeño */
+    background-color: #fff;
+    /* Fondo blanco */
+    margin: 0 auto;
+    /* Centrar horizontalmente */
 }
 
 .ticket-header {
@@ -402,7 +441,9 @@ a:hover {
     font-weight: bold;
 }
 
-.ticket-fecha, .ticket-usuario, .ticket-metodo-pago {
+.ticket-fecha,
+.ticket-usuario,
+.ticket-metodo-pago {
     margin-bottom: -5px;
 }
 
@@ -419,8 +460,10 @@ a:hover {
 }
 
 .large-input {
-    padding: 15px; /* Aumentar el padding para hacer el input más grande */
-    font-size: 2em; /* Aumentar el tamaño del texto */
+    padding: 15px;
+    /* Aumentar el padding para hacer el input más grande */
+    font-size: 2em;
+    /* Aumentar el tamaño del texto */
 }
 
 .input-group-custom {
@@ -436,7 +479,8 @@ a:hover {
     display: flex;
     align-items: center;
     padding: 15px;
-    font-size: 2em; /* Keep user's requested font size */
+    font-size: 2em;
+    /* Keep user's requested font size */
     font-weight: 400;
     line-height: 1.5;
     color: #495057;
@@ -452,17 +496,24 @@ a:hover {
 .input-group-custom .large-input {
     position: relative;
     display: block;
-    border: 1px solid #ced4da; /* Eliminar el borde del input */
-    margin-bottom: 0; /* Eliminar el margen inferior del input */
-    flex: 1 1 auto; /* Allow input to grow and shrink */
-    width: 1%; /* Required for flex-grow to work correctly */
-    padding: 15px; /* Mantener el padding para el tamaño */
-    font-size: 2em; /* Mantener el tamaño de fuente */
+    border: 1px solid #ced4da;
+    /* Eliminar el borde del input */
+    margin-bottom: 0;
+    /* Eliminar el margen inferior del input */
+    flex: 1 1 auto;
+    /* Allow input to grow and shrink */
+    width: 1%;
+    /* Required for flex-grow to work correctly */
+    padding: 15px;
+    /* Mantener el padding para el tamaño */
+    font-size: 2em;
+    /* Mantener el tamaño de fuente */
     line-height: 1.5;
     color: #495057;
     background-color: #fff;
     background-clip: padding-box;
-    box-sizing: border-box; /* Incluir padding en el tamaño */
+    box-sizing: border-box;
+    /* Incluir padding en el tamaño */
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
     border-top-right-radius: .25rem;
@@ -476,3 +527,124 @@ a:hover {
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
+
+.input-group {
+    position: relative;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-box-align: stretch;
+    -ms-flex-align: stretch;
+    align-items: stretch;
+    width: 100%;
+}
+
+.input-group-text {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    padding: .375rem .75rem;
+    margin-bottom: 0;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    text-align: center;
+    white-space: nowrap;
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="number"],
+select#metodo-pago {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccd0d5;
+    border-radius: 6px;
+    box-sizing: border-box;
+    background-color: #f5f6f7;
+    font-size: 1.1em;
+}
+
+.input-group-append,
+.input-group-prepend {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+.input-group>.input-group-append:last-child>.btn:not(:last-child):not(.dropdown-toggle),
+.input-group>.input-group-append:last-child>.input-group-text:not(:last-child),
+.input-group>.input-group-append:not(:last-child)>.btn,
+.input-group>.input-group-append:not(:last-child)>.input-group-text,
+.input-group>.input-group-prepend>.btn,
+.input-group>.input-group-prepend>.input-group-text {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    min-width: 90px;
+}
+
+.input-group-text {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    padding: .375rem .75rem;
+    margin-bottom: 0;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    text-align: center;
+    white-space: nowrap;
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+}
+
+.input-group>.custom-select:not(:first-child),
+.input-group>.form-control:not(:first-child) {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.input-group>.custom-file,
+.input-group>.custom-select,
+.input-group>.form-control {
+    position: relative;
+    -webkit-box-flex: 1;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    width: 1%;
+    margin-bottom: 0;
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.mb-3,
+.my-3 {
+    margin-bottom: 1rem !important;
+}
