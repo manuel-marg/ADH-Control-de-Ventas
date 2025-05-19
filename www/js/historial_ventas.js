@@ -124,30 +124,54 @@ function subirVentasTemporales() {
         return;
     }
 
-    // Intentar enviar cada venta sin esperar confirmación individual
+    let successfulUploads = 0;
+    let failedUploads = 0;
+    const totalVentas = ventasTemp.length;
+
+    function handleUploadComplete() {
+        if (successfulUploads + failedUploads === totalVentas) {
+            // Todas las ventas han sido procesadas
+            if (failedUploads === 0) {
+                localStorage.removeItem('ventasTemp');
+                cargarHistorialVentas();
+                Swal.fire({
+                    title: '¡Subido!',
+                    text: 'Las ventas temporales han sido subidas exitosamente.',
+                    icon: 'success',
+                    confirmButtonColor: '#20429a',
+                    confirmButtonText: "Aceptar"
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error al subir ventas',
+                    text: `Ocurrió un error al intentar subir ${failedUploads} de ${totalVentas} ventas. Por favor, revise su conexión a Internet y vuelva a intentarlo.`,
+                    icon: 'error',
+                    confirmButtonColor: '#20429a',
+                    confirmButtonText: "Aceptar"
+                });
+            }
+        }
+    }
+
     ventasTemp.forEach(venta => {
-        enviarVentaAGoogleForms(venta);
-    });
-
-    // Limpiar el almacenamiento temporal y actualizar la vista inmediatamente
-    localStorage.removeItem('ventasTemp');
-    cargarHistorialVentas();
-
-    Swal.fire({
-        title: '¡Intentando subir!',
-        text: 'Se ha iniciado el proceso para subir las ventas temporales. Por favor, verifica en Google Forms si se subieron correctamente.',
-        icon: 'info',
-        confirmButtonColor: '#20429a',
-        confirmButtonText: "Aceptar"
+        enviarVentaAGoogleForms(venta, (error, success) => {
+            if (success) {
+                successfulUploads++;
+            } else {
+                failedUploads++;
+                console.error('Error al subir una venta:', error);
+            }
+            handleUploadComplete();
+        });
     });
 }
 
-function enviarVentaAGoogleForms(venta) {
+function enviarVentaAGoogleForms(venta, callback) {
     // Construir la cadena de productos
-    const productosString = venta.items.map(item => `${item.nombre} x ${item.cantidad}`).join(', ');
+    const productosString = venta.items.map(item => `${removeAccents(item.nombre)} x ${item.cantidad}`).join(', ');
 
     // Construir la URL de la petición GET
-    const url = `https://docs.google.com/forms/d/e/1FAIpQLSc2F9aUxdAUatdoUM6L-f92eh9W4SX5n3M0XuRt76guyt-UHQ/formResponse?usp=pp_url&entry.625195464=${venta.fecha}&entry.1134916832=${venta.usuario}&entry.773060726=${venta.metodoPago}&entry.2067765280=${productosString}&entry.1267682030=${venta.totalUSD}&entry.1216241302=${venta.totalBS}`;
+    const url = `https://docs.google.com/forms/d/e/1FAIpQLSc2F9aUxdAUatdoUM6L-f92eh9W4SX5n3M0XuRt76guyt-UHQ/formResponse?usp=pp_url&entry.625195464=${encodeURIComponent(venta.fecha)}&entry.1134916832=${encodeURIComponent(venta.usuario)}&entry.773060726=${encodeURIComponent(venta.metodoPago)}&entry.2067765280=${encodeURIComponent(productosString)}&entry.1267682030=${encodeURIComponent(venta.totalUSD)}&entry.1216241302=${encodeURIComponent(venta.totalBS)}`;
 
     // Reemplazar la URL original con la URL a través del proxy
     const proxyUrl = "https://corsproxy.io/?url=" + encodeURIComponent(url);
@@ -158,15 +182,23 @@ function enviarVentaAGoogleForms(venta) {
 
     xhr.onload = function() {
         if (xhr.status >= 200 && xhr.status < 300) {
-            console.log('Intento de envío de venta exitoso:', xhr.responseText);
+            console.log('Venta enviada exitosamente:', xhr.responseText);
+            callback(null, true); // Indicar éxito
         } else {
-            console.error('Intento de envío de venta fallido. Estado:', xhr.status);
+            console.error('Error al enviar la venta. Estado:', xhr.status);
+            callback(new Error('Error en la respuesta del servidor con estado ' + xhr.status), false); // Indicar error
         }
     };
 
     xhr.onerror = function() {
-        console.error('Error de red durante el intento de envío de venta.');
+        console.error('Error de red al enviar la venta.');
+        callback(new Error('Error de red al enviar la venta'), false); // Indicar error de red
     };
 
     xhr.send();
+}
+
+// Función auxiliar para eliminar acentos
+function removeAccents(str) {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
