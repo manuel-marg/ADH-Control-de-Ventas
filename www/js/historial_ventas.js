@@ -109,11 +109,11 @@ if (subirHistorialButton) {
     });
 }
 
-async function subirVentasTemporales() {
+function subirVentasTemporales() {
     const ventasTemp = JSON.parse(localStorage.getItem('ventasTemp')) || [];
-    console.log(ventasTemp)
-    if (ventasTemp.length == 0) {
-        console.log(ventasTemp)
+    console.log(ventasTemp);
+
+    if (ventasTemp.length === 0) {
         Swal.fire({
             title: '¡Nada que subir!',
             text: 'No hay ventas temporales para subir.',
@@ -124,39 +124,25 @@ async function subirVentasTemporales() {
         return;
     }
 
-    let allSuccessful = true;
+    // Intentar enviar cada venta sin esperar confirmación individual
+    ventasTemp.forEach(venta => {
+        enviarVentaAGoogleForms(venta);
+    });
 
-    for (const venta of ventasTemp) {
-        try {
-            await enviarVentaAGoogleForms(venta);
-        } catch (error) {
-            console.error('Error al subir una venta:', error);
-            allSuccessful = false;
-            Swal.fire({
-                title: 'Error al subir ventas',
-                text: 'Ocurrió un error al intentar subir las ventas. Por favor, revise su conexión a Internet y vuelva a intentarlo.',
-                icon: 'error',
-                confirmButtonColor: '#20429a',
-                confirmButtonText: "Aceptar"
-            });
-            break; // Detener el proceso en caso de error
-        }
-    }
+    // Limpiar el almacenamiento temporal y actualizar la vista inmediatamente
+    localStorage.removeItem('ventasTemp');
+    cargarHistorialVentas();
 
-    if (allSuccessful) {
-        localStorage.removeItem('ventasTemp');
-        cargarHistorialVentas();
-        Swal.fire({
-            title: '¡Subido!',
-            text: 'Las ventas temporales han sido subidas exitosamente.',
-            icon: 'success',
-            confirmButtonColor: '#20429a',
-            confirmButtonText: "Aceptar"
-        });
-    }
+    Swal.fire({
+        title: '¡Intentando subir!',
+        text: 'Se ha iniciado el proceso para subir las ventas temporales. Por favor, verifica en Google Forms si se subieron correctamente.',
+        icon: 'info',
+        confirmButtonColor: '#20429a',
+        confirmButtonText: "Aceptar"
+    });
 }
 
-async function enviarVentaAGoogleForms(venta) {
+function enviarVentaAGoogleForms(venta) {
     // Construir la cadena de productos
     const productosString = venta.items.map(item => `${item.nombre} x ${item.cantidad}`).join(', ');
 
@@ -166,19 +152,21 @@ async function enviarVentaAGoogleForms(venta) {
     // Reemplazar la URL original con la URL a través del proxy
     const proxyUrl = "https://corsproxy.io/?url=" + encodeURIComponent(url);
 
-    // Realizar la petición GET con fetch nativo
-    return fetch(proxyUrl)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Error en la respuesta del servidor');
-            }
-            return response.text(); // Obtener el cuerpo de la respuesta como texto
-        })
-        .then(body => {
-            console.log(body); // Mostrar el cuerpo de la respuesta (puede ser HTML, texto, etc.)
-        })
-        .catch(error => {
-            console.error('Error al enviar la venta a Google Forms:', error);
-            throw error; // Re-lanzar el error para que el llamado pueda manejarlo
-        });
+    // Realizar la petición GET con XMLHttpRequest
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', proxyUrl, true); // true para asíncrono
+
+    xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+            console.log('Intento de envío de venta exitoso:', xhr.responseText);
+        } else {
+            console.error('Intento de envío de venta fallido. Estado:', xhr.status);
+        }
+    };
+
+    xhr.onerror = function() {
+        console.error('Error de red durante el intento de envío de venta.');
+    };
+
+    xhr.send();
 }
