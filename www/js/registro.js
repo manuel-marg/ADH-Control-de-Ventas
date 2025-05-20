@@ -1,5 +1,10 @@
 document.addEventListener('deviceready', onDeviceReadyRegistro, false);
 
+// Check if a user is already logged in and redirect to menu.html
+if (localStorage.getItem('currentUser')) {
+    window.location.href = "menu.html";
+}
+
 function onDeviceReadyRegistro() {
     console.log('Running cordova for registro.html');
 }

@@ -19,6 +19,12 @@
 
 // Wait for the deviceready event before using any of Cordova's device APIs.
 // See https://cordova.apache.org/docs/en/latest/cordova/events/events.html#deviceready
+
+// Check if a user is already logged in and redirect to menu.html
+if (localStorage.getItem('currentUser')) {
+    window.location.href = "menu.html";
+}
+
 document.addEventListener('deviceready', onDeviceReady, false);
 
 function onDeviceReady() {
