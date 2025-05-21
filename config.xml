@@ -23,5 +23,6 @@
         <icon src="www/img/android/icon-96-xhdpi.png" density="xhdpi" />
         <icon src="www/img/android/icon-144-xxhdpi.png" density="xxhdpi" />
         <icon src="www/img/android/icon-192-xxxhdpi.png" density="xxxhdpi" />
+        <preference name="AndroidWindowSplashScreenAnimatedIcon" value="www/img/android/splash.png" />
     </platform>
 </widget>
