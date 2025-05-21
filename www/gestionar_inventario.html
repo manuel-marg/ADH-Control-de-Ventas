@@ -48,23 +48,33 @@
                     <input type="number" id="gestionar-stock-producto" class="form-control" placeholder="" step="1">
                 </div>
 
+                <div class="input-group mb-3" style="display: flex; align-items: center;">
+                    <div class="input-group" style="width: 69%;">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Categoría:</span>
+                        </div>
+                        <select id="gestionar-categoria-producto" class="form-control">
+                            <!-- Options will be added here by JavaScript -->
+                        </select>
+                    </div>
+                    <button id="agregar-categoria-button" class="btn btn-primary"
+                        style="margin-left: 5px; width: 14%;"><i class="fa fa-plus"></i></button>
+                    <button id="eliminar-categoria-button" class="btn btn-danger"
+                        style="margin-left: 5px; width: 14%;">X</button>
+                </div>
+
                 <label for="gestionar-foto-producto">Foto del Producto:</label>
                 <input type="file" id="gestionar-foto-producto" accept="image/*"><br>
                 <img id="foto-preview" src="#" alt="Vista previa"
                     style="display: none; margin-top: 5px; margin-bottom: 10px;" />
-                <!-- Estilos de tamaño se manejarán en CSS, pero se añade margen aquí -->
-                <br>
-
-                <button id="guardar-producto-button" style="margin-top:15px;">Guardar Producto</button>
-                <button id="cancelar-edicion-producto-button"
-                    style="display:none; background-color: #ccc; margin-top:5px;">Cancelar Edición</button>
             </div>
-            <!-- Botón Volver al Menú eliminado -->
+            <button id="guardar-producto-button" style="margin-top:15px;margin-bottom:15px;">Guardar Producto</button>
+            <button id="cancelar-edicion-producto-button"
+                style="display:none; background-color: #ccc; margin-top:5px;margin-bottom:15px;">Cancelar Edición</button>
         </div>
-    </div>
-    <script src="cordova.js"></script>
-    <script src="lib/sweetalert2/sweetalert2.min.js"></script>
-    <script src="js/gestionar_inventario.js"></script>
+        <script src="cordova.js"></script>
+        <script src="lib/sweetalert2/sweetalert2.min.js"></script>
+        <script src="js/gestionar_inventario.js"></script>
 </body>
 
 </html>

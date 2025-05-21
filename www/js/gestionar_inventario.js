@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // La llamada original en onDeviceReadyGestionarInventario también es válida si el script está al final.
     // Para ser explícito y cubrir casos donde el script podría no estar al final:
     if (typeof cargarGestionarInventarioPage === "function") {
-         cargarGestionarInventarioPage();
+        cargarGestionarInventarioPage();
     }
 });
 
@@ -37,12 +37,108 @@ const gestionarFotoProductoInputPage = document.getElementById('gestionar-foto-p
 const fotoPreviewPage = document.getElementById('foto-preview'); // Nuevo preview de imagen
 const guardarProductoButtonPage = document.getElementById('guardar-producto-button');
 const cancelarEdicionProductoButtonPage = document.getElementById('cancelar-edicion-producto-button');
+const agregarCategoriaButton = document.getElementById('agregar-categoria-button');
+const eliminarCategoriaButton = document.getElementById('eliminar-categoria-button');
 // const volverMenuGestionarButtonPage = document.getElementById('volver-menu-gestionar-button'); // Botón eliminado
 
 function cargarGestionarInventarioPage() {
+    // Cargar categorías desde localStorage
+    let categorias = JSON.parse(localStorage.getItem('categorias')) || [];
+    const categoriaSelect = document.getElementById('gestionar-categoria-producto');
+
+    // Limpiar opciones existentes
+    categoriaSelect.innerHTML = '';
+
+    // Agregar la opción por defecto
+    let defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Selecciona una categoría';
+    categoriaSelect.appendChild(defaultOption);
+
+    // Agregar las opciones de categoría
+    categorias.forEach(categoria => {
+        let option = document.createElement('option');
+        option.value = categoria;
+        option.textContent = categoria;
+        categoriaSelect.appendChild(option);
+    });
+
+    if (agregarCategoriaButton) {
+        agregarCategoriaButton.addEventListener('click', () => {
+            Swal.fire({
+                title: 'Agregar Categoría',
+                input: 'text',
+                inputPlaceholder: 'Ingrese el nombre de la categoría',
+                showCancelButton: true,
+                confirmButtonText: 'Guardar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#20429a',
+                preConfirm: (value) => {
+                    if (!value) {
+                        Swal.showValidationMessage('Debes ingresar un nombre para la categoría.');
+                        return false;
+                    }
+                    if (categorias.includes(value)) {
+                        Swal.showValidationMessage('Esta categoría ya existe.');
+                        return false;
+                    }
+                    return value;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    categorias.push(result.value);
+                    localStorage.setItem('categorias', JSON.stringify(categorias));
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: 'Categoría agregada correctamente.',
+                        confirmButtonColor: '#20429a',
+                        confirmButtonText: "Aceptar"
+                    });
+                    // Actualizar el input de categoría (opcional, si es un select)
+                    cargarGestionarInventarioPage();
+                }
+            });
+        });
+    }
+
+    if (eliminarCategoriaButton) {
+        eliminarCategoriaButton.addEventListener('click', () => {
+            // Implementar lógica para eliminar categoría (usando Swal para confirmar)
+            Swal.fire({
+                title: 'Eliminar Categoría',
+                text: '¿Estás seguro de que deseas eliminar la categoría seleccionada?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Lógica para eliminar la categoría
+                    let categorias = JSON.parse(localStorage.getItem('categorias')) || [];
+                    const categoriaSeleccionada = categoriaSelect.value;
+                    if (categoriaSeleccionada) {
+                        categorias = categorias.filter(cat => cat !== categoriaSeleccionada);
+                        localStorage.setItem('categorias', JSON.stringify(categorias));
+                        cargarGestionarInventarioPage();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Eliminada',
+                            text: 'La categoría ha sido eliminada.',
+                            confirmButtonColor: '#20429a',
+                            confirmButtonText: "Aceptar"
+                        });
+                    }
+                }
+            });
+        });
+    }
+
     if (!listaGestionarInventarioDivPage) return;
     listaGestionarInventarioDivPage.innerHTML = ''; // Clear previous content
-    
+
     const h3 = document.createElement('h3');
     // h3.textContent = 'Productos para Gestionar'; // Already in HTML
     // listaGestionarInventarioDivPage.appendChild(h3);
@@ -63,7 +159,7 @@ function cargarGestionarInventarioPage() {
             li.style.display = 'flex';
             li.style.justifyContent = 'space-between';
             li.style.alignItems = 'center';
-            
+
             // Contenedor para imagen y texto
             const infoContainer = document.createElement('div');
             infoContainer.style.display = 'flex';
@@ -93,13 +189,18 @@ function cargarGestionarInventarioPage() {
             precioSpan.textContent = `($${p.precioUSD.toFixed(2)})`;
             infoDiv.appendChild(precioSpan);
 
+            const categoriaSpan = document.createElement('span');
+            categoriaSpan.classList.add('producto-categoria-venta');
+            categoriaSpan.textContent = ` - Categoría: ${p.categoria}`;
+            infoDiv.appendChild(categoriaSpan);
+
             const stockSpan = document.createElement('span');
             stockSpan.classList.add('producto-stock-venta');
             stockSpan.textContent = ` - Stock: ${p.inventario}`;
             infoDiv.appendChild(stockSpan);
-            
+
             infoContainer.appendChild(infoDiv);
-            
+
             li.appendChild(infoContainer);
 
             const buttonsDiv = document.createElement('div');
@@ -126,7 +227,7 @@ function cargarGestionarInventarioPage() {
             // deleteButton.style.backgroundColor = '#f44336'; // Color ahora en CSS
             deleteButton.addEventListener('click', () => eliminarProductoPage(p.id));
             buttonsDiv.appendChild(deleteButton);
-            
+
             li.appendChild(buttonsDiv);
             ul.appendChild(li);
         });
@@ -169,11 +270,11 @@ function limpiarFormularioProductoPage() {
 
 // Event listener for file input change to show preview
 if (gestionarFotoProductoInputPage) {
-    gestionarFotoProductoInputPage.addEventListener('change', function(event) {
+    gestionarFotoProductoInputPage.addEventListener('change', function (event) {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 fotoPreviewPage.src = e.target.result;
                 fotoPreviewPage.style.display = 'block';
             }
@@ -193,9 +294,10 @@ if (guardarProductoButtonPage) {
         const precio = parseFloat(gestionarPrecioProductoInputPage.value);
         const stock = parseInt(gestionarStockProductoInputPage.value);
         const fotoFile = gestionarFotoProductoInputPage.files[0];
+        const categoria = document.getElementById('gestionar-categoria-producto').value.trim();
 
-        if (nombre === '' || isNaN(precio) || precio <= 0 || isNaN(stock) || stock < 0) {
-            Swal.fire({ icon: 'error', title: 'Datos Incompletos', text: 'Por favor, complete todos los campos correctamente (Nombre, Precio, Stock).', confirmButtonColor: '#20429a' });
+        if (nombre === '' || isNaN(precio) || precio <= 0 || isNaN(stock) || stock < 0 || categoria === '') {
+            Swal.fire({ icon: 'error', title: 'Datos Incompletos', text: 'Por favor, complete todos los campos correctamente (Nombre, Precio, Stock, Categoría).', confirmButtonColor: '#20429a' });
             return;
         }
 
@@ -209,12 +311,13 @@ if (guardarProductoButtonPage) {
                         return;
                     }
                     const productoExistente = gestionarProductosDisponibles[productoIndex];
-                    gestionarProductosDisponibles[productoIndex] = { 
-                        ...productoExistente, 
-                        nombre, 
-                        precioUSD: precio, 
+                    gestionarProductosDisponibles[productoIndex] = {
+                        ...productoExistente,
+                        nombre,
+                        precioUSD: precio,
                         inventario: stock,
-                        fotoBase64: fotoBase64 || productoExistente.fotoBase64 
+                        categoria: categoria,
+                        fotoBase64: fotoBase64 || productoExistente.fotoBase64
                     };
                     mensajeExito = 'Producto actualizado exitosamente.';
                 }
@@ -224,7 +327,7 @@ if (guardarProductoButtonPage) {
                     Swal.fire({ icon: 'error', title: 'Error', text: 'Un producto con este nombre ya existe.', confirmButtonColor: '#20429a' });
                     return;
                 }
-                gestionarProductosDisponibles.push({ id: nuevoId, nombre, precioUSD: precio, inventario: stock, fotoBase64 });
+                gestionarProductosDisponibles.push({ id: nuevoId, nombre, precioUSD: precio, inventario: stock, categoria: categoria, fotoBase64 });
                 mensajeExito = 'Producto agregado exitosamente.';
             }
             localStorage.setItem('productos', JSON.stringify(gestionarProductosDisponibles));
@@ -263,7 +366,7 @@ if (guardarProductoButtonPage) {
 
         if (fotoFile) {
             const reader = new FileReader();
-            reader.onloadend = async function() {
+            reader.onloadend = async function () {
                 const resizedImage = await resizeImage(reader.result);
                 guardarProductoConFoto(resizedImage);
             }
@@ -276,39 +379,3 @@ if (guardarProductoButtonPage) {
         }
     });
 }
-
-if (cancelarEdicionProductoButtonPage) {
-    cancelarEdicionProductoButtonPage.addEventListener('click', limpiarFormularioProductoPage);
-}
-
-function eliminarProductoPage(productoId) {
-    Swal.fire({
-        title: '¿Estás seguro?',
-        text: "¡No podrás revertir la eliminación de este producto!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#20429a', // Changed to blue
-        cancelButtonColor: '#d33', // Kept red for cancel
-        confirmButtonText: 'Aceptar', // Changed to "Aceptar"
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            gestionarProductosDisponibles = gestionarProductosDisponibles.filter(p => p.id !== productoId);
-            localStorage.setItem('productos', JSON.stringify(gestionarProductosDisponibles));
-            cargarGestionarInventarioPage();
-            Swal.fire({
-                title: '¡Eliminado!',
-                text: 'El producto ha sido eliminado.',
-                icon: 'success',
-                confirmButtonColor: '#20429a',
-                confirmButtonText: "Aceptar"
-            });
-        }
-    });
-}
-
-// if (volverMenuGestionarButtonPage) { // Botón eliminado
-//     volverMenuGestionarButtonPage.addEventListener('click', () => {
-//         window.location.href = "menu.html";
-//     });
-// }
