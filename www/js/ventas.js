@@ -10,8 +10,8 @@ function onDeviceReadyVentas() {
 }
 
 // Mover la inicialización de estas variables globales más cerca de donde se usan o dentro de initializeVentas
-let ventasTasaDolar; 
-let ventasProductosDisponibles; 
+let ventasTasaDolar;
+let ventasProductosDisponibles;
 let ventasProductosSeleccionados = [];
 
 // Get references to elements in ventas.html
@@ -42,15 +42,44 @@ function actualizarDisplayTasaVentasPage() {
 function cargarProductosDisponiblesPage() {
     if (!productosDisponiblesVentasDivPage) return;
     productosDisponiblesVentasDivPage.innerHTML = '';
-    if (ventasProductosDisponibles.length === 0) {
+
+    // Group products by category
+    const productosPorCategoria = {};
+    ventasProductosDisponibles.forEach(producto => {
+        if (producto.inventario > 0) {
+            if (!productosPorCategoria[producto.categoria]) {
+                productosPorCategoria[producto.categoria] = [];
+            }
+            productosPorCategoria[producto.categoria].push(producto);
+        }
+    });
+
+    if (Object.keys(productosPorCategoria).length === 0) {
         productosDisponiblesVentasDivPage.innerHTML = '<p>No hay productos disponibles.</p>';
         return;
     }
-    ventasProductosDisponibles.forEach(producto => {
-        if (producto.inventario > 0) {
+
+    for (const categoria in productosPorCategoria) {
+        const productos = productosPorCategoria[categoria];
+
+        // Create category header
+        const categoryHeader = document.createElement('div');
+        categoryHeader.classList.add('category-header');
+        categoryHeader.innerHTML = `
+            <i class="fa fa-chevron-right category-arrow" style="margin-right: 5px;"></i>
+            <h3 style="display: inline-block; margin-right: 10px;">${categoria}</h3>
+        `;
+        productosDisponiblesVentasDivPage.appendChild(categoryHeader);
+
+        // Create product list container (initially hidden)
+        const productListContainer = document.createElement('div');
+        productListContainer.classList.add('product-list-container');
+        productListContainer.style.display = 'none'; // Initially hidden
+
+        productos.forEach(producto => {
             const productoDiv = document.createElement('div');
             productoDiv.classList.add('producto-item-venta');
-            
+
             let imgHtml = '';
             if (producto.fotoBase64) {
                 imgHtml = `<img src="${producto.fotoBase64}" alt="${producto.nombre}" style="width: 40px; height: 40px; object-fit: cover; margin-right: 10px;">`;
@@ -68,9 +97,25 @@ function cargarProductosDisponiblesPage() {
                 <button data-id="${producto.id}" class="agregar-producto-venta-btn"><i class="fa fa-plus"></i></button>
             `;
             productoDiv.querySelector('button').addEventListener('click', () => agregarProductoAVentaPage(producto.id));
-            productosDisponiblesVentasDivPage.appendChild(productoDiv);
-        }
-    });
+            productListContainer.appendChild(productoDiv);
+        });
+
+        productosDisponiblesVentasDivPage.appendChild(productListContainer);
+
+        // Add event listener to toggle category visibility
+        categoryHeader.addEventListener('click', () => {
+            const icon = categoryHeader.querySelector('.category-arrow');
+            if (productListContainer.style.display === 'none') {
+                productListContainer.style.display = 'block';
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-down');
+            } else {
+                productListContainer.style.display = 'none';
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-right');
+            }
+        });
+    }
 }
 
 function agregarProductoAVentaPage(productoId) {
@@ -78,7 +123,7 @@ function agregarProductoAVentaPage(productoId) {
     if (productoOriginal && productoOriginal.inventario > 0) {
         const productoEnVenta = ventasProductosSeleccionados.find(p => p.id === productoId);
         if (productoEnVenta) {
-            // Check against the current inventory of the original product, minus what's already in the cart
+            // Check against the current inventory of the original product, minus lo que ya está en el carrito
             const cantidadYaEnCarrito = productoEnVenta.cantidad;
             if (cantidadYaEnCarrito < productoOriginal.inventario) {
                  productoEnVenta.cantidad++;
