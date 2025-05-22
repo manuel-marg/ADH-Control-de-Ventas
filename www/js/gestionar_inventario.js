@@ -3,7 +3,7 @@ document.addEventListener('deviceready', onDeviceReadyGestionarInventario, false
 function onDeviceReadyGestionarInventario() {
     console.log('Running cordova for gestionar_inventario.html');
     if (!localStorage.getItem('currentUser')) {
-        // window.location.href = "index.html";
+         window.location.href = "index.html";
     }
     // Se moverá la llamada a cargarGestionarInventarioPage para asegurar que los datos estén listos.
 }

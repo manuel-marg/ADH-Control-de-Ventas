@@ -1,12 +1,12 @@
-// document.addEventListener('deviceready', onDeviceReadyTasa, false); // Cordova's deviceready might not be strictly necessary for this simple page logic
+document.addEventListener('deviceready', onDeviceReadyTasa, false); // Cordova's deviceready might not be strictly necessary for this simple page logic
 
-// function onDeviceReadyTasa() {
-//     console.log('Running cordova for tasa.html');
-//     if (!localStorage.getItem('currentUser')) {
-//         // window.location.href = "index.html";
-//     }
-//     initializeTasaPage();
-// }
+function onDeviceReadyTasa() {
+    console.log('Running cordova for tasa.html');
+    if (!localStorage.getItem('currentUser')) {
+        window.location.href = "index.html";
+    }
+    //     initializeTasaPage();
+}
 
 const tasaActualDisplayPage = document.getElementById('tasa-actual-display');
 const tasaInputPage = document.getElementById('tasa-input');
@@ -38,7 +38,7 @@ if (tasaButtonSavePage) {
     tasaButtonSavePage.addEventListener('click', () => {
         const nuevaTasa = parseFloat(tasaInputPage.value);
         if (!isNaN(nuevaTasa) && nuevaTasa > 0) {
-            localStorage.setItem('tasaDolar', nuevaTasa.toString()); 
+            localStorage.setItem('tasaDolar', nuevaTasa.toString());
             Swal.fire({
                 icon: 'success',
                 title: '¡Actualizado!',

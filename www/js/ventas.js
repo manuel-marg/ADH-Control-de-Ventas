@@ -4,7 +4,7 @@ function onDeviceReadyVentas() {
     console.log('Running cordova for ventas.html');
     // Check if user is logged in, redirect to index.html if not
     if (!localStorage.getItem('currentUser')) {
-        // window.location.href = "index.html";
+         window.location.href = "index.html";
     }
     // initializeVentas() se llamará desde DOMContentLoaded ahora
 }

@@ -3,7 +3,7 @@ document.addEventListener('deviceready', onDeviceReadyHistorial, false);
 function onDeviceReadyHistorial() {
     console.log('Running cordova for historial_ventas.html');
     if (!localStorage.getItem('currentUser')) {
-        // window.location.href = "index.html"; // Opcional: redirigir si no está logueado
+         window.location.href = "index.html"; // Opcional: redirigir si no está logueado
     }
     cargarHistorialVentas();
 }

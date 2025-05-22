@@ -138,7 +138,7 @@ h3 {
 
 input[type="text"],
 input[type="password"],
-input[type="number"]{
+input[type="number"] {
     padding: 9px;
     margin-bottom: 15px;
     border: 1px solid #ccd0d5;
@@ -558,25 +558,21 @@ a:hover {
 }
 
 .input-group-text {
-    display: -webkit-box;
-    display: -ms-flexbox;
     display: flex;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
     align-items: center;
-    padding: .375rem .75rem;
-    margin-bottom: 0;
-    font-size: 1rem;
-    font-weight: 400;
+    padding: 10px;
+    font-size: 1.2em;
+    font-weight: 500;
     line-height: 1.5;
     color: #495057;
     text-align: center;
     white-space: nowrap;
     background-color: #e9ecef;
+    border-right: 1px solid #ced4da;
+    border-top-left-radius: .25rem;
+    border-bottom-left-radius: .25rem;
     border: 1px solid #ced4da;
-    border-radius: .25rem;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
+    min-width: 80px;
 }
 
 .input-group>.custom-select:not(:first-child),
@@ -589,11 +585,23 @@ a:hover {
 .input-group>.custom-select,
 .input-group>.form-control {
     position: relative;
-    -webkit-box-flex: 1;
-    -ms-flex: 1 1 auto;
+    display: block;
+    border: 1px solid #ced4da;
+    margin-bottom: 0;
     flex: 1 1 auto;
     width: 1%;
-    margin-bottom: 0;
+    padding: 10px;
+    font-size: 1.2em;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    box-sizing: border-box;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: .25rem;
+    border-bottom-right-radius: .25rem;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 
 .form-control {

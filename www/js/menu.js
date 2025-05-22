@@ -2,11 +2,8 @@ document.addEventListener('deviceready', onDeviceReadyMenu, false);
 
 function onDeviceReadyMenu() {
     console.log('Running cordova for menu.html');
-    // Check if user is logged in, redirect to index.html if not
-    // This is a basic check, a more robust session management might be needed
-    if (!localStorage.getItem('currentUser')) {
-        // alert('No estás autenticado.'); // Optional: notify user
-        // window.location.href = "index.html";
+   if (!localStorage.getItem('currentUser')) {
+        window.location.href = "index.html";
     }
 }
 
