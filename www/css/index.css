@@ -627,3 +627,33 @@ a:hover {
     background-color: #dc3545;
     color: white;
 }
+
+.payment-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.payment-row .form-group:first-child {
+    flex: 0 0 75%;
+}
+
+.payment-row .form-group:last-child {
+    flex: 0 0 25%;
+}
+
+.payment-row select {
+    width: 100%;
+    padding: 8px;
+    margin-right: 5px;
+}
+
+.payment-row input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 0px;
+}
+
+.payment-row + .payment-row {
+    margin-top: 15px;
+}

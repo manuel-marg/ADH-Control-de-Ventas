@@ -38,20 +38,41 @@
             <div id="total-venta" style="text-align: right; margin-top: 10px; font-weight: bold;">
                 Total $: <span id="total-venta-usd">0.00</span> | Total Bs: <span id="total-venta-bs">0.00</span>
             </div>
-            <div class="input-group mb-3">
-                <div class="input-group" style="width: auto;">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">Método de Pago:</span>
+            <div id="payment-methods">
+                <!-- Payment Row 1 -->
+                <div class="payment-row">
+                    <div class="form-group">
+                        <select class="form-control" id="metodo-pago-1">
+                            <option value="Punto de venta (Bs)">Punto de venta (Bs)</option>
+                            <option value="Efectivo ($)">Efectivo ($)</option>
+                            <option value="Pago Movil">Pago Movil</option>
+                            <option value="Transferencia en Bs.">Transferencia en Bs.</option>
+                            <option value="Efectivo en Bs.">Efectivo en Bs.</option>
+                            <option value="Zelle">Zelle</option>
+                            <option value="Transferencia en $">Transferencia en $</option>
+                        </select>
                     </div>
-                    <select id="metodo-pago" class="form-control">
-                        <option value="Punto de venta (Bs)">Punto de venta (Bs)</option>
-                        <option value="Efectivo ($)">Efectivo ($)</option>
-                        <option value="Pago Movil">Pago Movil</option>
-                        <option value="Transferencia en Bs.">Transferencia en Bs.</option>
-                        <option value="Efectivo en Bs.">Efectivo en Bs.</option>
-                        <option value="Zelle">Zelle</option>
-                        <option value="Transferencia en $">Transferencia en $</option>
-                    </select>
+                    <div class="form-group">
+                        <input type="number" class="form-control" id="monto-pago-1" placeholder="Monto" step="0.01">
+                    </div>
+                </div>
+
+                <!-- Payment Row 2 -->
+                <div class="payment-row">
+                    <div class="form-group">
+                        <select class="form-control" id="metodo-pago-2">
+                            <option value="Punto de venta (Bs)">Punto de venta (Bs)</option>
+                            <option value="Efectivo ($)">Efectivo ($)</option>
+                            <option value="Pago Movil">Pago Movil</option>
+                            <option value="Transferencia en Bs.">Transferencia en Bs.</option>
+                            <option value="Efectivo en Bs.">Efectivo en Bs.</option>
+                            <option value="Zelle">Zelle</option>
+                            <option value="Transferencia en $">Transferencia en $</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="number" class="form-control" id="monto-pago-2" placeholder="Monto" step="0.01">
+                    </div>
                 </div>
             </div>
             <button id="registrar-venta-button" style="margin-top: 15px;">Registrar Venta</button>
