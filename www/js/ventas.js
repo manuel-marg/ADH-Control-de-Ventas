@@ -4,7 +4,7 @@ function onDeviceReadyVentas() {
     console.log('Running cordova for ventas.html');
     // Check if user is logged in, redirect to index.html if not
     if (!localStorage.getItem('currentUser')) {
-         window.location.href = "index.html";
+        window.location.href = "index.html";
     }
     // initializeVentas() se llamará desde DOMContentLoaded ahora
 }
@@ -23,6 +23,17 @@ const totalVentaBsSpanPage = document.getElementById('total-venta-bs');
 const registrarVentaButtonPage = document.getElementById('registrar-venta-button');
 // const volverMenuVentasButtonPage = document.getElementById('volver-menu-ventas-button'); // Botón eliminado
 
+function calcularMontoInicial() {
+    const metodoPagoSelect = document.getElementById('metodo-pago-1');
+    const montoPagoInput = document.getElementById('monto-pago-1');
+    const totalUSD = parseFloat(totalVentaUsdSpanPage.textContent);
+    const tasaDolar = parseFloat(localStorage.getItem('tasaDolar')) || 1;
+
+    if (metodoPagoSelect.value === 'Punto de venta (Bs)') {
+        montoPagoInput.value = (totalUSD * tasaDolar).toFixed(2);
+    }
+}
+
 function initializeVentas() {
     // Leer/Releer los valores de localStorage aquí para asegurar frescura
     ventasTasaDolar = parseFloat(localStorage.getItem('tasaDolar')) || 1;
@@ -33,6 +44,104 @@ function initializeVentas() {
     ventasProductosSeleccionados = []; // Resetear selección para nueva venta
     actualizarListaProductosSeleccionadosPage();
     calcularTotalVentaPage();
+
+    // Get references to payment method and amount input fields
+    const metodoPagoSelect = document.getElementById('metodo-pago-1');
+    const montoPagoInput = document.getElementById('monto-pago-1');
+
+    // Add event listener to payment method select input
+    metodoPagoSelect.addEventListener('change', calcularMonto);
+
+    // Get references to second payment method and amount input fields
+    const metodoPagoSelect2 = document.getElementById('metodo-pago-2');
+    const montoPagoInput2 = document.getElementById('monto-pago-2');
+
+    // Set second payment method amount input to read-only
+    montoPagoInput2.readOnly = true;
+
+    // Add event listener to second payment method select input
+    metodoPagoSelect2.addEventListener('change', calcularMontoSegundoPago);
+
+    // Set default value for payment method 1 and calculate initial amount
+    metodoPagoSelect.value = 'Punto de venta (Bs)';
+
+    calcularMontoInicial();
+}
+
+function calcularMontoSegundoPago() {
+    const metodoPagoSelect1 = document.getElementById('metodo-pago-1');
+    const montoPagoInput1 = document.getElementById('monto-pago-1');
+    const metodoPagoSelect2 = document.getElementById('metodo-pago-2');
+    const montoPagoInput2 = document.getElementById('monto-pago-2');
+    const totalUSD = parseFloat(totalVentaUsdSpanPage.textContent);
+    const tasaDolar = parseFloat(localStorage.getItem('tasaDolar')) || 1;
+
+    const metodoPago1 = metodoPagoSelect1.value;
+    const montoPago1 = parseFloat(montoPagoInput1.value) || 0;
+    const metodoPago2 = metodoPagoSelect2.value;
+
+    let restante = 0;
+    let monto2 = 0;
+
+    if (metodoPago1 === 'Efectivo ($)' || metodoPago1 === 'Transferencia en $' || metodoPago1 === 'Zelle') {
+        restante = totalUSD - montoPago1;
+    } else {
+        restante = (totalUSD * tasaDolar) - montoPago1;
+    }
+
+    if (metodoPago2 === 'Efectivo ($)' || metodoPago2 === 'Transferencia en $' || metodoPago2 === 'Zelle') {
+        monto2 = restante;
+    } else {
+        monto2 = restante / tasaDolar;
+    }
+
+    montoPagoInput2.value = monto2.toFixed(2);
+}
+
+function calcularMonto() {
+    const metodoPagoSelect = document.getElementById('metodo-pago-1');
+    const montoPagoInput = document.getElementById('monto-pago-1');
+    const totalUSD = parseFloat(totalVentaUsdSpanPage.textContent);
+    const tasaDolar = parseFloat(localStorage.getItem('tasaDolar')) || 1;
+
+    const metodoPago = metodoPagoSelect.value;
+    let monto = 0;
+
+    if (metodoPago === 'Efectivo ($)' || metodoPago === 'Transferencia en $' || metodoPago === 'Zelle') {
+        monto = totalUSD;
+    } else {
+        monto = totalUSD * tasaDolar;
+    }
+
+    montoPagoInput.value = monto.toFixed(2);
+
+    // Add event listener to amount input field to calculate remaining amount
+    montoPagoInput.addEventListener('input', calcularRestante);
+}
+
+function calcularRestante() {
+    const metodoPagoSelect = document.getElementById('metodo-pago-1');
+    const montoPagoInput = document.getElementById('monto-pago-1');
+    const totalUSD = parseFloat(totalVentaUsdSpanPage.textContent);
+    const tasaDolar = parseFloat(localStorage.getItem('tasaDolar')) || 1;
+
+    const metodoPago = metodoPagoSelect.value;
+    const montoIngresado = parseFloat(montoPagoInput.value) || 0;
+
+    let restante = 0;
+
+    if (metodoPago === 'Efectivo ($)' || metodoPago === 'Transferencia en $' || metodoPago === 'Zelle') {
+        restante = totalUSD - montoIngresado;
+    } else {
+        restante = (totalUSD * tasaDolar) - montoIngresado;
+    }
+
+    const restanteVentaMonto = document.getElementById('restante-venta-monto');
+    if (restanteVentaMonto) {
+        restanteVentaMonto.textContent = restante.toFixed(2);
+    }
+
+    calcularMontoSegundoPago();
 }
 
 function actualizarDisplayTasaVentasPage() {
@@ -71,7 +180,7 @@ function cargarProductosDisponiblesPage() {
         `;
         productosDisponiblesVentasDivPage.appendChild(categoryHeader);
 
-        // Create product list container (initially hidden)
+        // Create product list container
         const productListContainer = document.createElement('div');
         productListContainer.classList.add('product-list-container');
         productListContainer.style.display = 'none'; // Initially hidden
@@ -126,15 +235,16 @@ function agregarProductoAVentaPage(productoId) {
             // Check against the current inventory of the original product, minus lo que ya está en el carrito
             const cantidadYaEnCarrito = productoEnVenta.cantidad;
             if (cantidadYaEnCarrito < productoOriginal.inventario) {
-                 productoEnVenta.cantidad++;
+                productoEnVenta.cantidad++;
             } else {
                 Swal.fire({ icon: 'info', title: 'Stock Agotado', text: 'No hay más stock disponible para este producto.', confirmButtonColor: '#20429a', confirmButtonText: "Aceptar" });
             }
         } else {
-             ventasProductosSeleccionados.push({ ...productoOriginal, cantidad: 1 });
+            ventasProductosSeleccionados.push({ ...productoOriginal, cantidad: 1 });
         }
         actualizarListaProductosSeleccionadosPage();
         calcularTotalVentaPage();
+        calcularMontoInicial();
     }
 }
 
@@ -147,6 +257,7 @@ function quitarProductoDeVentaPage(productoId) {
         }
         actualizarListaProductosSeleccionadosPage();
         calcularTotalVentaPage();
+        calcularMontoInicial();
     }
 }
 
@@ -181,7 +292,11 @@ if (registrarVentaButtonPage) {
             Swal.fire({ icon: 'warning', title: 'Venta Vacía', text: 'No hay productos seleccionados para registrar la venta.', confirmButtonColor: '#20429a', confirmButtonText: "Aceptar" });
             return;
         }
-        const metodoPago = document.getElementById('metodo-pago').value;
+
+        const metodoPagoSelect = document.getElementById('metodo-pago-1');
+        const montoPagoInput = document.getElementById('monto-pago-1');
+        const metodoPago = metodoPagoSelect.value;
+        const montoPago = parseFloat(montoPagoInput.value);
 
         ventasProductosSeleccionados.forEach(itemVenta => {
             const productoInventario = ventasProductosDisponibles.find(p => p.id === itemVenta.id);
@@ -191,7 +306,7 @@ if (registrarVentaButtonPage) {
         });
         localStorage.setItem('productos', JSON.stringify(ventasProductosDisponibles));
 
-const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
         const usuarioVenta = currentUser ? currentUser.username : 'Desconocido';
 
         let ventasTemp = JSON.parse(localStorage.getItem('ventasTemp')) || [];
@@ -201,18 +316,18 @@ const currentUser = JSON.parse(localStorage.getItem('currentUser'));
             items: [...ventasProductosSeleccionados],
             totalUSD: parseFloat(totalVentaUsdSpanPage.textContent),
             totalBS: parseFloat(totalVentaBsSpanPage.textContent),
-            metodoPago: metodoPago
+            metodoPago: metodoPago,
+            montoPago: montoPago
         };
 
         // Intentar enviar la venta a Google Forms
-        enviarVentaAGoogleForms(nuevaVenta)
+        enviarVentaAGoogleForms(venta)
             .then(() => {
                 // Si la venta se envía correctamente, no se guarda en ventasTemp
                 console.log('Venta enviada correctamente a Google Forms.');
             })
             .catch((error) => {
-                // Si hay un error al enviar la venta, se guarda en ventasTemp
-                console.error('Error al enviar la venta a Google Forms:', error);
+                // Si hay un error al enviar la venta a Google Forms:', error);
                 ventasTemp.push(nuevaVenta);
                 localStorage.setItem('ventasTemp', JSON.stringify(ventasTemp));
             });
@@ -227,32 +342,32 @@ const currentUser = JSON.parse(localStorage.getItem('currentUser'));
         });
         initializeVentas(); // Reset the sales page
 
-function enviarVentaAGoogleForms(venta) {
-    // Construir la cadena de productos
-    const productosString = venta.items.map(item => `${item.nombre} x ${item.cantidad}`).join(', ');
+        function enviarVentaAGoogleForms(venta) {
+            // Construir la cadena de productos
+            const productosString = venta.items.map(item => `${item.nombre} x ${item.cantidad}`).join(', ');
 
-    // Construir la URL de la petición GET
-    const url = `https://docs.google.com/forms/d/e/1FAIpQLSc2F9aUxdAUatdoUM6L-f92eh9W4SX5n3M0XuRt76guyt-UHQ/formResponse?usp=pp_url&entry.625195464=${venta.fecha}&entry.1134916832=${venta.usuario}&entry.773060726=${venta.metodoPago}&entry.2067765280=${productosString}&entry.1267682030=${venta.totalUSD}&entry.1216241302=${venta.totalBS}`;
+            // Construir la URL de la petición GET
+            const url = `https://docs.google.com/forms/d/e/1FAIpQLSc2F9aUxdAUatdoUM6L-f92eh9W4SX5n3M0XuRt76guyt-UHQ/formResponse?usp=pp_url&entry.625195464=${venta.fecha}&entry.1134916832=${venta.usuario}&entry.773060726=${venta.metodoPago}&entry.2067765280=${productosString}&entry.1267682030=${venta.totalUSD}&entry.1216241302=${venta.totalBS}`;
 
-    // Reemplazar la URL original con la URL a través del proxy
-    const proxyUrl = "https://corsproxy.io/?url=" + encodeURIComponent(url);
+            // Reemplazar la URL original con la URL a través del proxy
+            const proxyUrl = "https://corsproxy.io/?url=" + encodeURIComponent(url);
 
-    // Realizar la petición GET con fetch nativo
-    return fetch(proxyUrl)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Error en la respuesta del servidor');
-            }
-            return response.text(); // Obtener el cuerpo de la respuesta como texto
-        })
-        .then(body => {
-            console.log(body); // Mostrar el cuerpo de la respuesta (puede ser HTML, texto, etc.)
-        })
-        .catch(error => {
-            console.error('Error al enviar la venta a Google Forms:', error);
-            throw error; // Re-lanzar el error para que el llamado pueda manejarlo
-        });
-}
+            // Realizar la petición GET con fetch nativo
+            return fetch(proxyUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la respuesta del servidor');
+                    }
+                    return response.text(); // Obtener el cuerpo de la respuesta como texto
+                })
+                .then(body => {
+                    console.log(body); // Mostrar el cuerpo de la respuesta (puede ser HTML, texto, etc.)
+                })
+                .catch(error => {
+                    console.error('Error al enviar la venta a Google Forms:', error);
+                    throw error; // Re-lanzar el error para que el llamado pueda manejarlo
+                });
+        }
 
         initializeVentas(); // Reset the sales page
     });
