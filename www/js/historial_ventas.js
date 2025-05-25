@@ -64,7 +64,12 @@ function cargarHistorialVentas() {
                 </div>
                 <div class="ticket-fecha">Fecha: ${fechaVenta}</div>
                 <div class="ticket-usuario">Registrada por: ${venta.usuario || 'Desconocido'}</div>
-                <div class="ticket-metodo-pago">Método de Pago: ${venta.metodoPago.toUpperCase().replace('PUNTO DE VENTA', 'PUNTO')}</div>
+                <div class="ticket-metodo-pago">Método de Pago 1: ${venta.metodoPago1.toUpperCase().replace('PUNTO DE VENTA', 'PUNTO')}</div>
+                <div class="ticket-total" style="text-align: right;">Monto 1: ${venta.montoPago1.toFixed(2).padStart(10, ' ')} ${venta.metodoPago1.includes('Bs') ? 'Bs' : 'USD'}</div>
+                ${venta.metodoPago2 ? `
+                <div class="ticket-metodo-pago">Método de Pago 2: ${venta.metodoPago2.toUpperCase().replace('PUNTO DE VENTA', 'PUNTO')}</div>
+                <div class="ticket-total" style="text-align: right;">Monto 2: ${venta.montoPago2.toFixed(2).padStart(10, ' ')} ${venta.metodoPago2.includes('Bs') ? 'Bs' : 'USD'}</div>
+                ` : ''}
                 <hr style="border-top: 1px solid #000;">
                 <div class="ticket-items">${itemsHtml}</div>
                 <div class="ticket-total" style="text-align: right;">Total USD: $${venta.totalUSD.toFixed(2).padStart(10, ' ')}</div>
@@ -167,35 +172,44 @@ function subirVentasTemporales() {
 }
 
 function enviarVentaAGoogleForms(venta, callback) {
+    // Formatear la fecha al formato de Google Sheets (DD/MM/YYYY HH:mm:ss)
+    const fechaObj = new Date(venta.fecha);
+    const dia = fechaObj.getDate().toString().padStart(2, '0');
+    const mes = (fechaObj.getMonth() + 1).toString().padStart(2, '0');
+    const año = fechaObj.getFullYear();
+    const hora = fechaObj.getHours().toString().padStart(2, '0');
+    const minutos = fechaObj.getMinutes().toString().padStart(2, '0');
+    const segundos = fechaObj.getSeconds().toString().padStart(2, '0');
+    const fechaFormateada = `${dia}/${mes}/${año} ${hora}:${minutos}:${segundos}`;
+
     // Construir la cadena de productos
     const productosString = venta.items.map(item => `${removeAccents(item.nombre)} x ${item.cantidad}`).join(', ');
 
-    // Construir la URL de la petición GET
-    const url = `https://docs.google.com/forms/d/e/1FAIpQLSc2F9aUxdAUatdoUM6L-f92eh9W4SX5n3M0XuRt76guyt-UHQ/formResponse?usp=pp_url&entry.625195464=${encodeURIComponent(venta.fecha)}&entry.1134916832=${encodeURIComponent(venta.usuario)}&entry.773060726=${encodeURIComponent(venta.metodoPago)}&entry.2067765280=${encodeURIComponent(productosString)}&entry.1267682030=${encodeURIComponent(venta.totalUSD)}&entry.1216241302=${encodeURIComponent(venta.totalBS)}`;
+    // URL del script de Google Apps Script desplegado
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbypHRSG6calz4ogODo6OVXhMNedZqwfJ3YyOOCo4yKKQtoh7xfOk_ZwxUpE3nvHlDAN/exec';
 
-    // Reemplazar la URL original con la URL a través del proxy
-    const proxyUrl = "https://corsproxy.io/?url=" + encodeURIComponent(url);
+    // Construir la URL con los parámetros actualizados
+    const url = `${scriptUrl}?action=insert&fecha=${encodeURIComponent(fechaFormateada)}&usuario=${encodeURIComponent(venta.usuario)}&metodoPago1=${encodeURIComponent(venta.metodoPago1)}&montoPago1=${encodeURIComponent(venta.montoPago1)}&metodoPago2=${encodeURIComponent(venta.metodoPago2 || '')}&montoPago2=${encodeURIComponent(venta.montoPago2 || 0)}&productos=${encodeURIComponent(productosString)}&totalUSD=${encodeURIComponent(venta.totalUSD)}&totalBS=${encodeURIComponent(venta.totalBS)}&estado_venta=completada`;
 
-    // Realizar la petición GET con XMLHttpRequest
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', proxyUrl, true); // true para asíncrono
-
-    xhr.onload = function() {
-        if (xhr.status >= 200 && xhr.status < 300) {
-            console.log('Venta enviada exitosamente:', xhr.responseText);
-            callback(null, true); // Indicar éxito
-        } else {
-            console.error('Error al enviar la venta. Estado:', xhr.status);
-            callback(new Error('Error en la respuesta del servidor con estado ' + xhr.status), false); // Indicar error
-        }
-    };
-
-    xhr.onerror = function() {
-        console.error('Error de red al enviar la venta.');
-        callback(new Error('Error de red al enviar la venta'), false); // Indicar error de red
-    };
-
-    xhr.send();
+    // Realizar la petición GET
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data.status) {
+                throw new Error(data.message || 'Error al registrar la venta');
+            }
+            console.log('Venta registrada exitosamente en Google Sheets');
+            callback(null, true);
+        })
+        .catch(error => {
+            console.error('Error al enviar la venta a Google Sheets:', error);
+            callback(error, false);
+        });
 }
 
 // Función auxiliar para eliminar acentos

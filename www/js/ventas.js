@@ -320,14 +320,20 @@ if (registrarVentaButtonPage) {
         const usuarioVenta = currentUser ? currentUser.username : 'Desconocido';
 
         let ventasTemp = JSON.parse(localStorage.getItem('ventasTemp')) || [];
+        // Obtener los valores del segundo método de pago
+        const metodoPago2 = document.getElementById('metodo-pago-2').value;
+        const montoPago2 = parseFloat(document.getElementById('monto-pago-2').value) || 0;
+
         const nuevaVenta = {
             fecha: new Date().toISOString(),
             usuario: usuarioVenta,
             items: [...ventasProductosSeleccionados],
             totalUSD: parseFloat(totalVentaUsdSpanPage.textContent),
             totalBS: parseFloat(totalVentaBsSpanPage.textContent),
-            metodoPago: metodoPago,
-            montoPago: montoPago
+            metodoPago1: metodoPago,
+            montoPago1: montoPago,
+            metodoPago2: metodoPago2,
+            montoPago2: montoPago2
         };
 
         // Intentar enviar la venta a Google Forms
