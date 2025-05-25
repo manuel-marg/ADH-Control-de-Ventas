@@ -356,26 +356,35 @@ if (registrarVentaButtonPage) {
             // Construir la cadena de productos
             const productosString = venta.items.map(item => `${item.nombre} x ${item.cantidad}`).join(', ');
 
-            // Construir la URL de la petición GET
-            const url = `https://docs.google.com/forms/d/e/1FAIpQLSc2F9aUxdAUatdoUM6L-f92eh9W4SX5n3M0XuRt76guyt-UHQ/formResponse?usp=pp_url&entry.625195464=${venta.fecha}&entry.1134916832=${venta.usuario}&entry.773060726=${venta.metodoPago}&entry.2067765280=${productosString}&entry.1267682030=${venta.totalUSD}&entry.1216241302=${venta.totalBS}`;
+            // URL del script de Google Apps Script desplegado
+            const scriptUrl = 'https://script.google.com/macros/s/AKfycbypHRSG6calz4ogODo6OVXhMNedZqwfJ3YyOOCo4yKKQtoh7xfOk_ZwxUpE3nvHlDAN/exec';
 
-            // Reemplazar la URL original con la URL a través del proxy
-            const proxyUrl = "https://corsproxy.io/?url=" + encodeURIComponent(url);
+            // Obtener los valores del segundo método de pago
+            const metodoPagoSelect2 = document.getElementById('metodo-pago-2');
+            const montoPagoInput2 = document.getElementById('monto-pago-2');
+            const metodoPago2 = metodoPagoSelect2.value;
+            const montoPago2 = parseFloat(montoPagoInput2.value) || 0;
 
-            // Realizar la petición GET con fetch nativo
-            return fetch(proxyUrl)
+            // Construir la URL con los parámetros actualizados
+            const url = `${scriptUrl}?action=insert&fecha=${encodeURIComponent(venta.fecha)}&usuario=${encodeURIComponent(venta.usuario)}&metodoPago1=${encodeURIComponent(venta.metodoPago)}&montoPago1=${encodeURIComponent(venta.montoPago)}&metodoPago2=${encodeURIComponent(metodoPago2)}&montoPago2=${encodeURIComponent(montoPago2)}&productos=${encodeURIComponent(productosString)}&totalUSD=${encodeURIComponent(venta.totalUSD)}&totalBS=${encodeURIComponent(venta.totalBS)}&estado_venta=completada`;
+
+            // Realizar la petición GET
+            return fetch(url)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Error en la respuesta del servidor');
                     }
-                    return response.text(); // Obtener el cuerpo de la respuesta como texto
+                    return response.json();
                 })
-                .then(body => {
-                    console.log(body); // Mostrar el cuerpo de la respuesta (puede ser HTML, texto, etc.)
+                .then(data => {
+                    if (!data.status) {
+                        throw new Error(data.message || 'Error al registrar la venta');
+                    }
+                    console.log('Venta registrada exitosamente en Google Sheets');
                 })
                 .catch(error => {
-                    console.error('Error al enviar la venta a Google Forms:', error);
-                    throw error; // Re-lanzar el error para que el llamado pueda manejarlo
+                    console.error('Error al enviar la venta a Google Sheets:', error);
+                    throw error;
                 });
         }
 
