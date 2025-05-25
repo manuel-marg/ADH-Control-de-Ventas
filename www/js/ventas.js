@@ -331,7 +331,7 @@ if (registrarVentaButtonPage) {
         };
 
         // Intentar enviar la venta a Google Forms
-        enviarVentaAGoogleForms(venta)
+        enviarVentaAGoogleForms(nuevaVenta)
             .then(() => {
                 // Si la venta se envía correctamente, no se guarda en ventasTemp
                 console.log('Venta enviada correctamente a Google Forms.');
