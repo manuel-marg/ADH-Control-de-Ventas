@@ -4,7 +4,7 @@ function onDeviceReadyVentas() {
     console.log('Running cordova for ventas.html');
     // Check if user is logged in, redirect to index.html if not
     if (!localStorage.getItem('currentUser')) {
-        window.location.href = "index.html";
+         window.location.href = "index.html";
     }
     // initializeVentas() se llamará desde DOMContentLoaded ahora
 }
@@ -64,7 +64,6 @@ function initializeVentas() {
 
     // Set default value for payment method 1 and calculate initial amount
     metodoPagoSelect.value = 'Punto de venta (Bs)';
-
     calcularMontoInicial();
 }
 
@@ -89,8 +88,9 @@ function calcularMontoSegundoPago() {
         restante = (totalUSD * tasaDolar) - montoPago1;
     }
 
-    if (metodoPago2 === 'Efectivo ($)' || metodoPago2 === 'Transferencia en $' || metodoPago2 === 'Zelle') {
-        monto2 = restante;
+    if ((metodoPago1 === 'Efectivo ($)' || metodoPago1 === 'Transferencia en $' || metodoPago1 === 'Zelle') &&
+        (metodoPago2 === 'Punto de venta (Bs)' || metodoPago2 === 'Pago Movil' || metodoPago2 === 'Transferencia en Bs.' || metodoPago2 === 'Efectivo en Bs.')) {
+        monto2 = restante * tasaDolar;
     } else {
         monto2 = restante / tasaDolar;
     }
