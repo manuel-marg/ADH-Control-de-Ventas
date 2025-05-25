@@ -376,13 +376,20 @@ if (registrarVentaButtonPage) {
             const scriptUrl = 'https://script.google.com/macros/s/AKfycbypHRSG6calz4ogODo6OVXhMNedZqwfJ3YyOOCo4yKKQtoh7xfOk_ZwxUpE3nvHlDAN/exec';
 
             // Obtener los valores del segundo método de pago
+            // Obtener los valores del primer método de pago
+            const metodoPagoSelect1 = document.getElementById('metodo-pago-1');
+            const montoPagoInput1 = document.getElementById('monto-pago-1');
+            const metodoPago1 = metodoPagoSelect1.value;
+            const montoPago1 = parseFloat(montoPagoInput1.value) || 0;
+
+            // Obtener los valores del segundo método de pago
             const metodoPagoSelect2 = document.getElementById('metodo-pago-2');
             const montoPagoInput2 = document.getElementById('monto-pago-2');
             const metodoPago2 = metodoPagoSelect2.value;
             const montoPago2 = parseFloat(montoPagoInput2.value) || 0;
 
             // Construir la URL con los parámetros actualizados
-            const url = `${scriptUrl}?action=insert&fecha=${encodeURIComponent(fechaFormateada)}&usuario=${encodeURIComponent(venta.usuario)}&metodoPago1=${encodeURIComponent(venta.metodoPago)}&montoPago1=${encodeURIComponent(venta.montoPago)}&metodoPago2=${encodeURIComponent(metodoPago2)}&montoPago2=${encodeURIComponent(montoPago2)}&productos=${encodeURIComponent(productosString)}&totalUSD=${encodeURIComponent(venta.totalUSD)}&totalBS=${encodeURIComponent(venta.totalBS)}&estado_venta=completada`;
+            const url = `${scriptUrl}?action=insert&fecha=${encodeURIComponent(fechaFormateada)}&usuario=${encodeURIComponent(venta.usuario)}&metodoPago1=${encodeURIComponent(metodoPago1)}&montoPago1=${encodeURIComponent(montoPago1)}&metodoPago2=${encodeURIComponent(metodoPago2)}&montoPago2=${encodeURIComponent(montoPago2)}&productos=${encodeURIComponent(productosString)}&totalUSD=${encodeURIComponent(venta.totalUSD)}&totalBS=${encodeURIComponent(venta.totalBS)}&estado_venta=completada`;
 
             // Realizar la petición GET
             return fetch(url)
