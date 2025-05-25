@@ -88,11 +88,15 @@ function calcularMontoSegundoPago() {
         restante = (totalUSD * tasaDolar) - montoPago1;
     }
 
+    // Correctly calculate monto2 based on the currencies of both payment methods
     if ((metodoPago1 === 'Efectivo ($)' || metodoPago1 === 'Transferencia en $' || metodoPago1 === 'Zelle') &&
-        (metodoPago2 === 'Punto de venta (Bs)' || metodoPago2 === 'Pago Movil' || metodoPago2 === 'Transferencia en Bs.' || metodoPago2 === 'Efectivo en Bs.')) {
-        monto2 = restante * tasaDolar;
+        (metodoPago2 !== 'Efectivo ($)' && metodoPago2 !== 'Transferencia en $' && metodoPago2 !== 'Zelle')) {
+        monto2 = restante * tasaDolar; // Convert USD to Bs
+    } else if ((metodoPago1 !== 'Efectivo ($)' && metodoPago1 !== 'Transferencia en $' && metodoPago1 !== 'Zelle') &&
+               (metodoPago2 === 'Efectivo ($)' || metodoPago2 === 'Transferencia en $' || metodoPago2 === 'Zelle')) {
+        monto2 = restante / tasaDolar; // Convert Bs to USD
     } else {
-        monto2 = restante / tasaDolar;
+        monto2 = restante;
     }
 
     montoPagoInput2.value = monto2.toFixed(2);
