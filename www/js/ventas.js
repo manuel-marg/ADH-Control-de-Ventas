@@ -353,6 +353,16 @@ if (registrarVentaButtonPage) {
         initializeVentas(); // Reset the sales page
 
         function enviarVentaAGoogleForms(venta) {
+            // Formatear la fecha al formato de Google Sheets (DD/MM/YYYY HH:mm:ss)
+            const fechaObj = new Date(venta.fecha);
+            const dia = fechaObj.getDate().toString().padStart(2, '0');
+            const mes = (fechaObj.getMonth() + 1).toString().padStart(2, '0');
+            const año = fechaObj.getFullYear();
+            const hora = fechaObj.getHours().toString().padStart(2, '0');
+            const minutos = fechaObj.getMinutes().toString().padStart(2, '0');
+            const segundos = fechaObj.getSeconds().toString().padStart(2, '0');
+            const fechaFormateada = `${dia}/${mes}/${año} ${hora}:${minutos}:${segundos}`;
+
             // Construir la cadena de productos
             const productosString = venta.items.map(item => `${item.nombre} x ${item.cantidad}`).join(', ');
 
@@ -366,7 +376,7 @@ if (registrarVentaButtonPage) {
             const montoPago2 = parseFloat(montoPagoInput2.value) || 0;
 
             // Construir la URL con los parámetros actualizados
-            const url = `${scriptUrl}?action=insert&fecha=${encodeURIComponent(venta.fecha)}&usuario=${encodeURIComponent(venta.usuario)}&metodoPago1=${encodeURIComponent(venta.metodoPago)}&montoPago1=${encodeURIComponent(venta.montoPago)}&metodoPago2=${encodeURIComponent(metodoPago2)}&montoPago2=${encodeURIComponent(montoPago2)}&productos=${encodeURIComponent(productosString)}&totalUSD=${encodeURIComponent(venta.totalUSD)}&totalBS=${encodeURIComponent(venta.totalBS)}&estado_venta=completada`;
+            const url = `${scriptUrl}?action=insert&fecha=${encodeURIComponent(fechaFormateada)}&usuario=${encodeURIComponent(venta.usuario)}&metodoPago1=${encodeURIComponent(venta.metodoPago)}&montoPago1=${encodeURIComponent(venta.montoPago)}&metodoPago2=${encodeURIComponent(metodoPago2)}&montoPago2=${encodeURIComponent(montoPago2)}&productos=${encodeURIComponent(productosString)}&totalUSD=${encodeURIComponent(venta.totalUSD)}&totalBS=${encodeURIComponent(venta.totalBS)}&estado_venta=completada`;
 
             // Realizar la petición GET
             return fetch(url)
