@@ -32,6 +32,7 @@ function calcularMontoInicial() {
     if (metodoPagoSelect.value === 'Punto de venta (Bs)') {
         montoPagoInput.value = (totalUSD * tasaDolar).toFixed(2);
     }
+    calcularMontoSegundoPago()
 }
 
 function initializeVentas() {
@@ -61,6 +62,7 @@ function initializeVentas() {
 
     // Add event listener to second payment method select input
     metodoPagoSelect2.addEventListener('change', calcularMontoSegundoPago);
+    montoPagoInput.addEventListener('change', calcularMontoSegundoPago);
 
     // Set default value for payment method 1 and calculate initial amount
     metodoPagoSelect.value = 'Punto de venta (Bs)';
@@ -89,14 +91,18 @@ function calcularMontoSegundoPago() {
     }
 
     // Correctly calculate monto2 based on the currencies of both payment methods
-    if ((metodoPago1 === 'Efectivo ($)' || metodoPago1 === 'Transferencia en $' || metodoPago1 === 'Zelle') &&
-        (metodoPago2 !== 'Efectivo ($)' && metodoPago2 !== 'Transferencia en $' && metodoPago2 !== 'Zelle')) {
-        monto2 = restante * tasaDolar; // Convert USD to Bs
-    } else if ((metodoPago1 !== 'Efectivo ($)' && metodoPago1 !== 'Transferencia en $' && metodoPago1 !== 'Zelle') &&
-               (metodoPago2 === 'Efectivo ($)' || metodoPago2 === 'Transferencia en $' || metodoPago2 === 'Zelle')) {
-        monto2 = restante / tasaDolar; // Convert Bs to USD
+    if (montoPagoInput1.value) {
+        if ((metodoPago1 === 'Efectivo ($)' || metodoPago1 === 'Transferencia en $' || metodoPago1 === 'Zelle') &&
+            (metodoPago2 !== 'Efectivo ($)' && metodoPago2 !== 'Transferencia en $' && metodoPago2 !== 'Zelle')) {
+            monto2 = restante * tasaDolar; // Convert USD to Bs
+        } else if ((metodoPago1 !== 'Efectivo ($)' && metodoPago1 !== 'Transferencia en $' && metodoPago1 !== 'Zelle') &&
+                   (metodoPago2 === 'Efectivo ($)' || metodoPago2 === 'Transferencia en $' || metodoPago2 === 'Zelle')) {
+            monto2 = restante / tasaDolar; // Convert Bs to USD
+        } else {
+            monto2 = restante;
+        }
     } else {
-        monto2 = restante;
+        monto2 = 0;
     }
 
     montoPagoInput2.value = monto2.toFixed(2);
