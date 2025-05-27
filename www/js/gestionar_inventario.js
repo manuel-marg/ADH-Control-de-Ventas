@@ -3,7 +3,7 @@ document.addEventListener('deviceready', onDeviceReadyGestionarInventario, false
 function onDeviceReadyGestionarInventario() {
     console.log('Running cordova for gestionar_inventario.html');
     if (!localStorage.getItem('currentUser')) {
-         window.location.href = "index.html";
+        window.location.href = "index.html";
     }
     // Se moverá la llamada a cargarGestionarInventarioPage para asegurar que los datos estén listos.
 }
@@ -266,6 +266,32 @@ function limpiarFormularioProductoPage() {
     fotoPreviewPage.style.display = 'none';
     cancelarEdicionProductoButtonPage.style.display = 'none';
     guardarProductoButtonPage.textContent = 'Guardar Producto';
+}
+
+function eliminarProductoPage(productoId) {
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "¡No podrás revertir esto!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#20429a',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            gestionarProductosDisponibles = gestionarProductosDisponibles.filter(p => p.id !== productoId);
+            localStorage.setItem('productos', JSON.stringify(gestionarProductosDisponibles));
+            cargarGestionarInventarioPage();
+            Swal.fire({
+                icon: 'success',
+                title: 'Eliminado',
+                text: 'El producto ha sido eliminado.',
+                confirmButtonColor: '#20429a',
+                confirmButtonText: "Aceptar"
+            });
+        }
+    });
 }
 
 // Event listener for file input change to show preview
