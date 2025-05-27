@@ -243,6 +243,7 @@ function popularFormularioEdicionProductoPage(productoId) {
         gestionarNombreProductoInputPage.value = producto.nombre;
         gestionarPrecioProductoInputPage.value = producto.precioUSD.toFixed(2);
         gestionarStockProductoInputPage.value = producto.inventario;
+        document.getElementById('gestionar-categoria-producto').value = producto.categoria; // Nueva línea
         if (producto.fotoBase64) {
             fotoPreviewPage.src = producto.fotoBase64;
             fotoPreviewPage.style.display = 'block';
