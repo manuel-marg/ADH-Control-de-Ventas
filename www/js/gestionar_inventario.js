@@ -316,6 +316,17 @@ if (gestionarFotoProductoInputPage) {
 
 if (guardarProductoButtonPage) {
     guardarProductoButtonPage.addEventListener('click', () => {
+    });
+}
+
+if (cancelarEdicionProductoButtonPage) {
+    cancelarEdicionProductoButtonPage.addEventListener('click', () => {
+        limpiarFormularioProductoPage();
+    });
+}
+
+if (guardarProductoButtonPage) {
+    guardarProductoButtonPage.addEventListener('click', () => {
         const id = editProductoIdInputPage.value ? parseInt(editProductoIdInputPage.value) : null;
         const nombre = gestionarNombreProductoInputPage.value.trim();
         const precio = parseFloat(gestionarPrecioProductoInputPage.value);
