@@ -427,35 +427,123 @@ function generateWeeklySalesReport() {
       });
     }
   });
+  currentRow++; // Move to the next row after the TOTAL row
 
-  
+  // Add a blank row
+  currentRow++;
+
+  // Calculate total income by payment type for the new table
+  const totalIncomeByPaymentType = {};
+  paymentMethods.forEach(method => {
+    totalIncomeByPaymentType[method] = 0;
+  });
+
+  for (const category in salesByCategoryDayAndMethod) {
+    for (const day in salesByCategoryDayAndMethod[category]) {
+      for (const method in salesByCategoryDayAndMethod[category][day]) {
+        totalIncomeByPaymentType[method] += salesByCategoryDayAndMethod[category][day][method];
+      }
+    }
+  }
+
+  // Add the new table for total income
+  currentRow++;
+  const totalIncomeTableStartRow = currentRow;
+  reportSheet.getRange(currentRow, 1).setValue("INGRESO TOTAL");
+  reportSheet.getRange(currentRow, 1).setFontWeight("bold");
+  reportSheet.getRange(currentRow, 1).setBackground("#95b3d7");
+  reportSheet.getRange(currentRow, 1, 1, 3).merge(); // Merge for "INGRESO TOTAL" title
+
+  currentRow++;
+  reportSheet.getRange(currentRow, 1).setValue("Tipo de Pago");
+  reportSheet.getRange(currentRow, 2).setValue("Monto");
+  reportSheet.getRange(currentRow, 3).setValue("Moneda");
+  reportSheet.getRange(currentRow, 1, 1, 3).setFontWeight("bold");
+  reportSheet.getRange(currentRow, 1, 1, 3).setBackground("#fcd5b4");
+
+  // Define the order of payment methods for the new table
+  const orderedPaymentMethods = [
+    "DIVISAS",
+    "P/VENTA",
+    "EFECTIVO/BS.",
+    "PAGO MÓVIL",
+    "ZELLE",
+    "TRANS. BANC.",
+    "TRANS. USD"
+  ];
+
+  let totalUSD = 0;
+  let totalBS = 0;
+
+  orderedPaymentMethods.forEach(method => {
+    currentRow++;
+    reportSheet.getRange(currentRow, 1).setValue(method);
+    const amount = totalIncomeByPaymentType[method] || 0;
+    reportSheet.getRange(currentRow, 2).setValue(amount);
+
+    let currency = "";
+    if (["DIVISAS", "ZELLE", "TRANS. USD"].includes(method)) {
+      currency = "$";
+      totalUSD += amount;
+    } else if (["P/VENTA", "EFECTIVO/BS.", "PAGO MÓVIL", "TRANS. BANC."].includes(method)) {
+      currency = "Bs.";
+      totalBS += amount;
+    }
+    reportSheet.getRange(currentRow, 3).setValue(currency);
+  });
+
+  // Add total rows for $ and Bs.
+  currentRow++;
+  reportSheet.getRange(currentRow, 1).setValue("TOTAL ($)");
+  reportSheet.getRange(currentRow, 2).setValue(totalUSD);
+  reportSheet.getRange(currentRow, 3).setValue("$");
+  reportSheet.getRange(currentRow, 1, 1, 3).setFontWeight("bold");
+
+  currentRow++;
+  reportSheet.getRange(currentRow, 1).setValue("TOTAL (Bs.)");
+  reportSheet.getRange(currentRow, 2).setValue(totalBS);
+  reportSheet.getRange(currentRow, 3).setValue("Bs.");
+  reportSheet.getRange(currentRow, 1, 1, 3).setFontWeight("bold");
+
   // Format the report
   reportSheet.getRange(1, 1, 1, 1 + (uniqueCategories.length * paymentMethods.length)).merge();
   reportSheet.getRange(1, 1).setFontSize(14);
   reportSheet.getRange(1, 1).setFontWeight("bold");
   reportSheet.getRange(1, 1).setHorizontalAlignment("center");
-  
-  reportSheet.getRange(2, 1, 1, 1 + (uniqueCategories.length * paymentMethods.length)).merge();
-reportSheet.getRange(2, 1).setFontWeight("bold");
-reportSheet.getRange(2, 1).setHorizontalAlignment("center");
 
-// Formatear fila 3 igual que fila 2
-reportSheet.getRange(3, 1, 1,  1 + (uniqueCategories.length * paymentMethods.length)).merge();
-reportSheet.getRange(3, 1).setFontWeight("bold");
-reportSheet.getRange(3, 1).setHorizontalAlignment("center");
+  reportSheet.getRange(2, 1, 2, 1 + (uniqueCategories.length * paymentMethods.length)).merge();
+  reportSheet.getRange(2, 1).setFontWeight("bold");
+  reportSheet.getRange(2, 1).setHorizontalAlignment("center");
+
+  // Formatear fila 14 
+  reportSheet.getRange(14, 1, 2, 1 + (uniqueCategories.length * paymentMethods.length)).merge();
+  reportSheet.getRange(14, 1).setFontWeight("bold");
+  reportSheet.getRange(14, 1).setHorizontalAlignment("center");
+
+  // Combinar celdas D16 a O26
+  reportSheet.getRange(16, 4, 11, (uniqueCategories.length * paymentMethods.length) - 2).merge();
 
   // Aplicar bordes a toda la tabla
   const dataRange = reportSheet.getDataRange();
   dataRange.setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
-  
-/*
-  // Set up trigger for weekly execution
-  ScriptApp.newTrigger('generateWeeklySalesReport')
-    .timeBased()
-    .everyWeeks(1)
-    .onWeekDay(ScriptApp.WeekDay.MONDAY)
-    .atHour(7)
-    .create();
-*/
-  Logger.log("Weekly sales report generated successfully!");
+
+  // Establecer un ancho fijo para todas las columnas
+    for (let i = 1; i <= currentColumn - 1; i++) {
+      reportSheet.setColumnWidth(i, 100);
+    }
+
+  // Set column widths for better readability
+  reportSheet.setColumnWidth(1, 150);
+  reportSheet.setColumnWidth(2, 100);
+  reportSheet.setColumnWidth(3, 80);
+
+  // Apply borders to the entire report table
+  const lastRow = reportSheet.getLastRow();
+  const lastCol = reportSheet.getLastColumn();
+  reportSheet.getRange(4, 1, lastRow - 3, lastCol).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
+
+  // Apply borders to the total income table
+  reportSheet.getRange(totalIncomeTableStartRow, 1, currentRow - totalIncomeTableStartRow + 1, 3).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
+
+  Logger.log("Reporte semanal generado exitosamente.");
 }
