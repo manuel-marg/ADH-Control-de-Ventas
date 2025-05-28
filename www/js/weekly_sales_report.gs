@@ -55,7 +55,9 @@ function generateWeeklySalesReport() {
 
   // Set up report headers
   reportSheet.getRange(1, 1).setValue("REPORTE DE VENTAS SEMANAL");
-  reportSheet.getRange(2, 1).setValue(`DEL ${lastMondayFormatted} AL ${lastSundayFormatted}`);
+  const weekRange = `DESDE LUNES ${lastMondayFormatted} HASTA VIERNES ${lastSundayFormatted}`;
+reportSheet.getRange(2, 1).setValue(`MES: ${monthName}`);
+reportSheet.getRange(3, 1).setValue(weekRange);
   reportSheet.getRange(4, 1).setValue("CATEGORÍA");
 
   // Prepare data structure for reporting
@@ -511,9 +513,13 @@ function generateWeeklySalesReport() {
   reportSheet.getRange(1, 1).setFontWeight("bold");
   reportSheet.getRange(1, 1).setHorizontalAlignment("center");
 
-  reportSheet.getRange(2, 1, 2, 1 + (uniqueCategories.length * paymentMethods.length)).merge();
+  reportSheet.getRange(2, 1, 1, 1 + (uniqueCategories.length * paymentMethods.length)).merge();
   reportSheet.getRange(2, 1).setFontWeight("bold");
   reportSheet.getRange(2, 1).setHorizontalAlignment("center");
+
+  reportSheet.getRange(3, 1, 1, 1 + (uniqueCategories.length * paymentMethods.length)).merge();
+  reportSheet.getRange(3, 1).setFontWeight("bold");
+  reportSheet.getRange(3, 1).setHorizontalAlignment("center");
 
   // Formatear fila 14 
   reportSheet.getRange(14, 1, 2, 1 + (uniqueCategories.length * paymentMethods.length)).merge();
