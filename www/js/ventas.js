@@ -369,8 +369,8 @@ if (registrarVentaButtonPage) {
             const segundos = fechaObj.getSeconds().toString().padStart(2, '0');
             const fechaFormateada = `${dia}/${mes}/${año} ${hora}:${minutos}:${segundos}`;
 
-            // Construir la cadena de productos
-            const productosString = venta.items.map(item => `${item.nombre} x ${item.cantidad}`).join(', ');
+            // Construir la cadena de productos incluyendo la categoría
+            const productosString = venta.items.map(item => `${item.nombre} (${item.categoria}) x ${item.cantidad}`).join(', ');
 
             // URL del script de Google Apps Script desplegado
             const scriptUrl = 'https://script.google.com/macros/s/AKfycbypHRSG6calz4ogODo6OVXhMNedZqwfJ3YyOOCo4yKKQtoh7xfOk_ZwxUpE3nvHlDAN/exec';
