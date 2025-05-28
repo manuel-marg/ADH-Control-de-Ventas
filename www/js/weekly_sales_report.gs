@@ -42,7 +42,10 @@ function generateWeeklySalesReport() {
   // Format dates for sheet name
   const lastMondayFormatted = Utilities.formatDate(lastMonday, ss.getSpreadsheetTimeZone(), "dd/MM");
   const lastSundayFormatted = Utilities.formatDate(lastSunday, ss.getSpreadsheetTimeZone(), "dd/MM");
-  const monthName = Utilities.formatDate(lastSunday, ss.getSpreadsheetTimeZone(), "MMMM").toUpperCase();
+  
+  // Obtener el mes de las ventas en lugar de la fecha actual
+  const salesMonth = new Date(salesData[1][0]); // Usar la primera venta después del encabezado
+  const monthName = Utilities.formatDate(salesMonth, ss.getSpreadsheetTimeZone(), "MMMM").toUpperCase();
 
   const reportSheetName = `SEMANA DEL ${lastMondayFormatted.split('/')[0]} AL ${lastSundayFormatted.split('/')[0]} DE ${monthName}`;
 
