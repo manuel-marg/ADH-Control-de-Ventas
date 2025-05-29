@@ -45,6 +45,8 @@ function insertarVenta(req, sheet) {
     var productos = req.parameter.productos;
     var totalUSD = req.parameter.totalUSD;
     var totalBS = req.parameter.totalBS;
+    var estadoVenta = req.parameter.estado_venta || 'desconocido'; // Nuevo parámetro
+    var nombreCliente = req.parameter.nombreCliente || ''; // Nuevo parámetro para ventas pendientes
 
     // Verificar si la hoja tiene encabezados, si no, crearlos
     if (sheet.getLastRow() === 0) {
@@ -57,7 +59,9 @@ function insertarVenta(req, sheet) {
         'Monto Pago 2',
         'Productos',
         'Total USD',
-        'Total BS'
+        'Total BS',
+        'Estado de Venta', // Nuevo encabezado
+        'Nombre Cliente' // Nuevo encabezado
       ]);
     }
 
@@ -71,7 +75,9 @@ function insertarVenta(req, sheet) {
       montoPago2,
       productos,
       totalUSD,
-      totalBS
+      totalBS,
+      estadoVenta, // Incluir estado de venta
+      nombreCliente // Incluir nombre del cliente
     ]);
 
     return response().json({

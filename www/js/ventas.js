@@ -371,44 +371,66 @@ if (pendienteButtonPage) {
             return;
         }
 
-        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        const usuarioVenta = currentUser ? currentUser.username : 'Desconocido';
-
-        let ventasTemp = JSON.parse(localStorage.getItem('ventasTemp')) || [];
-
-        const nuevaVenta = {
-            fecha: new Date().toISOString(),
-            usuario: usuarioVenta,
-            items: [...ventasProductosSeleccionados],
-            totalUSD: parseFloat(totalVentaUsdSpanPage.textContent),
-            totalBS: parseFloat(totalVentaBsSpanPage.textContent),
-            metodoPago1: '', // No payment info for pending sales
-            montoPago1: 0,
-            metodoPago2: '',
-            montoPago2: 0
-        };
-
-        // Intentar enviar la venta a Google Forms
-        enviarVentaAGoogleForms(nuevaVenta, 'pendiente')
-            .then(() => {
-                // Si la venta se envía correctamente, no se guarda en ventasTemp
-                console.log('Venta pendiente enviada correctamente a Google Forms.');
-            })
-            .catch((error) => {
-                // Si hay un error al enviar la venta a Google Forms:', error);
-                ventasTemp.push(nuevaVenta);
-                localStorage.setItem('ventasTemp', JSON.stringify(ventasTemp));
-            });
-
-        // Mostrar mensaje de éxito
         Swal.fire({
-            icon: 'info',
-            title: '¡Venta Pendiente Registrada!',
-            text: 'La venta ha sido guardada como pendiente.',
+            title: 'Venta Pendiente',
+            input: 'text',
+            inputLabel: 'Nombre de la persona',
+            inputPlaceholder: 'Ingrese el nombre aquí',
+            showCancelButton: true,
+            confirmButtonText: 'Registrar Pendiente',
+            cancelButtonText: 'Cancelar',
             confirmButtonColor: '#20429a',
-            confirmButtonText: "Aceptar"
+            cancelButtonColor: '#d33',
+            inputValidator: (value) => {
+                if (!value) {
+                    return '¡Necesitas escribir un nombre!';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const nombreCliente = result.value;
+
+                const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                const usuarioVenta = currentUser ? currentUser.username : 'Desconocido';
+
+                let ventasTemp = JSON.parse(localStorage.getItem('ventasTemp')) || [];
+
+                const nuevaVenta = {
+                    fecha: new Date().toISOString(),
+                    usuario: usuarioVenta,
+                    items: [...ventasProductosSeleccionados],
+                    totalUSD: parseFloat(totalVentaUsdSpanPage.textContent),
+                    totalBS: parseFloat(totalVentaBsSpanPage.textContent),
+                    metodoPago1: '', // No payment method for pending sales
+                    montoPago1: 0,
+                    metodoPago2: '', // No second payment method for pending sales
+                    montoPago2: 0,
+                    nombreCliente: nombreCliente // Add customer name
+                };
+
+                // Intentar enviar la venta a Google Forms
+                enviarVentaAGoogleForms(nuevaVenta, 'pendiente')
+                    .then(() => {
+                        // Si la venta se envía correctamente, no se guarda en ventasTemp
+                        console.log('Venta pendiente enviada correctamente a Google Forms.');
+                    })
+                    .catch((error) => {
+                        // Si hay un error al enviar la venta a Google Forms:', error);
+                        ventasTemp.push(nuevaVenta);
+                        localStorage.setItem('ventasTemp', JSON.stringify(ventasTemp));
+                    });
+
+                // Mostrar mensaje de éxito
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Venta Pendiente Registrada!',
+                    text: `La venta para ${nombreCliente} ha sido guardada como pendiente.`,
+                    confirmButtonColor: '#20429a',
+                    confirmButtonText: "Aceptar"
+                });
+                initializeVentas(); // Reset the sales page
+            }
         });
-        initializeVentas(); // Reset the sales page
     });
 }
 
@@ -495,7 +517,12 @@ function enviarVentaAGoogleForms(venta, estado_venta) {
     const montoPago2 = venta.montoPago2;
 
     // Construir la URL con los parámetros actualizados
-    const url = `${scriptUrl}?action=insert&fecha=${encodeURIComponent(fechaFormateada)}&usuario=${encodeURIComponent(venta.usuario)}&metodoPago1=${encodeURIComponent(metodoPago1)}&montoPago1=${encodeURIComponent(montoPago1)}&metodoPago2=${encodeURIComponent(metodoPago2)}&montoPago2=${encodeURIComponent(montoPago2)}&productos=${encodeURIComponent(productosString)}&totalUSD=${encodeURIComponent(venta.totalUSD)}&totalBS=${encodeURIComponent(venta.totalBS)}&estado_venta=${encodeURIComponent(estado_venta)}`;
+    let url = `${scriptUrl}?action=insert&fecha=${encodeURIComponent(fechaFormateada)}&usuario=${encodeURIComponent(venta.usuario)}&metodoPago1=${encodeURIComponent(metodoPago1)}&montoPago1=${encodeURIComponent(montoPago1)}&metodoPago2=${encodeURIComponent(metodoPago2)}&montoPago2=${encodeURIComponent(montoPago2)}&productos=${encodeURIComponent(productosString)}&totalUSD=${encodeURIComponent(venta.totalUSD)}&totalBS=${encodeURIComponent(venta.totalBS)}&estado_venta=${encodeURIComponent(estado_venta)}`;
+
+    // Add customer name for pending sales
+    if (estado_venta === 'pendiente' && venta.nombreCliente) {
+        url += `&nombreCliente=${encodeURIComponent(venta.nombreCliente)}`;
+    }
 
     // Realizar la petición GET
     return fetch(url)
