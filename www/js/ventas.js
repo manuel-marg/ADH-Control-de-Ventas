@@ -20,7 +20,9 @@ const productosDisponiblesVentasDivPage = document.getElementById('productos-dis
 const listaProductosSeleccionadosUlPage = document.getElementById('lista-productos-seleccionados');
 const totalVentaUsdSpanPage = document.getElementById('total-venta-usd');
 const totalVentaBsSpanPage = document.getElementById('total-venta-bs');
-const registrarVentaButtonPage = document.getElementById('registrar-venta-button');
+const cortesiaButtonPage = document.getElementById('cortesia-button');
+const pendienteButtonPage = document.getElementById('pendiente-button');
+const ventaButtonPage = document.getElementById('venta-button');
 // const volverMenuVentasButtonPage = document.getElementById('volver-menu-ventas-button'); // Botón eliminado
 
 function calcularMontoInicial() {
@@ -296,17 +298,22 @@ function calcularTotalVentaPage() {
     totalVentaBsSpanPage.textContent = totalBS.toFixed(2);
 }
 
-if (registrarVentaButtonPage) {
-    registrarVentaButtonPage.addEventListener('click', () => {
+if (ventaButtonPage) {
+    ventaButtonPage.addEventListener('click', () => {
         if (ventasProductosSeleccionados.length === 0) {
             Swal.fire({ icon: 'warning', title: 'Venta Vacía', text: 'No hay productos seleccionados para registrar la venta.', confirmButtonColor: '#20429a', confirmButtonText: "Aceptar" });
             return;
         }
 
-        const metodoPagoSelect = document.getElementById('metodo-pago-1');
-        const montoPagoInput = document.getElementById('monto-pago-1');
-        const metodoPago = metodoPagoSelect.value;
-        const montoPago = parseFloat(montoPagoInput.value);
+        const metodoPagoSelect1 = document.getElementById('metodo-pago-1');
+        const montoPagoInput1 = document.getElementById('monto-pago-1');
+        const metodoPago1 = metodoPagoSelect1.value;
+        const montoPago1 = parseFloat(montoPagoInput1.value) || 0;
+
+        const metodoPagoSelect2 = document.getElementById('metodo-pago-2');
+        const montoPagoInput2 = document.getElementById('monto-pago-2');
+        const metodoPago2 = metodoPagoSelect2.value;
+        const montoPago2 = parseFloat(montoPagoInput2.value) || 0;
 
         ventasProductosSeleccionados.forEach(itemVenta => {
             const productoInventario = ventasProductosDisponibles.find(p => p.id === itemVenta.id);
@@ -320,9 +327,6 @@ if (registrarVentaButtonPage) {
         const usuarioVenta = currentUser ? currentUser.username : 'Desconocido';
 
         let ventasTemp = JSON.parse(localStorage.getItem('ventasTemp')) || [];
-        // Obtener los valores del segundo método de pago
-        const metodoPago2 = document.getElementById('metodo-pago-2').value;
-        const montoPago2 = parseFloat(document.getElementById('monto-pago-2').value) || 0;
 
         const nuevaVenta = {
             fecha: new Date().toISOString(),
@@ -330,14 +334,14 @@ if (registrarVentaButtonPage) {
             items: [...ventasProductosSeleccionados],
             totalUSD: parseFloat(totalVentaUsdSpanPage.textContent),
             totalBS: parseFloat(totalVentaBsSpanPage.textContent),
-            metodoPago1: metodoPago,
-            montoPago1: montoPago,
+            metodoPago1: metodoPago1,
+            montoPago1: montoPago1,
             metodoPago2: metodoPago2,
             montoPago2: montoPago2
         };
 
         // Intentar enviar la venta a Google Forms
-        enviarVentaAGoogleForms(nuevaVenta)
+        enviarVentaAGoogleForms(nuevaVenta, 'completada')
             .then(() => {
                 // Si la venta se envía correctamente, no se guarda en ventasTemp
                 console.log('Venta enviada correctamente a Google Forms.');
@@ -357,62 +361,160 @@ if (registrarVentaButtonPage) {
             confirmButtonText: "Aceptar"
         });
         initializeVentas(); // Reset the sales page
+    });
+}
 
-        function enviarVentaAGoogleForms(venta) {
-            // Formatear la fecha al formato de Google Sheets (DD/MM/YYYY HH:mm:ss)
-            const fechaObj = new Date(venta.fecha);
-            const dia = fechaObj.getDate().toString().padStart(2, '0');
-            const mes = (fechaObj.getMonth() + 1).toString().padStart(2, '0');
-            const año = fechaObj.getFullYear();
-            const hora = fechaObj.getHours().toString().padStart(2, '0');
-            const minutos = fechaObj.getMinutes().toString().padStart(2, '0');
-            const segundos = fechaObj.getSeconds().toString().padStart(2, '0');
-            const fechaFormateada = `${dia}/${mes}/${año} ${hora}:${minutos}:${segundos}`;
-
-            // Construir la cadena de productos incluyendo la categoría
-            const productosString = venta.items.map(item => `${item.nombre} (${item.categoria}) x ${item.cantidad}`).join(', ');
-
-            // URL del script de Google Apps Script desplegado
-            const scriptUrl = 'https://script.google.com/macros/s/AKfycbypHRSG6calz4ogODo6OVXhMNedZqwfJ3YyOOCo4yKKQtoh7xfOk_ZwxUpE3nvHlDAN/exec';
-
-            // Obtener los valores del segundo método de pago
-            // Obtener los valores del primer método de pago
-            const metodoPagoSelect1 = document.getElementById('metodo-pago-1');
-            const montoPagoInput1 = document.getElementById('monto-pago-1');
-            const metodoPago1 = metodoPagoSelect1.value;
-            const montoPago1 = parseFloat(montoPagoInput1.value) || 0;
-
-            // Obtener los valores del segundo método de pago
-            const metodoPagoSelect2 = document.getElementById('metodo-pago-2');
-            const montoPagoInput2 = document.getElementById('monto-pago-2');
-            const metodoPago2 = metodoPagoSelect2.value;
-            const montoPago2 = parseFloat(montoPagoInput2.value) || 0;
-
-            // Construir la URL con los parámetros actualizados
-            const url = `${scriptUrl}?action=insert&fecha=${encodeURIComponent(fechaFormateada)}&usuario=${encodeURIComponent(venta.usuario)}&metodoPago1=${encodeURIComponent(metodoPago1)}&montoPago1=${encodeURIComponent(montoPago1)}&metodoPago2=${encodeURIComponent(metodoPago2)}&montoPago2=${encodeURIComponent(montoPago2)}&productos=${encodeURIComponent(productosString)}&totalUSD=${encodeURIComponent(venta.totalUSD)}&totalBS=${encodeURIComponent(venta.totalBS)}&estado_venta=completada`;
-
-            // Realizar la petición GET
-            return fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error en la respuesta del servidor');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (!data.status) {
-                        throw new Error(data.message || 'Error al registrar la venta');
-                    }
-                    console.log('Venta registrada exitosamente en Google Sheets');
-                })
-                .catch(error => {
-                    console.error('Error al enviar la venta a Google Sheets:', error);
-                    throw error;
-                });
+if (pendienteButtonPage) {
+    pendienteButtonPage.addEventListener('click', () => {
+        if (ventasProductosSeleccionados.length === 0) {
+            Swal.fire({ icon: 'warning', title: 'Venta Vacía', text: 'No hay productos seleccionados para registrar la venta pendiente.', confirmButtonColor: '#20429a', confirmButtonText: "Aceptar" });
+            return;
         }
 
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        const usuarioVenta = currentUser ? currentUser.username : 'Desconocido';
+
+        let ventasTemp = JSON.parse(localStorage.getItem('ventasTemp')) || [];
+
+        const nuevaVenta = {
+            fecha: new Date().toISOString(),
+            usuario: usuarioVenta,
+            items: [...ventasProductosSeleccionados],
+            totalUSD: parseFloat(totalVentaUsdSpanPage.textContent),
+            totalBS: parseFloat(totalVentaBsSpanPage.textContent),
+            metodoPago1: '', // No payment info for pending sales
+            montoPago1: 0,
+            metodoPago2: '',
+            montoPago2: 0
+        };
+
+        // Intentar enviar la venta a Google Forms
+        enviarVentaAGoogleForms(nuevaVenta, 'pendiente')
+            .then(() => {
+                // Si la venta se envía correctamente, no se guarda en ventasTemp
+                console.log('Venta pendiente enviada correctamente a Google Forms.');
+            })
+            .catch((error) => {
+                // Si hay un error al enviar la venta a Google Forms:', error);
+                ventasTemp.push(nuevaVenta);
+                localStorage.setItem('ventasTemp', JSON.stringify(ventasTemp));
+            });
+
+        // Mostrar mensaje de éxito
+        Swal.fire({
+            icon: 'info',
+            title: '¡Venta Pendiente Registrada!',
+            text: 'La venta ha sido guardada como pendiente.',
+            confirmButtonColor: '#20429a',
+            confirmButtonText: "Aceptar"
+        });
         initializeVentas(); // Reset the sales page
     });
+}
+
+if (cortesiaButtonPage) {
+    cortesiaButtonPage.addEventListener('click', () => {
+        if (ventasProductosSeleccionados.length === 0) {
+            Swal.fire({ icon: 'warning', title: 'Venta Vacía', text: 'No hay productos seleccionados para registrar la cortesía.', confirmButtonColor: '#20429a', confirmButtonText: "Aceptar" });
+            return;
+        }
+
+        // For cortesia, we still need to update inventory but no payment info is needed
+        ventasProductosSeleccionados.forEach(itemVenta => {
+            const productoInventario = ventasProductosDisponibles.find(p => p.id === itemVenta.id);
+            if (productoInventario) {
+                productoInventario.inventario -= itemVenta.cantidad;
+            }
+        });
+        localStorage.setItem('productos', JSON.stringify(ventasProductosDisponibles));
+
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        const usuarioVenta = currentUser ? currentUser.username : 'Desconocido';
+
+        let ventasTemp = JSON.parse(localStorage.getItem('ventasTemp')) || [];
+
+        const nuevaVenta = {
+            fecha: new Date().toISOString(),
+            usuario: usuarioVenta,
+            items: [...ventasProductosSeleccionados],
+            totalUSD: parseFloat(totalVentaUsdSpanPage.textContent), // Still record total for tracking
+            totalBS: parseFloat(totalVentaBsSpanPage.textContent), // Still record total for tracking
+            metodoPago1: 'Cortesia', // Indicate it's a courtesy
+            montoPago1: 0,
+            metodoPago2: '',
+            montoPago2: 0
+        };
+
+        // Intentar enviar la venta a Google Forms
+        enviarVentaAGoogleForms(nuevaVenta, 'cortesia')
+            .then(() => {
+                // Si la venta se envía correctamente, no se guarda en ventasTemp
+                console.log('Cortesia enviada correctamente a Google Forms.');
+            })
+            .catch((error) => {
+                // Si hay un error al enviar la venta a Google Forms:', error);
+                ventasTemp.push(nuevaVenta);
+                localStorage.setItem('ventasTemp', JSON.stringify(ventasTemp));
+            });
+
+        // Mostrar mensaje de éxito
+        Swal.fire({
+            icon: 'success',
+            title: '¡Cortesia Registrada!',
+            text: 'La cortesía ha sido registrada.',
+            confirmButtonColor: '#20429a',
+            confirmButtonText: "Aceptar"
+        });
+        initializeVentas(); // Reset the sales page
+    });
+}
+
+function enviarVentaAGoogleForms(venta, estado_venta) {
+    // Formatear la fecha al formato de Google Sheets (DD/MM/YYYY HH:mm:ss)
+    const fechaObj = new Date(venta.fecha);
+    const dia = fechaObj.getDate().toString().padStart(2, '0');
+    const mes = (fechaObj.getMonth() + 1).toString().padStart(2, '0');
+    const año = fechaObj.getFullYear();
+    const hora = fechaObj.getHours().toString().padStart(2, '0');
+    const minutos = fechaObj.getMinutes().toString().padStart(2, '0');
+    const segundos = fechaObj.getSeconds().toString().padStart(2, '0');
+    const fechaFormateada = `${dia}/${mes}/${año} ${hora}:${minutos}:${segundos}`;
+
+    // Construir la cadena de productos incluyendo la categoría
+    const productosString = venta.items.map(item => `${item.nombre} (${item.categoria}) x ${item.cantidad}`).join(', ');
+
+    // URL del script de Google Apps Script desplegado
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbypHRSG6calz4ogODo6OVXhMNedZqwfJ3YyOOCo4yKKQtoh7xfOk_ZwxUpE3nvHlDAN/exec';
+
+    // Obtener los valores del primer método de pago
+    const metodoPago1 = venta.metodoPago1;
+    const montoPago1 = venta.montoPago1;
+
+    // Obtener los valores del segundo método de pago
+    const metodoPago2 = venta.metodoPago2;
+    const montoPago2 = venta.montoPago2;
+
+    // Construir la URL con los parámetros actualizados
+    const url = `${scriptUrl}?action=insert&fecha=${encodeURIComponent(fechaFormateada)}&usuario=${encodeURIComponent(venta.usuario)}&metodoPago1=${encodeURIComponent(metodoPago1)}&montoPago1=${encodeURIComponent(montoPago1)}&metodoPago2=${encodeURIComponent(metodoPago2)}&montoPago2=${encodeURIComponent(montoPago2)}&productos=${encodeURIComponent(productosString)}&totalUSD=${encodeURIComponent(venta.totalUSD)}&totalBS=${encodeURIComponent(venta.totalBS)}&estado_venta=${encodeURIComponent(estado_venta)}`;
+
+    // Realizar la petición GET
+    return fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data.status) {
+                throw new Error(data.message || 'Error al registrar la venta');
+            }
+            console.log('Venta registrada exitosamente en Google Sheets');
+        })
+        .catch(error => {
+            console.error('Error al enviar la venta a Google Sheets:', error);
+            throw error;
+        });
 }
 
 // if(volverMenuVentasButtonPage) { // Botón eliminado
