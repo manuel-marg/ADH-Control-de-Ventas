@@ -44,6 +44,14 @@ if (historialVentasTemporalesLinkButton) { // Nuevo event listener
     });
 }
 
+const pendientesLinkButton = document.getElementById('pendientes-link-button');
+
+if (pendientesLinkButton) {
+    pendientesLinkButton.addEventListener('click', () => {
+        window.location.href = "pendientes.html";
+    });
+}
+
 if (logoutButtonMenu) {
     logoutButtonMenu.addEventListener('click', () => {
         localStorage.removeItem('currentUser'); // Clear logged-in user state

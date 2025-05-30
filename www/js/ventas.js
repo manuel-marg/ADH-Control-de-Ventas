@@ -20,9 +20,9 @@ const productosDisponiblesVentasDivPage = document.getElementById('productos-dis
 const listaProductosSeleccionadosUlPage = document.getElementById('lista-productos-seleccionados');
 const totalVentaUsdSpanPage = document.getElementById('total-venta-usd');
 const totalVentaBsSpanPage = document.getElementById('total-venta-bs');
-const cortesiaButtonPage = document.getElementById('cortesia-button');
-const pendienteButtonPage = document.getElementById('pendiente-button');
-const ventaButtonPage = document.getElementById('venta-button');
+const cortesiaButtonPage = document.getElementById('cortesiaBtn');
+const pendienteButtonPage = document.getElementById('pendienteBtn');
+const ventaButtonPage = document.getElementById('registrarVentaBtn');
 // const volverMenuVentasButtonPage = document.getElementById('volver-menu-ventas-button'); // Botón eliminado
 
 function calcularMontoInicial() {
