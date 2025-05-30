@@ -263,6 +263,20 @@ button:hover {
     background-color: #c82333;
 }
 
+.reportar-pago-btn {
+    padding: 5px 10px;
+    font-size: 0.9em;
+    background-color: #20429a; /* Blue color */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: auto;
+}
+
+.reportar-pago-btn:hover {
+    background-color: #218838; /* Darker green */
+}
 #ventas-section button {
     margin: 3px;
 }

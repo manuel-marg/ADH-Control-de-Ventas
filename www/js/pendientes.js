@@ -54,7 +54,7 @@ async function cargarVentasPendientes() {
             if (data.records.length === 0) {
                 pendientesListContainer.innerHTML = '<p>No hay ventas pendientes.</p>';
             } else {
-                let html = '<table border="1"><thead><tr><th>Fecha</th><th>Cliente</th><th>Total USD</th><th>Productos</th></tr></thead><tbody>';
+                let html = '<table border="1"><thead><tr><th>Fecha</th><th>Cliente</th><th>Total USD</th><th>Productos</th><th>ACCIONES</th></tr></thead><tbody>';
                 data.records.filter(venta => venta.Estado_de_Venta === 'pendiente').forEach(venta => {
                     html += `
                         <tr>
@@ -62,6 +62,7 @@ async function cargarVentasPendientes() {
                             <td data-label="Cliente">${venta.Nombre_Cliente || 'N/A'}</td>
                             <td data-label="Total USD">$${parseFloat(venta.Total_USD || 0).toFixed(2)}</td>
                             <td data-label="Productos">${venta.Productos || 'N/A'}</td>
+                            <td data-label="ACCIONES"><button class="reportar-pago-btn" data-venta-id="${venta.ID}">Reportar Pago</button></td>
                         </tr>
                     `;
                 });
