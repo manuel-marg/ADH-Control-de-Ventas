@@ -16,6 +16,22 @@ function initializePendientes() {
     cargarVentasPendientes();
 }
 
+function formatDate(dateString) {
+    if (!dateString || dateString === 'N/A') {
+        return 'N/A';
+    }
+    try {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    } catch (e) {
+        console.error("Error formatting date:", dateString, e);
+        return dateString; // Return original if parsing fails
+    }
+}
+
 if (volverMenuPendientesButton) {
     volverMenuPendientesButton.addEventListener('click', () => {
         window.location.href = "menu.html";
@@ -38,19 +54,18 @@ async function cargarVentasPendientes() {
             if (data.records.length === 0) {
                 pendientesListContainer.innerHTML = '<p>No hay ventas pendientes.</p>';
             } else {
-                let html = '<ul>';
+                let html = '<table border="1"><thead><tr><th>Fecha</th><th>Cliente</th><th>Total USD</th><th>Productos</th></tr></thead><tbody>';
                 data.records.filter(venta => venta.Estado_de_Venta === 'pendiente').forEach(venta => {
                     html += `
-                        <li>
-                            <strong>Fecha:</strong> ${venta.Fecha || 'N/A'}<br>
-                            <strong>Usuario:</strong> ${venta.Usuario || 'N/A'}<br>
-                            <strong>Cliente:</strong> ${venta.Nombre_Cliente || 'N/A'}<br>
-                            <strong>Total USD:</strong> $${parseFloat(venta.Total_USD || 0).toFixed(2)}<br>
-                            <strong>Productos:</strong> ${venta.Productos || 'N/A'}
-                        </li>
+                        <tr>
+                            <td data-label="Fecha">${formatDate(venta.Fecha)}</td>
+                            <td data-label="Cliente">${venta.Nombre_Cliente || 'N/A'}</td>
+                            <td data-label="Total USD">$${parseFloat(venta.Total_USD || 0).toFixed(2)}</td>
+                            <td data-label="Productos">${venta.Productos || 'N/A'}</td>
+                        </tr>
                     `;
                 });
-                html += '</ul>';
+                html += '</tbody></table>';
                 pendientesListContainer.innerHTML = html;
             }
         } else {
