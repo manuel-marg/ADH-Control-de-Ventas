@@ -16,6 +16,8 @@ function doGet(req) {
       return insertarVenta(req, sheetVentas);
     case "readPending":
       return readPendingSales(req, sheetVentas);
+    case "updateSale":
+      return updateSale(req, sheetVentas);
     default:
       return response().json({
         status: false,
@@ -150,6 +152,92 @@ function insertarVenta(req, sheet) {
     return response().json({
       status: false,
       message: 'Error al registrar la venta: ' + error.toString()
+    });
+  }
+}
+
+/* Actualizar venta existente
+ * Parámetros esperados:
+ * - fecha: fecha de la venta a actualizar (usado como ID)
+ * - estado_venta: nuevo estado de la venta (e.g., 'completada')
+ * - metodoPago1: primer método de pago utilizado
+ * - montoPago1: monto del primer pago
+ * - metodoPago2: segundo método de pago (opcional)
+ * - montoPago2: monto del segundo pago (opcional)
+ */
+function updateSale(req, sheet) {
+  try {
+    var fechaToUpdate = req.parameter.fecha;
+    var newEstadoVenta = req.parameter.estado_venta;
+    var newMetodoPago1 = req.parameter.metodoPago1;
+    var newMontoPago1 = req.parameter.montoPago1;
+    var newMetodoPago2 = req.parameter.metodoPago2 || '';
+    var newMontoPago2 = req.parameter.montoPago2 || '0';
+
+     var data = _readData(sheet);
+     var records = data.records;
+     var headers = _getHeaderRow(sheet);
+
+     var fechaColumnIndex = headers.indexOf('Fecha');
+     var estadoVentaColumnIndex = headers.indexOf('Estado de Venta');
+     var metodoPago1ColumnIndex = headers.indexOf('Método de Pago 1');
+     var montoPago1ColumnIndex = headers.indexOf('Monto Pago 1');
+     var metodoPago2ColumnIndex = headers.indexOf('Método de Pago 2');
+     var montoPago2ColumnIndex = headers.indexOf('Monto Pago 2');
+
+     if (fechaColumnIndex === -1 || estadoVentaColumnIndex === -1 || metodoPago1ColumnIndex === -1 || montoPago1ColumnIndex === -1 || metodoPago2ColumnIndex === -1 || montoPago2ColumnIndex === -1) {
+       throw new Error('Una o más columnas necesarias no se encontraron.');
+     }
+
+     // Helper function to format a Date object to 'DD/MM/YYYY HH:MM:SS'
+     // This function is now defined outside updateSale for efficiency, but included here for context.
+     // function formatDateTime(date) { ... }
+
+     // Parse the incoming date string to a Date object, then format it for comparison
+     // This assumes fechaToUpdate is in 'DD/MM/YYYY HH:MM:SS' format from the client
+     var parsedFechaToUpdate = fechaToUpdate; // The client should send the date in the correct string format
+
+     var rowFound = false;
+     for (var i = 0; i < records.length; i++) {
+       var record = records[i];
+       var sheetDate = record.Fecha; // This will be a Date object if the cell is formatted as date/time
+
+       // Format the sheet date to 'DD/MM/YYYY HH:MM:SS' for comparison
+       var sheetDateString = '';
+       if (sheetDate instanceof Date) {
+         sheetDateString = Utilities.formatDate(sheetDate, SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone(), "dd/MM/yyyy HH:mm:ss");
+       } else {
+         sheetDateString = String(sheetDate); // Fallback for non-Date values
+       }
+
+       if (sheetDateString === parsedFechaToUpdate) {
+         var rowIdx = i + 2; // +2 because sheet rows are 1-indexed and header is row 1
+         sheet.getRange(rowIdx, estadoVentaColumnIndex + 1).setValue(newEstadoVenta);
+         sheet.getRange(rowIdx, metodoPago1ColumnIndex + 1).setValue(newMetodoPago1);
+         sheet.getRange(rowIdx, montoPago1ColumnIndex + 1).setValue(newMontoPago1);
+         sheet.getRange(rowIdx, metodoPago2ColumnIndex + 1).setValue(newMetodoPago2);
+         sheet.getRange(rowIdx, montoPago2ColumnIndex + 1).setValue(newMontoPago2);
+         rowFound = true;
+         break;
+       }
+     }
+
+    if (rowFound) {
+      return response().json({
+        status: true,
+        message: 'Venta actualizada exitosamente'
+      });
+    } else {
+      return response().json({
+        status: false,
+        message: 'Venta no encontrada para la fecha: ' + fechaToUpdate
+      });
+    }
+
+  } catch (error) {
+    return response().json({
+      status: false,
+      message: 'Error al actualizar la venta: ' + error.toString()
     });
   }
 }

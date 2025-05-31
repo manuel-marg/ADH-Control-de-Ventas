@@ -65,7 +65,7 @@ async function cargarVentasPendientes() {
                             <td data-label="Cliente">${venta.Nombre_Cliente || 'N/A'}</td>
                             <td data-label="Total USD">$${parseFloat(venta.Total_USD || 0).toFixed(2)}</td>
                             <td data-label="Productos">${venta.Productos || 'N/A'}</td>
-                            <td data-label="ACCIONES"><button class="reportar-pago-btn" data-venta-id="${venta.ID}">Reportar Pago</button></td>
+                            <td data-label="ACCIONES"><button class="reportar-pago-btn" data-venta='${JSON.stringify(venta)}'>Reportar Pago</button></td>
                         </tr>
                     `;
                 });
@@ -83,29 +83,28 @@ async function cargarVentasPendientes() {
 }
 
 // Delegación de eventos para los botones "Reportar Pago"
+// Helper function to format a Date object to 'DD/MM/YYYY HH:MM:SS'
+function formatDateTime(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+}
+
 document.addEventListener('click', (event) => {
     if (event.target.classList.contains('reportar-pago-btn')) {
-        const ventaId = event.target.dataset.ventaId;
-        // Necesitamos obtener el total USD de la venta.
-        // Como `data.records` no está disponible globalmente,
-        // tendremos que recargar las ventas o pasar la información de otra manera.
-        // Por ahora, vamos a recargar las ventas y buscar la venta por ID.
-        // Una mejor solución sería almacenar `data.records` en una variable global o pasarla.
-        // Para simplificar, vamos a buscar la venta en el DOM si es posible,
-        // o recargar si es necesario.
+        const ventaData = JSON.parse(event.target.dataset.venta);
+        const ventaFecha = formatDateTime(new Date(ventaData.Fecha));
+        const totalUSD = parseFloat(ventaData.Total_USD || 0);
 
-        // Una forma más robusta sería almacenar los records en una variable global
-        // o en un mapa para acceso rápido. Por ahora, asumiremos que la tabla
-        // ya está renderizada y podemos extraer el total USD del DOM.
-        const row = event.target.closest('tr');
-        const totalUsdText = row.querySelector('td[data-label="Total USD"]').textContent;
-        const totalUSD = parseFloat(totalUsdText.replace('$', '')) || 0;
-
-        showPaymentModal(ventaId, totalUSD);
+        showPaymentModal(ventaFecha, totalUSD);
     }
 });
 
-async function showPaymentModal(ventaId, totalUSD) {
+async function showPaymentModal(ventaFecha, totalUSD) {
     const { value: formValues } = await Swal.fire({
         title: 'Reportar Pago',
         html: `
@@ -183,7 +182,7 @@ async function showPaymentModal(ventaId, totalUSD) {
             }
 
             return {
-                ventaId: ventaId,
+                ventaFecha: ventaFecha,
                 metodoPago1: metodoPago1,
                 montoPago1: montoPago1,
                 metodoPago2: metodoPago2,
@@ -196,7 +195,7 @@ async function showPaymentModal(ventaId, totalUSD) {
         console.log('Payment details:', formValues);
         // Here you would call a function to update the payment status in Google Sheets
         // Call the function to update the payment status in Google Sheets
-        await updatePaymentInGoogleSheets(formValues.ventaId, formValues.metodoPago1, formValues.montoPago1, formValues.metodoPago2, formValues.montoPago2);
+        await updatePaymentInGoogleSheets(formValues.ventaFecha, formValues.metodoPago1, formValues.montoPago1, formValues.metodoPago2, formValues.montoPago2);
         Swal.fire({
             icon: 'success',
             title: 'Pago Reportado',
@@ -209,22 +208,10 @@ async function showPaymentModal(ventaId, totalUSD) {
 }
 
 // --- Function to update payment in Google Sheets ---
-async function updatePaymentInGoogleSheets(ventaId, metodoPago1, montoPago1, metodoPago2, montoPago2) {
+async function updatePaymentInGoogleSheets(ventaFecha, metodoPago1, montoPago1, metodoPago2, montoPago2) {
     const scriptUrl = 'https://script.google.com/macros/s/AKfycbypHRSG6calz4ogODo6OVXhMNedZqwfJ3YyOOCo4yKKQtoh7xfOk_ZwxUpE3nvHlDAN/exec'; // Replace with your actual deployed script URL
 
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    const usuarioPago = currentUser ? currentUser.username : 'Desconocido';
-
-    const fechaObj = new Date();
-    const dia = fechaObj.getDate().toString().padStart(2, '0');
-    const mes = (fechaObj.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-indexed
-    const año = fechaObj.getFullYear();
-    const hora = fechaObj.getHours().toString().padStart(2, '0');
-    const minutos = fechaObj.getMinutes().toString().padStart(2, '0');
-    const segundos = fechaObj.getSeconds().toString().padStart(2, '0');
-    const fechaFormateada = `${dia}/${mes}/${año} ${hora}:${minutos}:${segundos}`;
-
-    let url = `${scriptUrl}?action=updatePayment&id=${encodeURIComponent(ventaId)}&metodoPago1=${encodeURIComponent(metodoPago1)}&montoPago1=${encodeURIComponent(montoPago1)}&metodoPago2=${encodeURIComponent(metodoPago2)}&montoPago2=${encodeURIComponent(montoPago2)}&usuarioPago=${encodeURIComponent(usuarioPago)}&fechaPago=${encodeURIComponent(fechaFormateada)}`;
+    let url = `${scriptUrl}?action=updateSale&fecha=${encodeURIComponent(ventaFecha)}&estado_venta=completada&metodoPago1=${encodeURIComponent(metodoPago1)}&montoPago1=${encodeURIComponent(montoPago1)}&metodoPago2=${encodeURIComponent(metodoPago2)}&montoPago2=${encodeURIComponent(montoPago2)}`;
 
     try {
         const response = await fetch(url);
