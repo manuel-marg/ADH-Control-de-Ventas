@@ -18,11 +18,44 @@ function doGet(req) {
       return readPendingSales(req, sheetVentas);
     case "updateSale":
       return updateSale(req, sheetVentas);
+    case "readAll":
+      return readAllSales(req, sheetVentas);
+    case "deleteSale":
+      return deleteSale(req, sheetVentas);
     default:
       return response().json({
         status: false,
         message: 'Acción no válida'
       });
+  }
+}
+
+/* Eliminar venta existente
+ * Parámetros esperados:
+ * - rowIndex: índice de la fila a eliminar (basado en 1)
+ */
+function deleteSale(req, sheet) {
+  try {
+    var rowIndex = parseInt(req.parameter.rowIndex);
+
+    if (isNaN(rowIndex) || rowIndex < 2) { // rowIndex should be at least 2 (1 for headers + 1 for data)
+      return response().json({
+        status: false,
+        message: 'Índice de fila no válido.'
+      });
+    }
+
+    sheet.deleteRow(rowIndex);
+
+    return response().json({
+      status: true,
+      message: 'Venta eliminada exitosamente.'
+    });
+  } catch (error) {
+    return response().json({
+      status: false,
+      message: 'Error al eliminar la venta: ' + error.toString()
+    });
   }
 }
 
@@ -48,6 +81,27 @@ function readPendingSales(req, sheet) {
     return response().json({
       status: false,
       message: 'Error al leer ventas pendientes: ' + error.toString()
+    });
+  }
+}
+
+/* Lee todas las ventas
+ *
+ * @request-parameter | action<string> = "readAll"
+ * @example-request | ?action=readAll
+ */
+function readAllSales(req, sheet) {
+  try {
+    var data = _readData(sheet);
+    return response().json({
+      status: true,
+      records: data.records
+    });
+
+  } catch (error) {
+    return response().json({
+      status: false,
+      message: 'Error al leer todas las ventas: ' + error.toString()
     });
   }
 }
@@ -147,7 +201,6 @@ function insertarVenta(req, sheet) {
       status: true,
       message: 'Venta registrada exitosamente'
     });
-
   } catch (error) {
     return response().json({
       status: false,
@@ -179,11 +232,11 @@ function updateSale(req, sheet) {
      var headers = _getHeaderRow(sheet);
 
      var fechaColumnIndex = headers.indexOf('Fecha');
-     var estadoVentaColumnIndex = headers.indexOf('Estado de Venta');
-     var metodoPago1ColumnIndex = headers.indexOf('Método de Pago 1');
-     var montoPago1ColumnIndex = headers.indexOf('Monto Pago 1');
-     var metodoPago2ColumnIndex = headers.indexOf('Método de Pago 2');
-     var montoPago2ColumnIndex = headers.indexOf('Monto Pago 2');
+     var estadoVentaColumnIndex = headers.indexOf('Estado_de_Venta');
+     var metodoPago1ColumnIndex = headers.indexOf('Método_de_Pago_1');
+     var montoPago1ColumnIndex = headers.indexOf('Monto_Pago_1');
+     var metodoPago2ColumnIndex = headers.indexOf('Método_de_Pago_2');
+     var montoPago2ColumnIndex = headers.indexOf('Monto_Pago_2');
 
      if (fechaColumnIndex === -1 || estadoVentaColumnIndex === -1 || metodoPago1ColumnIndex === -1 || montoPago1ColumnIndex === -1 || metodoPago2ColumnIndex === -1 || montoPago2ColumnIndex === -1) {
        throw new Error('Una o más columnas necesarias no se encontraron.');
@@ -233,7 +286,6 @@ function updateSale(req, sheet) {
         message: 'Venta no encontrada para la fecha: ' + fechaToUpdate
       });
     }
-
   } catch (error) {
     return response().json({
       status: false,
@@ -251,5 +303,5 @@ function response() {
         .createTextOutput(JSON.stringify(data))
         .setMimeType(ContentService.MimeType.JSON);
     }
-  }
+  };
 }

@@ -45,10 +45,17 @@ if (ventasSinInternetLinkButton) { // Nuevo event listener
 }
 
 const pendientesLinkButton = document.getElementById('pendientes-link-button');
+const verVentasLinkButton = document.getElementById('ver-ventas-link-button'); // Nuevo botón
 
 if (pendientesLinkButton) {
     pendientesLinkButton.addEventListener('click', () => {
         window.location.href = "pendientes.html";
+    });
+}
+
+if (verVentasLinkButton) { // Nuevo event listener
+    verVentasLinkButton.addEventListener('click', () => {
+        window.location.href = "ver_ventas.html";
     });
 }
 
