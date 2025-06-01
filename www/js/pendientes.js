@@ -199,7 +199,7 @@ async function showPaymentModal(ventaFecha, totalUSD) {
         Swal.fire({
             icon: 'success',
             title: 'Pago Reportado',
-            text: `El pago fue reportado con éxito.`, 
+            text: `Pago para la venta del cliente: ${formValues.nombreCliente} registrado.`, 
             confirmButtonColor: '#20429a',
             confirmButtonText: "Aceptar"
         });

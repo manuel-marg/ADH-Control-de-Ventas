@@ -8,38 +8,35 @@ function onDeviceReadyVerVentas() {
 }
 
 function loadAllSales() {
-    const salesListContainer = document.getElementById('ver-ventas-list-container');
-    salesListContainer.innerHTML = '<p>Cargando ventas...</p>'; // Show loading message
+    const salesTableBody = document.querySelector('#sales-table tbody');
+    salesTableBody.innerHTML = '<tr><td colspan="6">Cargando ventas...</td></tr>'; // Show loading message
 
     fetch(`${GOOGLE_SHEETS_API_URL}?action=readAll`)
         .then(response => response.json())
         .then(data => {
             if (data.status && data.records.length > 0) {
-                salesListContainer.innerHTML = ''; // Clear loading message
+                salesTableBody.innerHTML = ''; // Clear loading message
                 data.records.forEach(sale => {
-                    const saleDiv = document.createElement('div');
-                    saleDiv.className = 'sale-item'; // Add a class for styling if needed
-                    saleDiv.innerHTML = `
-                        <h3>Venta ID: ${sale.ID || 'N/A'}</h3>
-                        <p><strong>Fecha:</strong> ${sale.Fecha}</p>
-                        <p><strong>Usuario:</strong> ${sale.Usuario}</p>
-                        <p><strong>Productos:</strong> ${sale.Productos}</p>
-                        <p><strong>Total USD:</strong> ${sale.Total_USD}</p>
-                        <p><strong>Total BS:</strong> ${sale.Total_BS}</p>
-                        <p><strong>Estado:</strong> ${sale.Estado_de_Venta}</p>
-                        <hr>
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${sale.Fecha || 'N/A'}</td>
+                        <td>${sale.Usuario || 'N/A'}</td>
+                        <td>${sale.Productos || 'N/A'}</td>
+                        <td>$${parseFloat(sale.Total_USD || 0).toFixed(2)}</td>
+                        <td>${(parseFloat(sale.Total_BS || 0)).toFixed(2)}</td>
+                        <td>${sale.Estado_de_Venta || 'N/A'}</td>
                     `;
-                    salesListContainer.appendChild(saleDiv);
+                    salesTableBody.appendChild(row);
                 });
             } else if (data.status && data.records.length === 0) {
-                salesListContainer.innerHTML = '<p>No hay ventas registradas.</p>';
+                salesTableBody.innerHTML = '<tr><td colspan="6">No hay ventas registradas.</td></tr>';
             } else {
-                salesListContainer.innerHTML = `<p>Error al cargar ventas: ${data.message || 'Error desconocido'}</p>`;
+                salesTableBody.innerHTML = `<tr><td colspan="6">Error al cargar ventas: ${data.message || 'Error desconocido'}</td></tr>`;
                 console.error('Error al cargar ventas:', data.message);
             }
         })
         .catch(error => {
-            salesListContainer.innerHTML = `<p>Error de red: ${error.message}</p>`;
+            salesTableBody.innerHTML = `<tr><td colspan="6">Error de red: ${error.message}</td></tr>`;
             console.error('Error de red al cargar ventas:', error);
         });
 }
