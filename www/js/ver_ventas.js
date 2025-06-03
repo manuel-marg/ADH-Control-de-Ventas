@@ -28,7 +28,7 @@ function loadAllSales() {
     <td data-label="Total USD">$${parseFloat(sale.Total_USD || 0).toFixed(2)}</td>
     <td data-label="Total BS">Bs.${parseFloat(sale.Total_BS || 0).toFixed(2)}</td>
                             <td>
-                                <button class="delete-sale-btn" data-id="${sale.Id}">Eliminar venta</button>
+<button class="delete-sale-btn" data-index="${data.records.indexOf(sale) + 2}">Eliminar venta</button>
                             </td>
 </tr>
 `;
@@ -49,12 +49,12 @@ function loadAllSales() {
 
 document.addEventListener('click', (event) => {
     if (event.target.classList.contains('delete-sale-btn')) {
-        const saleId = event.target.dataset.id;
-        showDeleteConfirmation(saleId);
+        const saleIndex = event.target.dataset.index;
+        showDeleteConfirmation(saleIndex);
     }
 });
 
-function showDeleteConfirmation(saleId) {
+function showDeleteConfirmation(saleIndex) {
     Swal.fire({
         title: '¿Estás seguro?',
         text: '¿Deseas eliminar esta venta?',
@@ -65,13 +65,13 @@ function showDeleteConfirmation(saleId) {
         confirmButtonText: 'Sí, eliminar',
         cancelButtonText: 'Cancelar',
         preConfirm: () => {
-            deleteSale(saleId);
+            deleteSale(saleIndex);
         }
     });
 }
 
-function deleteSale(saleId) {
-    console.log('Iniciando eliminación de venta con ID:', saleId);
+function deleteSale(saleIndex) {
+    console.log('Iniciando eliminación de venta con índice:', saleIndex);
     Swal.fire({
         title: 'Eliminando venta...',
         allowOutsideClick: false,
@@ -80,7 +80,7 @@ function deleteSale(saleId) {
         }
     });
 
-    const url = `${GOOGLE_SHEETS_API_URL}?action=delete&id=${saleId}`;
+const url = `${GOOGLE_SHEETS_API_URL}?action=deleteSale&rowIndex=${saleIndex}`;
     console.log('URL de solicitud:', url);
     fetch(url, {
         method: 'GET', // Or 'GET' depending on your script's configuration
