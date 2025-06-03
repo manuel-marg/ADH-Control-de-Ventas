@@ -71,6 +71,7 @@ function showDeleteConfirmation(saleId) {
 }
 
 function deleteSale(saleId) {
+    console.log('Iniciando eliminación de venta con ID:', saleId);
     Swal.fire({
         title: 'Eliminando venta...',
         allowOutsideClick: false,
@@ -79,12 +80,19 @@ function deleteSale(saleId) {
         }
     });
 
-    fetch(`${GOOGLE_SHEETS_API_URL}?action=delete&id=${saleId}`, {
+    const url = `${GOOGLE_SHEETS_API_URL}?action=delete&id=${saleId}`;
+    console.log('URL de solicitud:', url);
+    fetch(url, {
         method: 'GET', // Or 'GET' depending on your script's configuration
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Respuesta recibida:', response);
+        return response.json();
+    })
     .then(data => {
+        console.log('Datos recibidos:', data);
         if (data.status === 'SUCCESS') {
+            console.log('Venta eliminada exitosamente');
             Swal.fire({
                 title: '¡Eliminada!',
                 text: 'La venta ha sido eliminada.',
@@ -92,6 +100,7 @@ function deleteSale(saleId) {
             });
             loadAllSales(); // Reload sales list
         } else {
+            console.log('Error al eliminar venta:', data);
             Swal.fire({
                 title: 'Error',
                 text: `Error al eliminar la venta: ${data.message || 'Error desconocido'}`,
@@ -101,11 +110,11 @@ function deleteSale(saleId) {
         }
     })
     .catch(error => {
+        console.error('Error de red al eliminar venta:', error);
         Swal.fire({
             title: 'Error',
             text: `Error de red al eliminar la venta: ${error.message}`,
             icon: 'error'
         });
-        console.error('Error de red al eliminar venta:', error);
     });
 }
