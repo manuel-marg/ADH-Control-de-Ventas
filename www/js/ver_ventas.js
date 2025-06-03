@@ -80,7 +80,7 @@ function deleteSale(saleId) {
     });
 
     fetch(`${GOOGLE_SHEETS_API_URL}?action=delete&id=${saleId}`, {
-        method: 'POST', // Or 'GET' depending on your script's configuration
+        method: 'GET', // Or 'GET' depending on your script's configuration
     })
     .then(response => response.json())
     .then(data => {
