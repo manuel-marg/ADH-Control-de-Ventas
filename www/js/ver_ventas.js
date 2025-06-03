@@ -18,18 +18,20 @@ function loadAllSales() {
                 if (data.records.length === 0) {
                     salesListContainer.innerHTML = '<p>No hay ventas registradas.</p>';
                 } else {
-                    let html = '<table border="1"><thead><tr><th>Fecha</th><th>Usuario</th><th>Productos</th><th>Total USD</th><th>Total BS</th><th>Estado</th></tr></thead><tbody>';
+                    let html = '<table border="1"><thead><tr><th>Fecha</th><th>Usuario</th><th>Productos</th><th>Total USD</th><th>Total BS</th><th>Acciones</th></tr></thead><tbody>';
                     data.records.forEach(sale => {
                         html += `
-                            <tr>
-                                <td data-label="Fecha">${sale.Fecha || 'N/A'}</td>
-                                <td data-label="Usuario">${sale.Usuario || 'N/A'}</td>
-                                <td data-label="Productos">${sale.Productos || 'N/A'}</td>
-                                <td data-label="Total USD">$${parseFloat(sale.Total_USD || 0).toFixed(2)}</td>
-                                <td data-label="Total BS">Bs.${parseFloat(sale.Total_BS || 0).toFixed(2)}</td>
-                                <td data-label="Estado">${sale.Estado_de_Venta || 'N/A'}</td>
-                            </tr>
-                        `;
+<tr>
+    <td data-label="Fecha">${sale.Fecha || 'N/A'}</td>
+    <td data-label="Usuario">${sale.Usuario || 'N/A'}</td>
+    <td data-label="Productos">${sale.Productos || 'N/A'}</td>
+    <td data-label="Total USD">$${parseFloat(sale.Total_USD || 0).toFixed(2)}</td>
+    <td data-label="Total BS">Bs.${parseFloat(sale.Total_BS || 0).toFixed(2)}</td>
+                            <td>
+                                <button class="delete-sale-btn" data-id="${sale.Id}">Eliminar venta</button>
+                            </td>
+</tr>
+`;
                     });
                     html += '</tbody></table>';
                     salesListContainer.innerHTML = html;
@@ -43,4 +45,67 @@ function loadAllSales() {
             salesListContainer.innerHTML = `<p>Error de red: ${error.message}</p>`;
             console.error('Error de red al cargar ventas:', error);
         });
+}
+
+document.addEventListener('click', (event) => {
+    if (event.target.classList.contains('delete-sale-btn')) {
+        const saleId = event.target.dataset.id;
+        showDeleteConfirmation(saleId);
+    }
+});
+
+function showDeleteConfirmation(saleId) {
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: '¿Deseas eliminar esta venta?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#20429a', // Azul de marca
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        preConfirm: () => {
+            deleteSale(saleId);
+        }
+    });
+}
+
+function deleteSale(saleId) {
+    Swal.fire({
+        title: 'Eliminando venta...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    fetch(`${GOOGLE_SHEETS_API_URL}?action=delete&id=${saleId}`, {
+        method: 'POST', // Or 'GET' depending on your script's configuration
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'SUCCESS') {
+            Swal.fire({
+                title: '¡Eliminada!',
+                text: 'La venta ha sido eliminada.',
+                icon: 'success'
+            });
+            loadAllSales(); // Reload sales list
+        } else {
+            Swal.fire({
+                title: 'Error',
+                text: `Error al eliminar la venta: ${data.message || 'Error desconocido'}`,
+                icon: 'error'
+            });
+            console.error('Error al eliminar venta:', data.message);
+        }
+    })
+    .catch(error => {
+        Swal.fire({
+            title: 'Error',
+            text: `Error de red al eliminar la venta: ${error.message}`,
+            icon: 'error'
+        });
+        console.error('Error de red al eliminar venta:', error);
+    });
 }
