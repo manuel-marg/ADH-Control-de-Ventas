@@ -69,99 +69,118 @@ reportSheet.getRange(3, 1).setValue(weekRange);
 
   // Process sales data, skipping header row
   Logger.log("Iniciando procesamiento de datos de ventas");
-  
+
   // Log de la estructura de la primera fila para entender las columnas
   if (salesData.length > 0) {
     Logger.log(`Estructura de la primera fila: ${JSON.stringify(salesData[0])}`);
   }
-  
+
+  // Prepare data structures for different sale states
+  const completedSales = [];
+  const cortesiaSales = [];
+  const pendienteSales = [];
+
   for (let i = 1; i < salesData.length; i++) {
     const row = salesData[i];
     const timestamp = new Date(row[0]); // Assuming timestamp is in column A
+    const saleState = row[9]; // Estado de Venta is in column J (index 9)
 
     // Check if the sale falls within the last week
     if (timestamp >= lastMonday && timestamp <= lastSunday) {
-      Logger.log(`Procesando venta del ${Utilities.formatDate(timestamp, ss.getSpreadsheetTimeZone(), "dd/MM/yyyy")}`);
-      
-      const productString = row[6]; // Productos están en la columna 7 (índice 6)
-      Logger.log(`Producto: ${productString}`);
-      
-      // Mejorar la extracción de categoría para asegurar que funcione correctamente
-      let category = "Sin Categoría";
-      if (productString) {
-        const categoryMatch = productString.match(/\(([^)]+)\)/);
-        if (categoryMatch && categoryMatch[1]) {
-          category = categoryMatch[1].trim(); // Eliminar espacios en blanco
-          Logger.log(`Categoría extraída: ${category}`);
-        } else {
-          Logger.log(`No se pudo extraer categoría de: ${productString}`);
-        }
-      } else {
-        Logger.log("String de producto vacío o nulo");
+      // Filter sales by state
+      if (saleState === "completada") {
+        completedSales.push(row);
+      } else if (saleState === "cortesia") {
+        cortesiaSales.push(row);
+      } else if (saleState === "pendiente") {
+        pendienteSales.push(row);
       }
-      
-      // Obtener los métodos de pago y montos
-      const paymentMethod1 = row[2]; // Método de Pago 1
-      const paymentAmount1 = parseFloat(row[3] || 0); // Monto Pago 1
-      const paymentMethod2 = row[4]; // Método de Pago 2
-      const paymentMethod2Present = paymentMethod2 && paymentMethod2.trim() !== "";
-      const paymentAmount2 = parseFloat(row[5] || 0); // Monto Pago 2
-      
-      // Determinar si los pagos son en USD o BS
-      const isPayment1USD = usdPaymentMethods.includes(paymentMethod1);
-      const isPayment2USD = paymentMethod2Present && usdPaymentMethods.includes(paymentMethod2);
-      const isPayment1BS = bsPaymentMethods.includes(paymentMethod1);
-      const isPayment2BS = paymentMethod2Present && bsPaymentMethods.includes(paymentMethod2);
-      
-      // Calcular el total de ventas (USD y BS)
-      let totalSale = 0;
-      if (isPayment1USD || isPayment1BS) {
-        totalSale += paymentAmount1;
-      }
-      if (isPayment2USD || isPayment2BS) {
-        totalSale += paymentAmount2;
-      }
-      
-      Logger.log(`Método de pago 1: ${paymentMethod1}, Monto: ${paymentAmount1}, Es USD: ${isPayment1USD}`);
-      if (paymentMethod2Present) {
-        Logger.log(`Método de pago 2: ${paymentMethod2}, Monto: ${paymentAmount2}, Es USD: ${isPayment2USD}`);
-      }
-      Logger.log(`Monto total en USD: ${totalSale}`);
-      
-      // Get payment method from column C (index 2) for first payment method
-      const rawPaymentMethod = row[2]; // Payment method 1 is in column C
-      Logger.log(`Método de pago original: ${rawPaymentMethod}`);
-      
-      // Map the raw payment method to standardized format
-      let paymentMethod = "Otro";
-      for (const [standardMethod, variations] of Object.entries(paymentMethodMappings)) {
-        if (variations.includes(rawPaymentMethod)) {
-          paymentMethod = standardMethod;
-          break;
-        }
-      }
-      Logger.log(`Método de pago estandarizado: ${paymentMethod}`);
-      
-      const saleDate = Utilities.formatDate(timestamp, ss.getSpreadsheetTimeZone(), "dd/MM/yyyy");
-
-      if (!salesByCategoryAndDay[category]) {
-        salesByCategoryAndDay[category] = {};
-      }
-      if (!salesByCategoryAndDay[category][saleDate]) {
-        salesByCategoryAndDay[category][saleDate] = 0;
-      }
-      salesByCategoryAndDay[category][saleDate] += totalSale;
-
-      if (!salesByCategoryAndPaymentMethod[category]) {
-        salesByCategoryAndPaymentMethod[category] = {};
-      }
-      if (!salesByCategoryAndPaymentMethod[category][paymentMethod]) {
-        salesByCategoryAndPaymentMethod[category][paymentMethod] = 0;
-      }
-      salesByCategoryAndPaymentMethod[category][paymentMethod] += totalSale;
-      
-      Logger.log(`Venta procesada: Categoría=${category}, Fecha=${saleDate}, Método=${paymentMethod}, Monto=${totalSale}`);
     }
+  }
+
+  // Process completed sales
+  for (let i = 0; i < completedSales.length; i++) {
+    const row = completedSales[i];
+    Logger.log(`Procesando venta del ${Utilities.formatDate(new Date(row[0]), ss.getSpreadsheetTimeZone(), "dd/MM/yyyy")}`);
+
+    const productString = row[6]; // Productos están en la columna 7 (índice 6)
+    Logger.log(`Producto: ${productString}`);
+
+    // Mejorar la extracción de categoría para asegurar que funcione correctamente
+    let category = "Sin Categoría";
+    if (productString) {
+      const categoryMatch = productString.match(/\(([^)]+)\)/);
+      if (categoryMatch && categoryMatch[1]) {
+        category = categoryMatch[1].trim(); // Eliminar espacios en blanco
+        Logger.log(`Categoría extraída: ${category}`);
+      } else {
+        Logger.log(`No se pudo extraer categoría de: ${productString}`);
+      }
+    } else {
+      Logger.log("String de producto vacío o nulo");
+    }
+
+    // Obtener los métodos de pago y montos
+    const paymentMethod1 = row[2]; // Método de Pago 1
+    const paymentAmount1 = parseFloat(row[3] || 0); // Monto Pago 1
+    const paymentMethod2 = row[4]; // Método de Pago 2
+    const paymentMethod2Present = paymentMethod2 && paymentMethod2.trim() !== "";
+    const paymentAmount2 = parseFloat(row[5] || 0); // Monto Pago 2
+
+    // Determinar si los pagos son en USD o BS
+    const isPayment1USD = usdPaymentMethods.includes(paymentMethod1);
+    const isPayment2USD = paymentMethod2Present && usdPaymentMethods.includes(paymentMethod2);
+    const isPayment1BS = bsPaymentMethods.includes(paymentMethod1);
+    const isPayment2BS = paymentMethod2Present && bsPaymentMethods.includes(paymentMethod2);
+
+    // Calcular el total de ventas (USD y BS)
+    let totalSale = 0;
+    if (isPayment1USD || isPayment1BS) {
+      totalSale += paymentAmount1;
+    }
+    if (isPayment2USD || isPayment2BS) {
+      totalSale += paymentAmount2;
+    }
+
+    Logger.log(`Método de pago 1: ${paymentMethod1}, Monto: ${paymentAmount1}, Es USD: ${isPayment1USD}`);
+    if (paymentMethod2Present) {
+      Logger.log(`Método de pago 2: ${paymentMethod2}, Monto: ${paymentAmount2}, Es USD: ${isPayment2USD}`);
+    }
+    Logger.log(`Monto total en USD: ${totalSale}`);
+
+    // Get payment method from column C (index 2) for first payment method
+    const rawPaymentMethod = row[2]; // Payment method 1 is in column C
+    Logger.log(`Método de pago original: ${rawPaymentMethod}`);
+
+    // Map the raw payment method to standardized format
+    let paymentMethod = "Otro";
+    for (const [standardMethod, variations] of Object.entries(paymentMethodMappings)) {
+      if (variations.includes(rawPaymentMethod)) {
+        paymentMethod = standardMethod;
+        break;
+      }
+    }
+    Logger.log(`Método de pago estandarizado: ${paymentMethod}`);
+
+    const saleDate = Utilities.formatDate(new Date(row[0]), ss.getSpreadsheetTimeZone(), "dd/MM/yyyy");
+
+    if (!salesByCategoryAndDay[category]) {
+      salesByCategoryAndDay[category] = {};
+    }
+    if (!salesByCategoryAndDay[category][saleDate]) {
+      salesByCategoryAndDay[category][saleDate] = 0;
+    }
+    salesByCategoryAndDay[category][saleDate] += totalSale;
+
+    if (!salesByCategoryAndPaymentMethod[category]) {
+      salesByCategoryAndPaymentMethod[category] = {};
+    }
+    if (!salesByCategoryAndPaymentMethod[category][paymentMethod]) {
+      salesByCategoryAndPaymentMethod[category][paymentMethod] = 0;
+    }
+    salesByCategoryAndPaymentMethod[category][paymentMethod] += totalSale;
+
+    Logger.log(`Venta procesada: Categoría=${category}, Fecha=${saleDate}, Método=${paymentMethod}, Monto=${totalSale}`);
   }
   
   // Log de categorías procesadas
@@ -510,6 +529,89 @@ reportSheet.getRange(3, 1).setValue(weekRange);
   reportSheet.getRange(currentRow, 3).setValue("Bs.");
   reportSheet.getRange(currentRow, 1, 1, 3).setFontWeight("bold");
 
+  // Add new sections for cortesia and pendiente sales
+  currentRow += 2; // Add space between sections
+
+  // Section for cortesia sales
+  reportSheet.getRange(currentRow, 1).setValue("VENTAS POR CORTESÍA");
+  reportSheet.getRange(currentRow, 1).setFontWeight("bold");
+  reportSheet.getRange(currentRow, 1).setBackground("#ffcc00"); // Yellow background
+  reportSheet.getRange(currentRow, 1, 1, 6).merge();
+  currentRow++;
+
+  // Add headers for cortesia sales
+  const cortesiaHeaders = ["Fecha", "Usuario", "Método de Pago", "Monto", "Productos", "Total USD"];
+  cortesiaHeaders.forEach((header, index) => {
+    reportSheet.getRange(currentRow, index + 1).setValue(header);
+    reportSheet.getRange(currentRow, index + 1).setFontWeight("bold");
+    reportSheet.getRange(currentRow, index + 1).setBackground("#fcd5b4");
+  });
+  currentRow++;
+
+  // Add cortesia sales data
+  let cortesiaTotalUSD = 0;
+  cortesiaSales.forEach(sale => {
+    const date = Utilities.formatDate(new Date(sale[0]), ss.getSpreadsheetTimeZone(), "dd/MM/yyyy");
+    const user = sale[1]; // Usuario
+    const paymentMethod = sale[2]; // Método de Pago 1
+    const amount = parseFloat(sale[3] || 0); // Monto Pago 1
+    const products = sale[6]; // Productos
+    const totalUSD = amount; // Assuming all cortesia sales are in USD
+
+    reportSheet.getRange(currentRow, 1).setValue(date);
+    reportSheet.getRange(currentRow, 2).setValue(user);
+    reportSheet.getRange(currentRow, 3).setValue(paymentMethod);
+    reportSheet.getRange(currentRow, 4).setValue(amount);
+    reportSheet.getRange(currentRow, 5).setValue(products);
+    reportSheet.getRange(currentRow, 6).setValue(totalUSD);
+
+    cortesiaTotalUSD += totalUSD;
+    currentRow++;
+  });
+
+  // Add total for cortesia sales
+  reportSheet.getRange(currentRow, 1).setValue("TOTAL CORTESÍA");
+  reportSheet.getRange(currentRow, 1).setFontWeight("bold");
+  reportSheet.getRange(currentRow, 6).setValue(cortesiaTotalUSD);
+  reportSheet.getRange(currentRow, 6).setFontWeight("bold");
+  currentRow += 2; // Add space between sections
+
+  // Section for pendiente sales
+  reportSheet.getRange(currentRow, 1).setValue("VENTAS PENDIENTES");
+  reportSheet.getRange(currentRow, 1).setFontWeight("bold");
+  reportSheet.getRange(currentRow, 1).setBackground("#ffcc00"); // Yellow background
+  reportSheet.getRange(currentRow, 1, 1, 7).merge();
+  currentRow++;
+
+  // Add headers for pendiente sales
+  const pendienteHeaders = ["Fecha", "Usuario", "Método de Pago", "Monto", "Productos", "Total USD", "Nombre Cliente"];
+  pendienteHeaders.forEach((header, index) => {
+    reportSheet.getRange(currentRow, index + 1).setValue(header);
+    reportSheet.getRange(currentRow, index + 1).setFontWeight("bold");
+    reportSheet.getRange(currentRow, index + 1).setBackground("#fcd5b4");
+  });
+  currentRow++;
+
+  // Add pendiente sales data
+  pendienteSales.forEach(sale => {
+    const date = Utilities.formatDate(new Date(sale[0]), ss.getSpreadsheetTimeZone(), "dd/MM/yyyy");
+    const user = sale[1]; // Usuario
+    const paymentMethod = sale[2]; // Método de Pago 1
+    const amount = parseFloat(sale[3] || 0); // Monto Pago 1
+    const products = sale[6]; // Productos
+    const totalUSD = amount; // Assuming all pendiente sales are in USD
+    const clientName = sale[10]; // Nombre Cliente
+
+    reportSheet.getRange(currentRow, 1).setValue(date);
+    reportSheet.getRange(currentRow, 2).setValue(user);
+    reportSheet.getRange(currentRow, 3).setValue(paymentMethod);
+    reportSheet.getRange(currentRow, 4).setValue(amount);
+    reportSheet.getRange(currentRow, 5).setValue(products);
+    reportSheet.getRange(currentRow, 6).setValue(totalUSD);
+    reportSheet.getRange(currentRow, 7).setValue(clientName);
+    currentRow++;
+  });
+
   // Format the report
   reportSheet.getRange(1, 1, 1, 1 + (uniqueCategories.length * paymentMethods.length)).merge();
   reportSheet.getRange(1, 1).setFontSize(14);
@@ -553,6 +655,24 @@ reportSheet.getRange(3, 1).setValue(weekRange);
 
   // Apply borders to the total income table
   reportSheet.getRange(totalIncomeTableStartRow, 1, currentRow - totalIncomeTableStartRow + 1, 3).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
+
+  // Apply formatting to cortesia and pendiente sales sections
+  // Format cortesia sales section
+  const cortesiaSectionStartRow = totalIncomeTableStartRow + 3 + orderedPaymentMethods.length + 3; // 3 for spacing, 3 for headers, + length of orderedPaymentMethods
+  const cortesiaSectionEndRow = currentRow - 2; // -2 for the spacing after cortesia sales
+  reportSheet.getRange(cortesiaSectionStartRow, 1, cortesiaSectionEndRow - cortesiaSectionStartRow + 1, 6).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
+
+  // Format pendiente sales section
+  const pendienteSectionStartRow = cortesiaSectionEndRow + 3; // +3 for spacing
+  const pendienteSectionEndRow = currentRow - 1; // -1 for the final row
+  reportSheet.getRange(pendienteSectionStartRow, 1, pendienteSectionEndRow - pendienteSectionStartRow + 1, 7).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
+
+  // Set column widths for better readability in new sections
+  reportSheet.setColumnWidth(4, 120); // Método de Pago
+  reportSheet.setColumnWidth(5, 100); // Monto
+  reportSheet.setColumnWidth(6, 200); // Productos
+  reportSheet.setColumnWidth(7, 100); // Total USD
+  reportSheet.setColumnWidth(8, 150); // Nombre Cliente (for pendiente sales)
 
   Logger.log("Reporte semanal generado exitosamente.");
 }
