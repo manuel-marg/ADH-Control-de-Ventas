@@ -653,6 +653,11 @@ reportSheet.getRange(3, 1).setValue(weekRange);
   reportSheet.getRange(14, 1).setFontWeight("bold");
   reportSheet.getRange(14, 1).setHorizontalAlignment("center");
 
+  // Formatear fila 27 
+  reportSheet.getRange(27, 1, 1, 1 + (uniqueCategories.length * paymentMethods.length)).merge();
+  reportSheet.getRange(27, 1).setFontWeight("bold");
+  reportSheet.getRange(27, 1).setHorizontalAlignment("center");
+
   // Combinar celdas D16 a O26
   reportSheet.getRange(16, 4, 11, (uniqueCategories.length * paymentMethods.length) - 2).merge();
 
