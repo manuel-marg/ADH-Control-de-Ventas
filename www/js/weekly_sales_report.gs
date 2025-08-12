@@ -548,43 +548,52 @@ reportSheet.getRange(3, 1).setValue(weekRange);
   });
   currentRow++;
 
-  // Add cortesia sales data
-  let cortesiaTotalUSD = 0;
-  cortesiaSales.forEach(sale => {
-    const date = Utilities.formatDate(new Date(sale[0]), ss.getSpreadsheetTimeZone(), "dd/MM/yyyy");
-    const user = sale[1]; // Usuario
-    const paymentMethod = sale[2]; // Método de Pago 1
-    const amount = parseFloat(sale[3] || 0); // Monto Pago 1
-    const products = sale[6]; // Productos
-    const totalUSD = amount; // Assuming all cortesia sales are in USD
-
-    reportSheet.getRange(currentRow, 1).setValue(date);
-    reportSheet.getRange(currentRow, 2).setValue(user);
-    reportSheet.getRange(currentRow, 3).setValue(paymentMethod);
-    reportSheet.getRange(currentRow, 4).setValue(amount);
-    reportSheet.getRange(currentRow, 5).setValue(products);
-    reportSheet.getRange(currentRow, 6).setValue(totalUSD);
-
-    cortesiaTotalUSD += totalUSD;
+  // Add cortesia sales data with validation
+  if (cortesiaSales.length > 0) {
+    // Add headers for cortesia sales
+    const cortesiaHeaders = ["Usuario", "Productos"];
+    cortesiaHeaders.forEach((header, index) => {
+      reportSheet.getRange(currentRow, index + 1).setValue(header);
+      reportSheet.getRange(currentRow, index + 1).setFontWeight("bold");
+      reportSheet.getRange(currentRow, index + 1).setBackground("#fcd5b4");
+    });
     currentRow++;
-  });
 
-  // Add total for cortesia sales
-  reportSheet.getRange(currentRow, 1).setValue("TOTAL CORTESÍA");
-  reportSheet.getRange(currentRow, 1).setFontWeight("bold");
-  reportSheet.getRange(currentRow, 6).setValue(cortesiaTotalUSD);
-  reportSheet.getRange(currentRow, 6).setFontWeight("bold");
-  currentRow += 2; // Add space between sections
+    let cortesiaCount = 0;
+    cortesiaSales.forEach(sale => {
+      const user = sale[1]; // Usuario
+      const products = sale[6]; // Productos
+
+      reportSheet.getRange(currentRow, 1).setValue(user);
+      reportSheet.getRange(currentRow, 2).setValue(products);
+
+      cortesiaCount++;
+      currentRow++;
+    });
+
+    // Add total for cortesia sales
+    reportSheet.getRange(currentRow, 1).setValue("TOTAL CORTESÍAS");
+    reportSheet.getRange(currentRow, 1).setFontWeight("bold");
+    reportSheet.getRange(currentRow, 2).setValue(cortesiaCount);
+    reportSheet.getRange(currentRow, 2).setFontWeight("bold");
+    currentRow += 2; // Add space between sections
+  } else {
+    // Add a note if there are no cortesia sales
+    reportSheet.getRange(currentRow, 1).setValue("NO HAY VENTAS POR CORTESÍA");
+    reportSheet.getRange(currentRow, 1).setFontWeight("bold");
+    reportSheet.getRange(currentRow, 1).setBackground("#ffcc00");
+    currentRow += 2; // Add space between sections
+  }
 
   // Section for pendiente sales
   reportSheet.getRange(currentRow, 1).setValue("VENTAS PENDIENTES");
   reportSheet.getRange(currentRow, 1).setFontWeight("bold");
   reportSheet.getRange(currentRow, 1).setBackground("#ffcc00"); // Yellow background
-  reportSheet.getRange(currentRow, 1, 1, 7).merge();
+  reportSheet.getRange(currentRow, 1, 1, 3).merge();
   currentRow++;
 
   // Add headers for pendiente sales
-  const pendienteHeaders = ["Fecha", "Usuario", "Método de Pago", "Monto", "Productos", "Total USD", "Nombre Cliente"];
+  const pendienteHeaders = ["Usuario", "Productos", "Nombre Cliente"];
   pendienteHeaders.forEach((header, index) => {
     reportSheet.getRange(currentRow, index + 1).setValue(header);
     reportSheet.getRange(currentRow, index + 1).setFontWeight("bold");
@@ -592,25 +601,38 @@ reportSheet.getRange(3, 1).setValue(weekRange);
   });
   currentRow++;
 
-  // Add pendiente sales data
-  pendienteSales.forEach(sale => {
-    const date = Utilities.formatDate(new Date(sale[0]), ss.getSpreadsheetTimeZone(), "dd/MM/yyyy");
-    const user = sale[1]; // Usuario
-    const paymentMethod = sale[2]; // Método de Pago 1
-    const amount = parseFloat(sale[3] || 0); // Monto Pago 1
-    const products = sale[6]; // Productos
-    const totalUSD = amount; // Assuming all pendiente sales are in USD
-    const clientName = sale[10]; // Nombre Cliente
+  // Add pendiente sales data with validation and sorting
+  if (pendienteSales.length > 0) {
+    // Sort pendiente sales by date (most recent first)
+    pendienteSales.sort((a, b) => new Date(b[0]) - new Date(a[0]));
 
-    reportSheet.getRange(currentRow, 1).setValue(date);
-    reportSheet.getRange(currentRow, 2).setValue(user);
-    reportSheet.getRange(currentRow, 3).setValue(paymentMethod);
-    reportSheet.getRange(currentRow, 4).setValue(amount);
-    reportSheet.getRange(currentRow, 5).setValue(products);
-    reportSheet.getRange(currentRow, 6).setValue(totalUSD);
-    reportSheet.getRange(currentRow, 7).setValue(clientName);
+    let pendienteCount = 0;
+    pendienteSales.forEach(sale => {
+      const user = sale[1]; // Usuario
+      const products = sale[6]; // Productos
+      const clientName = sale[10]; // Nombre Cliente
+
+      reportSheet.getRange(currentRow, 1).setValue(user);
+      reportSheet.getRange(currentRow, 2).setValue(products);
+      reportSheet.getRange(currentRow, 3).setValue(clientName);
+
+      pendienteCount++;
+      currentRow++;
+    });
+
+    // Add total for pendiente sales
+    reportSheet.getRange(currentRow, 1).setValue("TOTAL PENDIENTES");
+    reportSheet.getRange(currentRow, 1).setFontWeight("bold");
+    reportSheet.getRange(currentRow, 2).setValue(pendienteCount);
+    reportSheet.getRange(currentRow, 2).setFontWeight("bold");
     currentRow++;
-  });
+  } else {
+    // Add a note if there are no pendiente sales
+    reportSheet.getRange(currentRow, 1).setValue("NO HAY VENTAS PENDIENTES");
+    reportSheet.getRange(currentRow, 1).setFontWeight("bold");
+    reportSheet.getRange(currentRow, 1).setBackground("#ffcc00");
+    currentRow++;
+  }
 
   // Format the report
   reportSheet.getRange(1, 1, 1, 1 + (uniqueCategories.length * paymentMethods.length)).merge();
