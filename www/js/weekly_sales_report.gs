@@ -666,14 +666,11 @@ const cortesiaSectionActualEndRow = currentRow - 1; // Capture end row (last row
   dataRange.setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
 
   // Establecer un ancho fijo para todas las columnas
-    for (let i = 1; i <= currentColumn - 1; i++) {
+    for (let i = 1; i <= reportSheet.getLastColumn(); i++) {
       reportSheet.setColumnWidth(i, 100);
     }
 
-  // Set column widths for better readability
-  reportSheet.setColumnWidth(1, 150);
-  reportSheet.setColumnWidth(2, 100);
-  reportSheet.setColumnWidth(3, 80);
+
 
   // Apply borders to the entire report table
   const lastRow = reportSheet.getLastRow();
@@ -699,12 +696,7 @@ const cortesiaSectionActualEndRow = currentRow - 1; // Capture end row (last row
   // Use actual start and end rows
   reportSheet.getRange(pendienteSectionActualStartRow, 1, Math.max(1, pendienteSectionActualEndRow - pendienteSectionActualStartRow + 1), 7).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
 
-  // Set column widths for better readability in new sections
-  reportSheet.setColumnWidth(4, 120); // Método de Pago
-  reportSheet.setColumnWidth(5, 100); // Monto
-  reportSheet.setColumnWidth(6, 200); // Productos
-  reportSheet.setColumnWidth(7, 100); // Total USD
-  reportSheet.setColumnWidth(8, 150); // Nombre Cliente (for pendiente sales)
+
 
   Logger.log("Reporte semanal generado exitosamente.");
 }
