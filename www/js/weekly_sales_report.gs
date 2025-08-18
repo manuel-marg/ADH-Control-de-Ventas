@@ -654,7 +654,7 @@ const cortesiaSectionActualEndRow = currentRow - 1; // Capture end row (last row
   reportSheet.getRange(28, 1).setHorizontalAlignment("center");
 
   // Formatear fila después de ventas pendientes (calculada dinámicamente)
-  reportSheet.getRange(pendienteSectionActualEndRow + 1, 1, 1, 1 + (uniqueCategories.length * paymentMethods.length)).merge();
+  reportSheet.getRange(pendienteSectionActualEndRow + 1, 4, pendienteSales.length + 3, (1 + (uniqueCategories.length * paymentMethods.length)) - 3).merge();
   reportSheet.getRange(pendienteSectionActualEndRow + 1, 1).setFontWeight("bold");
   reportSheet.getRange(pendienteSectionActualEndRow + 1, 1).setHorizontalAlignment("center");
 
