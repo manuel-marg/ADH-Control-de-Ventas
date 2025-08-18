@@ -684,18 +684,14 @@ const cortesiaSectionActualEndRow = currentRow - 1; // Capture end row (last row
 
   reportSheet.getRange(4, 1, Math.max(1, lastRow - 3), lastCol).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
 
-  // Apply borders to the total income table
-  reportSheet.getRange(totalIncomeTableStartRow, 1, Math.max(1, currentRow - totalIncomeTableStartRow + 1), 3).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
-
   // Apply formatting to cortesia and pendiente sales sections
   // Format cortesia sales section
   // Use actual start and end rows
   reportSheet.getRange(cortesiaSectionActualStartRow, 1, Math.max(1, cortesiaSectionActualEndRow - cortesiaSectionActualStartRow + 1), 6).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
 
-  // Format pendiente sales section - solo hasta la fila con contenido, sin incluir la fila vacía adicional
-  if (pendienteSectionActualEndRow >= pendienteSectionActualStartRow) {
-    reportSheet.getRange(pendienteSectionActualStartRow, 1, pendienteSectionActualEndRow - pendienteSectionActualStartRow + 1, 7).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
-  }
+  // Format pendiente sales section
+  // Use actual start and end rows
+  reportSheet.getRange(pendienteSectionActualStartRow, 1, Math.max(1, pendienteSectionActualEndRow - pendienteSectionActualStartRow + 1), 7).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
 
 
 
