@@ -649,7 +649,7 @@ const cortesiaSectionActualEndRow = currentRow - 1; // Capture end row (last row
   reportSheet.getRange(27, 1).setHorizontalAlignment("center");
 
   // Formatear fila 28 
-  reportSheet.getRange(28, 3, pendienteSales.length + 3, (uniqueCategories.length * paymentMethods.length) -1 ).merge();
+  reportSheet.getRange(28, 3, cortesiaSales.length + 3, (uniqueCategories.length * paymentMethods.length) -1 ).merge();
   reportSheet.getRange(28, 1).setFontWeight("bold");
   reportSheet.getRange(28, 1).setHorizontalAlignment("center");
 
