@@ -1,6 +1,3 @@
-// This script will generate weekly sales reports in Google Sheets.
-// It will group products by category and calculate daily revenue by category and payment method.
-
 function generateWeeklySalesReport() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const salesSheet = ss.getSheetByName("Ventas");
@@ -26,28 +23,26 @@ function generateWeeklySalesReport() {
   const paymentMethods = Object.keys(paymentMethodMappings);
 
   // Get current date and calculate the start and end of the current week (Monday to Sunday)
-  // For testing purposes, we'll include the current week instead of last week
   const today = new Date();
+  today.setHours(0, 0, 0, 0); // Normalize to start of day
+
   const dayOfWeek = today.getDay(); // 0 for Sunday, 1 for Monday, ..., 6 for Saturday
-  const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust for Monday
-  
-  // Use current week instead of last week for testing
-  const lastMonday = new Date(new Date().setDate(diff));
-  const lastSunday = new Date(new Date().setDate(diff + 6));
-  
-  // For production, uncomment these lines to use last week instead
-  // const lastMonday = new Date(today.setDate(diff - 7));
-  // const lastSunday = new Date(today.setDate(diff - 1));
+  const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Days to subtract to get to Monday
+
+  const currentMonday = new Date(today);
+  currentMonday.setDate(today.getDate() + diffToMonday);
+
+  const currentSunday = new Date(currentMonday);
+  currentSunday.setDate(currentMonday.getDate() + 6);
 
   // Format dates for sheet name
-  const lastMondayFormatted = Utilities.formatDate(lastMonday, ss.getSpreadsheetTimeZone(), "dd/MM");
-  const lastSundayFormatted = Utilities.formatDate(lastSunday, ss.getSpreadsheetTimeZone(), "dd/MM");
+  const currentMondayFormatted = Utilities.formatDate(currentMonday, ss.getSpreadsheetTimeZone(), "dd/MM");
+  const currentSundayFormatted = Utilities.formatDate(currentSunday, ss.getSpreadsheetTimeZone(), "dd/MM");
   
-  // Obtener el mes de las ventas en lugar de la fecha actual
-  const salesMonth = new Date(salesData[1][0]); // Usar la primera venta después del encabezado
-  const monthName = Utilities.formatDate(salesMonth, ss.getSpreadsheetTimeZone(), "MMMM").toUpperCase();
+  // Obtener el mes de la fecha actual
+  const monthName = Utilities.formatDate(today, ss.getSpreadsheetTimeZone(), "MMMM").toUpperCase();
 
-  const reportSheetName = `SEMANA DEL ${lastMondayFormatted.split('/')[0]} AL ${lastSundayFormatted.split('/')[0]} DE ${monthName}`;
+  const reportSheetName = `SEMANA DEL ${currentMondayFormatted.split('/')[0]} AL ${currentSundayFormatted.split('/')[0]} DE ${monthName}`;
 
   // Create a new sheet for the report
   let reportSheet = ss.getSheetByName(reportSheetName);
@@ -58,7 +53,7 @@ function generateWeeklySalesReport() {
 
   // Set up report headers
   reportSheet.getRange(1, 1).setValue("REPORTE DE VENTAS SEMANAL");
-  const weekRange = `DESDE LUNES ${lastMondayFormatted} HASTA VIERNES ${lastSundayFormatted}`;
+  const weekRange = `DESDE LUNES ${currentMondayFormatted} HASTA DOMINGO ${currentSundayFormatted}`;
 reportSheet.getRange(2, 1).setValue(`MES: ${monthName}`);
 reportSheet.getRange(3, 1).setValue(weekRange);
   reportSheet.getRange(4, 1).setValue("CATEGORÍA");
@@ -85,8 +80,8 @@ reportSheet.getRange(3, 1).setValue(weekRange);
     const timestamp = new Date(row[0]); // Assuming timestamp is in column A
     const saleState = row[9]; // Estado de Venta is in column J (index 9)
 
-    // Check if the sale falls within the last week
-    if (timestamp >= lastMonday && timestamp <= lastSunday) {
+    // Check if the sale falls within the current week
+    if (timestamp >= currentMonday && timestamp <= currentSunday) {
       // Filter sales by state
       if (saleState === "completada") {
         completedSales.push(row);
@@ -187,9 +182,9 @@ reportSheet.getRange(3, 1).setValue(weekRange);
   Logger.log(`Categorías procesadas: ${Object.keys(salesByCategoryAndDay).join(', ')}`);
 
 
-  // Get unique dates from the last week
+  // Get unique dates from the current week
   const uniqueDates = [];
-  for (let d = new Date(lastMonday); d <= lastSunday; d.setDate(d.getDate() + 1)) {
+  for (let d = new Date(currentMonday); d <= currentSunday; d.setDate(d.getDate() + 1)) {
     uniqueDates.push(Utilities.formatDate(d, ss.getSpreadsheetTimeZone(), "dd/MM/yyyy"));
   }
 
@@ -207,7 +202,7 @@ reportSheet.getRange(3, 1).setValue(weekRange);
     const row = salesData[i];
     const timestamp = new Date(row[0]);
     
-    if (timestamp >= lastMonday && timestamp <= lastSunday) {
+    if (timestamp >= currentMonday && timestamp <= currentSunday) {
       const productString = row[6]; // Productos están en la columna 7 (índice 6)
       // Log del string de producto para depuración
       Logger.log(`Producto encontrado: ${productString}`);
@@ -260,7 +255,7 @@ reportSheet.getRange(3, 1).setValue(weekRange);
     const row = salesData[i];
     const timestamp = new Date(row[0]);
     
-    if (timestamp >= lastMonday && timestamp <= lastSunday) {
+    if (timestamp >= currentMonday && timestamp <= currentSunday) {
       const productString = row[6]; // Productos están en la columna 7 (índice 6)
       
       // Usar la misma lógica mejorada para extraer la categoría
@@ -532,60 +527,56 @@ reportSheet.getRange(3, 1).setValue(weekRange);
   // Add new sections for cortesia and pendiente sales
   currentRow += 2; // Add space between sections
 
-  // Section for cortesia sales
-  reportSheet.getRange(currentRow, 1).setValue("VENTAS POR CORTESÍA");
-  reportSheet.getRange(currentRow, 1).setFontWeight("bold");
-  reportSheet.getRange(currentRow, 1).setBackground("#ffcc00"); // Yellow background
-  reportSheet.getRange(currentRow, 1, 1, 6).merge();
-  currentRow++;
+// Section for cortesia sales
+const cortesiaSectionActualStartRow = currentRow; // Capture start row
+reportSheet.getRange(currentRow, 1).setValue("VENTAS POR CORTESÍA");
+reportSheet.getRange(currentRow, 1).setFontWeight("bold");
+reportSheet.getRange(currentRow, 1).setBackground("#ffcc00"); // Yellow background
+reportSheet.getRange(currentRow, 1, 1, 2).merge(); // Merge for "VENTAS POR CORTESÍA" title
+currentRow++;
 
-  // Add headers for cortesia sales
-  const cortesiaHeaders = ["Fecha", "Usuario", "Método de Pago", "Monto", "Productos", "Total USD"];
-  cortesiaHeaders.forEach((header, index) => {
-    reportSheet.getRange(currentRow, index + 1).setValue(header);
-    reportSheet.getRange(currentRow, index + 1).setFontWeight("bold");
-    reportSheet.getRange(currentRow, index + 1).setBackground("#fcd5b4");
-  });
-  currentRow++;
+// Add headers for cortesia sales (only Fecha and Usuario)
+const cortesiaHeaders = ["Fecha", "Usuario"];
+cortesiaHeaders.forEach((header, index) => {
+  reportSheet.getRange(currentRow, index + 1).setValue(header);
+  reportSheet.getRange(currentRow, index + 1).setFontWeight("bold");
+  reportSheet.getRange(currentRow, index + 1).setBackground("#fcd5b4");
+});
+currentRow++;
 
-  // Add cortesia sales data with validation
-  if (cortesiaSales.length > 0) {
-    // Add headers for cortesia sales
-    const cortesiaHeaders = ["Usuario", "Productos"];
-    cortesiaHeaders.forEach((header, index) => {
-      reportSheet.getRange(currentRow, index + 1).setValue(header);
-      reportSheet.getRange(currentRow, index + 1).setFontWeight("bold");
-      reportSheet.getRange(currentRow, index + 1).setBackground("#fcd5b4");
-    });
+// Add cortesia sales data with validation (only Fecha and Usuario)
+if (cortesiaSales.length > 0) {
+  let cortesiaCount = 0;
+  cortesiaSales.forEach(sale => {
+    const fecha = Utilities.formatDate(new Date(sale[0]), ss.getSpreadsheetTimeZone(), "dd/MM/yyyy"); // Fecha
+    const user = sale[1]; // Usuario
+
+    reportSheet.getRange(currentRow, 1).setValue(fecha);
+    reportSheet.getRange(currentRow, 2).setValue(user);
+
+    cortesiaCount++;
     currentRow++;
+  });
 
-    let cortesiaCount = 0;
-    cortesiaSales.forEach(sale => {
-      const user = sale[1]; // Usuario
-      const products = sale[6]; // Productos
-
-      reportSheet.getRange(currentRow, 1).setValue(user);
-      reportSheet.getRange(currentRow, 2).setValue(products);
-
-      cortesiaCount++;
-      currentRow++;
-    });
-
-    // Add total for cortesia sales
-    reportSheet.getRange(currentRow, 1).setValue("TOTAL CORTESÍAS");
-    reportSheet.getRange(currentRow, 1).setFontWeight("bold");
-    reportSheet.getRange(currentRow, 2).setValue(cortesiaCount);
-    reportSheet.getRange(currentRow, 2).setFontWeight("bold");
-    currentRow += 2; // Add space between sections
-  } else {
-    // Add a note if there are no cortesia sales
-    reportSheet.getRange(currentRow, 1).setValue("NO HAY VENTAS POR CORTESÍA");
-    reportSheet.getRange(currentRow, 1).setFontWeight("bold");
-    reportSheet.getRange(currentRow, 1).setBackground("#ffcc00");
-    currentRow += 2; // Add space between sections
-  }
+  // Add total for cortesia sales
+  reportSheet.getRange(currentRow, 1).setValue("TOTAL CORTESÍAS");
+  reportSheet.getRange(currentRow, 1).setFontWeight("bold");
+  reportSheet.getRange(currentRow, 2).setValue(cortesiaCount);
+  reportSheet.getRange(currentRow, 2).setFontWeight("bold");
+  currentRow++;
+  
+  // Add merged blank row to separate sections
+  reportSheet.getRange(currentRow, 1, 1, 1 + (uniqueCategories.length * paymentMethods.length)).merge();
+  currentRow++;
+} else {
+  // Add a note if there are no cortesia sales
+  reportSheet.getRange(currentRow, 1).setValue("NO HAY VENTAS POR CORTESÍA");
+  currentRow += 2; // Add space between sections
+}
+const cortesiaSectionActualEndRow = currentRow - 1; // Capture end row (last row with content)
 
   // Section for pendiente sales
+  const pendienteSectionActualStartRow = currentRow; // Capture start row
   reportSheet.getRange(currentRow, 1).setValue("VENTAS PENDIENTES");
   reportSheet.getRange(currentRow, 1).setFontWeight("bold");
   reportSheet.getRange(currentRow, 1).setBackground("#ffcc00"); // Yellow background
@@ -629,10 +620,9 @@ reportSheet.getRange(3, 1).setValue(weekRange);
   } else {
     // Add a note if there are no pendiente sales
     reportSheet.getRange(currentRow, 1).setValue("NO HAY VENTAS PENDIENTES");
-    reportSheet.getRange(currentRow, 1).setFontWeight("bold");
-    reportSheet.getRange(currentRow, 1).setBackground("#ffcc00");
     currentRow++;
   }
+  const pendienteSectionActualEndRow = currentRow - 1; // Capture end row (last row with content)
 
   // Format the report
   reportSheet.getRange(1, 1, 1, 1 + (uniqueCategories.length * paymentMethods.length)).merge();
@@ -658,10 +648,15 @@ reportSheet.getRange(3, 1).setValue(weekRange);
   reportSheet.getRange(27, 1).setFontWeight("bold");
   reportSheet.getRange(27, 1).setHorizontalAlignment("center");
 
-  // Formatear fila 31 
-  reportSheet.getRange(31, 1, 1, 1 + (uniqueCategories.length * paymentMethods.length)).merge();
-  reportSheet.getRange(31, 1).setFontWeight("bold");
-  reportSheet.getRange(31, 1).setHorizontalAlignment("center");
+  // Formatear fila 28 
+  reportSheet.getRange(28, 3, 1, (uniqueCategories.length * paymentMethods.length) -1 ).merge();
+  reportSheet.getRange(28, 1).setFontWeight("bold");
+  reportSheet.getRange(28, 1).setHorizontalAlignment("center");
+
+  // Formatear fila después de ventas pendientes (calculada dinámicamente)
+  reportSheet.getRange(pendienteSectionActualEndRow + 1, 1, 1, 1 + (uniqueCategories.length * paymentMethods.length)).merge();
+  reportSheet.getRange(pendienteSectionActualEndRow + 1, 1).setFontWeight("bold");
+  reportSheet.getRange(pendienteSectionActualEndRow + 1, 1).setHorizontalAlignment("center");
 
   // Combinar celdas D16 a O26
   reportSheet.getRange(16, 4, 11, (uniqueCategories.length * paymentMethods.length) - 2).merge();
@@ -683,21 +678,26 @@ reportSheet.getRange(3, 1).setValue(weekRange);
   // Apply borders to the entire report table
   const lastRow = reportSheet.getLastRow();
   const lastCol = reportSheet.getLastColumn();
-  reportSheet.getRange(4, 1, lastRow - 3, lastCol).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
+
+  Logger.log("Debugging border ranges:");
+  Logger.log("lastRow: " + lastRow + ", lastCol: " + lastCol);
+  Logger.log("totalIncomeTableStartRow: " + totalIncomeTableStartRow + ", currentRow: " + currentRow);
+  Logger.log("cortesiaSectionActualStartRow: " + cortesiaSectionActualStartRow + ", cortesiaSectionActualEndRow: " + cortesiaSectionActualEndRow);
+  Logger.log("pendienteSectionActualStartRow: " + pendienteSectionActualStartRow + ", pendienteSectionActualEndRow: " + pendienteSectionActualEndRow);
+
+  reportSheet.getRange(4, 1, Math.max(1, lastRow - 3), lastCol).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
 
   // Apply borders to the total income table
-  reportSheet.getRange(totalIncomeTableStartRow, 1, currentRow - totalIncomeTableStartRow + 1, 3).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
+  reportSheet.getRange(totalIncomeTableStartRow, 1, Math.max(1, currentRow - totalIncomeTableStartRow + 1), 3).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
 
   // Apply formatting to cortesia and pendiente sales sections
   // Format cortesia sales section
-  const cortesiaSectionStartRow = totalIncomeTableStartRow + 3 + orderedPaymentMethods.length + 3; // 3 for spacing, 3 for headers, + length of orderedPaymentMethods
-  const cortesiaSectionEndRow = currentRow - 2; // -2 for the spacing after cortesia sales
-  reportSheet.getRange(cortesiaSectionStartRow, 1, cortesiaSectionEndRow - cortesiaSectionStartRow + 1, 6).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
+  // Use actual start and end rows
+  reportSheet.getRange(cortesiaSectionActualStartRow, 1, Math.max(1, cortesiaSectionActualEndRow - cortesiaSectionActualStartRow + 1), 6).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
 
   // Format pendiente sales section
-  const pendienteSectionStartRow = cortesiaSectionEndRow + 3; // +3 for spacing
-  const pendienteSectionEndRow = currentRow - 1; // -1 for the final row
-  reportSheet.getRange(pendienteSectionStartRow, 1, pendienteSectionEndRow - pendienteSectionStartRow + 1, 7).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
+  // Use actual start and end rows
+  reportSheet.getRange(pendienteSectionActualStartRow, 1, Math.max(1, pendienteSectionActualEndRow - pendienteSectionActualStartRow + 1), 7).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
 
   // Set column widths for better readability in new sections
   reportSheet.setColumnWidth(4, 120); // Método de Pago
