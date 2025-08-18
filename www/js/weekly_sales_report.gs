@@ -653,10 +653,10 @@ const cortesiaSectionActualEndRow = currentRow - 1; // Capture end row (last row
   reportSheet.getRange(28, 1).setFontWeight("bold");
   reportSheet.getRange(28, 1).setHorizontalAlignment("center");
 
-  // Formatear fila después de ventas pendientes (calculada dinámicamente)
-  reportSheet.getRange(pendienteSectionActualStartRow - 1, 1, pendienteSales.length + 3, 1 + (uniqueCategories.length * paymentMethods.length)).merge();
-  reportSheet.getRange(pendienteSectionActualEndRow + 1, 1).setFontWeight("bold");
-  reportSheet.getRange(pendienteSectionActualEndRow + 1, 1).setHorizontalAlignment("center");
+  // Formatear fila al inicio de ventas pendientes (calculada dinámicamente)
+  reportSheet.getRange(pendienteSectionActualStartRow, 4, pendienteSales.length + 3, (1 + (uniqueCategories.length * paymentMethods.length)) - 3).merge();
+  reportSheet.getRange(pendienteSectionActualStartRow, 1).setFontWeight("bold");
+  reportSheet.getRange(pendienteSectionActualStartRow, 1).setHorizontalAlignment("center");
 
   // Combinar celdas D16 a O26
   reportSheet.getRange(16, 4, 11, (uniqueCategories.length * paymentMethods.length) - 2).merge();
