@@ -1,9 +1,28 @@
+/**
+ * Genera un reporte semanal de ventas en Google Sheets
+ * 
+ * Esta función procesa los datos de ventas de la semana actual (lunes a domingo)
+ * y genera un reporte completo que incluye:
+ * - Ventas por categoría y método de pago organizadas por día
+ * - Resumen de ingresos totales por tipo de pago
+ * - Listado de ventas por cortesía
+ * - Listado de ventas pendientes
+ * 
+ * @function generateWeeklySalesReport
+ * @description Función principal que genera el reporte semanal de ventas
+ * @returns {void} No retorna valor, crea una nueva hoja en el spreadsheet
+ * 
+ * @author Sistema de Control de Ventas ADH
+ * @version 1.0
+ * @since 2024
+ */
 function generateWeeklySalesReport() {
+  // Obtener la hoja de cálculo activa y los datos de ventas
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const salesSheet = ss.getSheetByName("Ventas");
   const salesData = salesSheet.getDataRange().getValues();
 
-  // Define payment methods with mappings to handle variations
+  // Definir mapeos de métodos de pago para manejar variaciones en los nombres
   const paymentMethodMappings = {
     "DIVISAS": ["DIVISAS", "Divisas", "Efectivo ($)"],
     "P/VENTA": ["P/VENTA", "Punto de venta (Bs)", "Punto de venta", "Punto de ventas(Bs)"],
@@ -14,7 +33,7 @@ function generateWeeklySalesReport() {
     "TRANS. USD": ["TRANS. USD", "Transferencia en $"]
   };
   
-  // Clasificar métodos de pago por moneda
+  // Clasificar métodos de pago por moneda (USD vs Bolívares)
   const usdPaymentMethods = ["Efectivo ($)", "Zelle", "DIVISAS", "Divisas", "Transferencia en $", "TRANS. USD"];
   const bsPaymentMethods = ["Punto de ventas(Bs)", "Punto de venta (Bs)", "Punto de venta", "P/VENTA", 
                            "Pago Movil", "Pago Móvil", "PAGO MÓVIL", "Pago móvil", 
@@ -22,12 +41,12 @@ function generateWeeklySalesReport() {
                            "Efectivo en BS", "EFECTIVO/BS.", "Efectivo en Bs.", "Efectivo"];
   const paymentMethods = Object.keys(paymentMethodMappings);
 
-  // Get current date and calculate the start and end of the current week (Monday to Sunday)
+  // Obtener la fecha actual y calcular el inicio y fin de la semana actual (lunes a domingo)
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // Normalize to start of day
+  today.setHours(0, 0, 0, 0); // Normalizar al inicio del día
 
-  const dayOfWeek = today.getDay(); // 0 for Sunday, 1 for Monday, ..., 6 for Saturday
-  const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Days to subtract to get to Monday
+  const dayOfWeek = today.getDay(); // 0 para domingo, 1 para lunes, ..., 6 para sábado
+  const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Días a restar para llegar al lunes
 
   const currentMonday = new Date(today);
   currentMonday.setDate(today.getDate() + diffToMonday);
@@ -35,54 +54,55 @@ function generateWeeklySalesReport() {
   const currentSunday = new Date(currentMonday);
   currentSunday.setDate(currentMonday.getDate() + 6);
 
-  // Format dates for sheet name
+  // Formatear fechas para el nombre de la hoja
   const currentMondayFormatted = Utilities.formatDate(currentMonday, ss.getSpreadsheetTimeZone(), "dd/MM");
   const currentSundayFormatted = Utilities.formatDate(currentSunday, ss.getSpreadsheetTimeZone(), "dd/MM");
   
-  // Obtener el mes de la fecha actual
+  // Obtener el nombre del mes en mayúsculas
   const monthName = Utilities.formatDate(today, ss.getSpreadsheetTimeZone(), "MMMM").toUpperCase();
 
   const reportSheetName = `SEMANA DEL ${currentMondayFormatted.split('/')[0]} AL ${currentSundayFormatted.split('/')[0]} DE ${monthName}`;
 
-  // Create a new sheet for the report
+  // Crear una nueva hoja para el reporte (eliminar si ya existe)
   let reportSheet = ss.getSheetByName(reportSheetName);
   if (reportSheet) {
     ss.deleteSheet(reportSheet);
   }
   reportSheet = ss.insertSheet(reportSheetName);
 
-  // Set up report headers
+  // Configurar encabezados del reporte
   reportSheet.getRange(1, 1).setValue("REPORTE DE VENTAS SEMANAL");
   const weekRange = `DESDE LUNES ${currentMondayFormatted} HASTA DOMINGO ${currentSundayFormatted}`;
-reportSheet.getRange(2, 1).setValue(`MES: ${monthName}`);
-reportSheet.getRange(3, 1).setValue(weekRange);
+  reportSheet.getRange(2, 1).setValue(`MES: ${monthName}`);
+  reportSheet.getRange(3, 1).setValue(weekRange);
   reportSheet.getRange(4, 1).setValue("CATEGORÍA");
 
-  // Prepare data structure for reporting
+  // Preparar estructuras de datos para el reporte
   const salesByCategoryAndDay = {};
   const salesByCategoryAndPaymentMethod = {};
 
-  // Process sales data, skipping header row
+  // Procesar datos de ventas, omitiendo la fila de encabezado
   Logger.log("Iniciando procesamiento de datos de ventas");
 
-  // Log de la estructura de la primera fila para entender las columnas
+  // Registrar la estructura de la primera fila para entender las columnas
   if (salesData.length > 0) {
     Logger.log(`Estructura de la primera fila: ${JSON.stringify(salesData[0])}`);
   }
 
-  // Prepare data structures for different sale states
+  // Preparar estructuras de datos para diferentes estados de venta
   const completedSales = [];
   const cortesiaSales = [];
   const pendienteSales = [];
 
+  // Filtrar ventas por estado y rango de fechas
   for (let i = 1; i < salesData.length; i++) {
     const row = salesData[i];
-    const timestamp = new Date(row[0]); // Assuming timestamp is in column A
-    const saleState = row[9]; // Estado de Venta is in column J (index 9)
+    const timestamp = new Date(row[0]); // La marca de tiempo está en la columna A
+    const saleState = row[9]; // El estado de venta está en la columna J (índice 9)
 
-    // Check if the sale falls within the current week
+    // Verificar si la venta está dentro de la semana actual
     if (timestamp >= currentMonday && timestamp <= currentSunday) {
-      // Filter sales by state
+      // Filtrar ventas por estado
       if (saleState === "completada") {
         completedSales.push(row);
       } else if (saleState === "cortesia") {
@@ -93,20 +113,20 @@ reportSheet.getRange(3, 1).setValue(weekRange);
     }
   }
 
-  // Process completed sales
+  // Procesar ventas completadas
   for (let i = 0; i < completedSales.length; i++) {
     const row = completedSales[i];
     Logger.log(`Procesando venta del ${Utilities.formatDate(new Date(row[0]), ss.getSpreadsheetTimeZone(), "dd/MM/yyyy")}`);
 
-    const productString = row[6]; // Productos están en la columna 7 (índice 6)
+    const productString = row[6]; // Los productos están en la columna 7 (índice 6)
     Logger.log(`Producto: ${productString}`);
 
-    // Mejorar la extracción de categoría para asegurar que funcione correctamente
+    // Extraer categoría del string de producto
     let category = "Sin Categoría";
     if (productString) {
       const categoryMatch = productString.match(/\(([^)]+)\)/);
       if (categoryMatch && categoryMatch[1]) {
-        category = categoryMatch[1].trim(); // Eliminar espacios en blanco
+        category = categoryMatch[1].trim();
         Logger.log(`Categoría extraída: ${category}`);
       } else {
         Logger.log(`No se pudo extraer categoría de: ${productString}`);
@@ -122,13 +142,13 @@ reportSheet.getRange(3, 1).setValue(weekRange);
     const paymentMethod2Present = paymentMethod2 && paymentMethod2.trim() !== "";
     const paymentAmount2 = parseFloat(row[5] || 0); // Monto Pago 2
 
-    // Determinar si los pagos son en USD o BS
+    // Determinar si los pagos son en USD o Bolívares
     const isPayment1USD = usdPaymentMethods.includes(paymentMethod1);
     const isPayment2USD = paymentMethod2Present && usdPaymentMethods.includes(paymentMethod2);
     const isPayment1BS = bsPaymentMethods.includes(paymentMethod1);
     const isPayment2BS = paymentMethod2Present && bsPaymentMethods.includes(paymentMethod2);
 
-    // Calcular el total de ventas (USD y BS)
+    // Calcular el total de ventas (USD y Bolívares)
     let totalSale = 0;
     if (isPayment1USD || isPayment1BS) {
       totalSale += paymentAmount1;
@@ -141,13 +161,13 @@ reportSheet.getRange(3, 1).setValue(weekRange);
     if (paymentMethod2Present) {
       Logger.log(`Método de pago 2: ${paymentMethod2}, Monto: ${paymentAmount2}, Es USD: ${isPayment2USD}`);
     }
-    Logger.log(`Monto total en USD: ${totalSale}`);
+    Logger.log(`Monto total: ${totalSale}`);
 
-    // Get payment method from column C (index 2) for first payment method
-    const rawPaymentMethod = row[2]; // Payment method 1 is in column C
+    // Obtener método de pago de la columna C (índice 2) para el primer método de pago
+    const rawPaymentMethod = row[2];
     Logger.log(`Método de pago original: ${rawPaymentMethod}`);
 
-    // Map the raw payment method to standardized format
+    // Mapear el método de pago crudo al formato estandarizado
     let paymentMethod = "Otro";
     for (const [standardMethod, variations] of Object.entries(paymentMethodMappings)) {
       if (variations.includes(rawPaymentMethod)) {
@@ -159,6 +179,7 @@ reportSheet.getRange(3, 1).setValue(weekRange);
 
     const saleDate = Utilities.formatDate(new Date(row[0]), ss.getSpreadsheetTimeZone(), "dd/MM/yyyy");
 
+    // Actualizar estructuras de datos de ventas por categoría y día
     if (!salesByCategoryAndDay[category]) {
       salesByCategoryAndDay[category] = {};
     }
@@ -167,6 +188,7 @@ reportSheet.getRange(3, 1).setValue(weekRange);
     }
     salesByCategoryAndDay[category][saleDate] += totalSale;
 
+    // Actualizar estructuras de datos de ventas por categoría y método de pago
     if (!salesByCategoryAndPaymentMethod[category]) {
       salesByCategoryAndPaymentMethod[category] = {};
     }
@@ -178,54 +200,52 @@ reportSheet.getRange(3, 1).setValue(weekRange);
     Logger.log(`Venta procesada: Categoría=${category}, Fecha=${saleDate}, Método=${paymentMethod}, Monto=${totalSale}`);
   }
   
-  // Log de categorías procesadas
   Logger.log(`Categorías procesadas: ${Object.keys(salesByCategoryAndDay).join(', ')}`);
 
-
-  // Get unique dates from the current week
+  // Obtener fechas únicas de la semana actual
   const uniqueDates = [];
   for (let d = new Date(currentMonday); d <= currentSunday; d.setDate(d.getDate() + 1)) {
     uniqueDates.push(Utilities.formatDate(d, ss.getSpreadsheetTimeZone(), "dd/MM/yyyy"));
   }
 
-  // Prepare data structure for day-of-week reporting
+  // Preparar estructura de datos para reporte por día de la semana
   const daysOfWeek = ["LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO", "DOMINGO"];
   const salesByCategoryDayAndMethod = {};
   
-  // Get unique categories from sales data
+  // Obtener categorías únicas de los datos de ventas
   const uniqueCategories = [];
   
-  // Log para depuración
   Logger.log("Iniciando extracción de categorías");
   
+  // Extraer categorías únicas de todas las ventas de la semana
   for (let i = 1; i < salesData.length; i++) {
     const row = salesData[i];
     const timestamp = new Date(row[0]);
     
     if (timestamp >= currentMonday && timestamp <= currentSunday) {
-      const productString = row[6]; // Productos están en la columna 7 (índice 6)
-      // Log del string de producto para depuración
+      const productString = row[6];
       Logger.log(`Producto encontrado: ${productString}`);
       
-      // Mejorar la extracción de categoría
+      // Extraer categoría usando la misma lógica mejorada
       let category = "Sin Categoría";
       if (productString) {
         const categoryMatch = productString.match(/\(([^)]+)\)/);
         if (categoryMatch && categoryMatch[1]) {
-          category = categoryMatch[1].trim(); // Eliminar espacios en blanco
+          category = categoryMatch[1].trim();
           Logger.log(`Categoría extraída: ${category}`);
         } else {
           Logger.log(`No se pudo extraer categoría de: ${productString}`);
         }
       }
       
-      // Verificar que la categoría no sea vacía o nula
+      // Verificar que la categoría sea válida y única
       if (category && category !== "") {
         if (!uniqueCategories.includes(category)) {
           uniqueCategories.push(category);
           Logger.log(`Nueva categoría añadida: ${category}`);
         }
         
+        // Inicializar estructura de datos para la categoría
         if (!salesByCategoryDayAndMethod[category]) {
           salesByCategoryDayAndMethod[category] = {};
           daysOfWeek.forEach(day => {
@@ -241,7 +261,6 @@ reportSheet.getRange(3, 1).setValue(weekRange);
     }
   }
   
-  // Log de todas las categorías encontradas
   Logger.log(`Categorías únicas encontradas: ${uniqueCategories.join(', ')}`);
   
   // Si no hay categorías, añadir una por defecto para evitar errores
@@ -250,39 +269,39 @@ reportSheet.getRange(3, 1).setValue(weekRange);
     Logger.log("No se encontraron categorías, se añadió 'Sin Categoría' por defecto");
   }
   
-  // Process sales data for the day-of-week report
+  // Procesar datos de ventas para el reporte por día de la semana
   for (let i = 1; i < salesData.length; i++) {
     const row = salesData[i];
     const timestamp = new Date(row[0]);
     
     if (timestamp >= currentMonday && timestamp <= currentSunday) {
-      const productString = row[6]; // Productos están en la columna 7 (índice 6)
+      const productString = row[6];
       
-      // Usar la misma lógica mejorada para extraer la categoría
+      // Usar la misma lógica para extraer la categoría
       let category = "Sin Categoría";
       if (productString) {
         const categoryMatch = productString.match(/\(([^)]+)\)/);
         if (categoryMatch && categoryMatch[1]) {
-          category = categoryMatch[1].trim(); // Eliminar espacios en blanco
+          category = categoryMatch[1].trim();
         }
       }
       
       // Verificar que la categoría sea válida
       if (category && category !== "" && uniqueCategories.includes(category)) {
         // Obtener los métodos de pago y montos
-        const paymentMethod1 = row[2]; // Método de Pago 1
-        const paymentAmount1 = parseFloat(row[3] || 0); // Monto Pago 1
-        const paymentMethod2 = row[4]; // Método de Pago 2
+        const paymentMethod1 = row[2];
+        const paymentAmount1 = parseFloat(row[3] || 0);
+        const paymentMethod2 = row[4];
         const paymentMethod2Present = paymentMethod2 && paymentMethod2.trim() !== "";
-        const paymentAmount2 = parseFloat(row[5] || 0); // Monto Pago 2
+        const paymentAmount2 = parseFloat(row[5] || 0);
         
-        // Determinar si los pagos son en USD o BS
+        // Determinar si los pagos son en USD o Bolívares
         const isPayment1USD = usdPaymentMethods.includes(paymentMethod1);
         const isPayment2USD = paymentMethod2Present && usdPaymentMethods.includes(paymentMethod2);
         const isPayment1BS = bsPaymentMethods.includes(paymentMethod1);
         const isPayment2BS = paymentMethod2Present && bsPaymentMethods.includes(paymentMethod2);
         
-        // Calcular el total de ventas (USD y BS)
+        // Calcular el total de ventas
         let totalSale = 0;
         if (isPayment1USD || isPayment1BS) {
           totalSale += paymentAmount1;
@@ -292,7 +311,7 @@ reportSheet.getRange(3, 1).setValue(weekRange);
         }
         const rawPaymentMethod = row[2];
         
-        // Map the raw payment method to standardized format
+        // Mapear el método de pago crudo al formato estandarizado
         let paymentMethod = "Otro";
         for (const [standardMethod, variations] of Object.entries(paymentMethodMappings)) {
           if (variations.includes(rawPaymentMethod)) {
@@ -301,11 +320,11 @@ reportSheet.getRange(3, 1).setValue(weekRange);
           }
         }
         
-        // Get day of week
-        const dayOfWeekIndex = timestamp.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-        const dayName = daysOfWeek[dayOfWeekIndex === 0 ? 6 : dayOfWeekIndex - 1]; // Adjust to make Monday first
+        // Obtener día de la semana
+        const dayOfWeekIndex = timestamp.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
+        const dayName = daysOfWeek[dayOfWeekIndex === 0 ? 6 : dayOfWeekIndex - 1]; // Ajustar para que lunes sea primero
         
-        // Process Payment Method 1
+        // Procesar Método de Pago 1
         if (paymentAmount1 > 0) {
           let paymentMethod1Standard = "Otro";
           for (const [standardMethod, variations] of Object.entries(paymentMethodMappings)) {
@@ -324,7 +343,7 @@ reportSheet.getRange(3, 1).setValue(weekRange);
           }
         }
 
-        // Process Payment Method 2 if present
+        // Procesar Método de Pago 2 si está presente
         if (paymentMethod2Present && paymentAmount2 > 0) {
           let paymentMethod2Standard = "Otro";
           for (const [standardMethod, variations] of Object.entries(paymentMethodMappings)) {
@@ -346,61 +365,55 @@ reportSheet.getRange(3, 1).setValue(weekRange);
     }
   }
   
-  // Log de verificación final
   Logger.log("Datos procesados para el reporte diario por categoría y método de pago");
 
-  
-  // Create the report table with the format shown in the image
-  // First, set up the header row with categories
+  // Crear la tabla del reporte con el formato requerido
+  // Primero, configurar la fila de encabezado con categorías
   let currentRow = 4;
   let currentColumn = 1;
   
-  // Write "CATEGORÍA" in the first cell
+  // Escribir "CATEGORÍA" en la primera celda
   reportSheet.getRange(currentRow, currentColumn).setValue("CATEGORÍA");
   reportSheet.getRange(currentRow, currentColumn).setFontWeight("bold");
   reportSheet.getRange(currentRow, currentColumn).setBackground("#95B3D7");
   
-  // Write category headers
+  // Escribir encabezados de categorías
   currentColumn = 2;
   uniqueCategories.forEach(category => {
-    // Log para depuración del encabezado de categoría
     Logger.log(`Creando encabezado para categoría: ${category}`);
     
     // Mostrar todas las categorías
-      const headerRange = reportSheet.getRange(currentRow, currentColumn, 1, paymentMethods.length);
-      headerRange.merge();
-      headerRange.setValue(category.toUpperCase());
-      headerRange.setHorizontalAlignment("center");
-      headerRange.setFontWeight("bold");
-      headerRange.setBackground("#95B3D7");
-      
-      // Añadir borde para mejor visualización
-      headerRange.setBorder(true, true, true, true, false, false, null, SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
-      
-      currentColumn += paymentMethods.length;
+    const headerRange = reportSheet.getRange(currentRow, currentColumn, 1, paymentMethods.length);
+    headerRange.merge();
+    headerRange.setValue(category.toUpperCase());
+    headerRange.setHorizontalAlignment("center");
+    headerRange.setFontWeight("bold");
+    headerRange.setBackground("#95B3D7");
+    
+    // Añadir borde para mejor visualización
+    headerRange.setBorder(true, true, true, true, false, false, null, SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
+    
+    currentColumn += paymentMethods.length;
   });
   currentRow++;
   
-  // Log para depuración después de crear los encabezados
   Logger.log(`Encabezados de categoría creados: ${uniqueCategories.join(', ')}`);
   Logger.log(`Métodos de pago disponibles: ${paymentMethods.join(', ')}`);
 
-  
-  // Write payment method headers under each category
+  // Escribir encabezados de métodos de pago bajo cada categoría
   currentColumn = 2;
   uniqueCategories.forEach(category => {
-    // Procesar todas las categorías
-      paymentMethods.forEach(method => {
-        reportSheet.getRange(currentRow, currentColumn).setValue(method);
-        reportSheet.getRange(currentRow, currentColumn).setHorizontalAlignment("center");
-        reportSheet.getRange(currentRow, currentColumn).setFontWeight("bold");
-        reportSheet.getRange(currentRow, currentColumn).setBackground("#FCD5B4"); // Light orange background
-        currentColumn++;
-      });
+    paymentMethods.forEach(method => {
+      reportSheet.getRange(currentRow, currentColumn).setValue(method);
+      reportSheet.getRange(currentRow, currentColumn).setHorizontalAlignment("center");
+      reportSheet.getRange(currentRow, currentColumn).setFontWeight("bold");
+      reportSheet.getRange(currentRow, currentColumn).setBackground("#FCD5B4"); // Fondo naranja claro
+      currentColumn++;
+    });
   });
   currentRow++;
   
-  // Write day rows with values for each category and payment method
+  // Escribir filas de días con valores para cada categoría y método de pago
   daysOfWeek.forEach(day => {
     currentColumn = 1;
     reportSheet.getRange(currentRow, currentColumn).setValue(day);
@@ -409,21 +422,18 @@ reportSheet.getRange(3, 1).setValue(weekRange);
     currentColumn++;
     
     uniqueCategories.forEach(category => {
-      // Procesar todas las categorías
-      {
-        paymentMethods.forEach(method => {
-          const value = salesByCategoryDayAndMethod[category] && 
-                       salesByCategoryDayAndMethod[category][day] && 
-                       salesByCategoryDayAndMethod[category][day][method] || 0;
-          reportSheet.getRange(currentRow, currentColumn).setValue(value);
-          currentColumn++;
-        });
-      }
+      paymentMethods.forEach(method => {
+        const value = salesByCategoryDayAndMethod[category] && 
+                     salesByCategoryDayAndMethod[category][day] && 
+                     salesByCategoryDayAndMethod[category][day][method] || 0;
+        reportSheet.getRange(currentRow, currentColumn).setValue(value);
+        currentColumn++;
+      });
     });
     currentRow++;
   });
   
-  // Add TOTAL row
+  // Añadir fila de TOTAL
   currentColumn = 1;
   reportSheet.getRange(currentRow, currentColumn).setValue("TOTAL");
   reportSheet.getRange(currentRow, currentColumn).setFontWeight("bold");
@@ -431,27 +441,24 @@ reportSheet.getRange(3, 1).setValue(weekRange);
   currentColumn++;
   
   uniqueCategories.forEach(category => {
-    // Procesar todas las categorías
-    {
-      paymentMethods.forEach(method => {
-        let methodTotal = 0;
-        daysOfWeek.forEach(day => {
-          methodTotal += salesByCategoryDayAndMethod[category] && 
-                        salesByCategoryDayAndMethod[category][day] && 
-                        salesByCategoryDayAndMethod[category][day][method] || 0;
-        });
-        reportSheet.getRange(currentRow, currentColumn).setValue(methodTotal);
-        reportSheet.getRange(currentRow, currentColumn).setFontWeight("bold");
-        currentColumn++;
+    paymentMethods.forEach(method => {
+      let methodTotal = 0;
+      daysOfWeek.forEach(day => {
+        methodTotal += salesByCategoryDayAndMethod[category] && 
+                      salesByCategoryDayAndMethod[category][day] && 
+                      salesByCategoryDayAndMethod[category][day][method] || 0;
       });
-    }
+      reportSheet.getRange(currentRow, currentColumn).setValue(methodTotal);
+      reportSheet.getRange(currentRow, currentColumn).setFontWeight("bold");
+      currentColumn++;
+    });
   });
-  currentRow++; // Move to the next row after the TOTAL row
+  currentRow++; // Moverse a la siguiente fila después de la fila TOTAL
 
-  // Add a blank row
+  // Añadir una fila en blanco
   currentRow++;
 
-  // Calculate total income by payment type for the new table
+  // Calcular ingresos totales por tipo de pago para la nueva tabla
   const totalIncomeByPaymentType = {};
   paymentMethods.forEach(method => {
     totalIncomeByPaymentType[method] = 0;
@@ -465,13 +472,13 @@ reportSheet.getRange(3, 1).setValue(weekRange);
     }
   }
 
-  // Add the new table for total income
+  // Añadir la nueva tabla para ingresos totales
   currentRow++;
   const totalIncomeTableStartRow = currentRow;
   reportSheet.getRange(currentRow, 1).setValue("INGRESO TOTAL");
   reportSheet.getRange(currentRow, 1).setFontWeight("bold");
   reportSheet.getRange(currentRow, 1).setBackground("#95b3d7");
-  reportSheet.getRange(currentRow, 1, 1, 3).merge(); // Merge for "INGRESO TOTAL" title
+  reportSheet.getRange(currentRow, 1, 1, 3).merge(); // Fusionar para el título "INGRESO TOTAL"
 
   currentRow++;
   reportSheet.getRange(currentRow, 1).setValue("Tipo de Pago");
@@ -480,7 +487,7 @@ reportSheet.getRange(3, 1).setValue(weekRange);
   reportSheet.getRange(currentRow, 1, 1, 3).setFontWeight("bold");
   reportSheet.getRange(currentRow, 1, 1, 3).setBackground("#fcd5b4");
 
-  // Define the order of payment methods for the new table
+  // Definir el orden de métodos de pago para la nueva tabla
   const orderedPaymentMethods = [
     "DIVISAS",
     "P/VENTA",
@@ -494,6 +501,7 @@ reportSheet.getRange(3, 1).setValue(weekRange);
   let totalUSD = 0;
   let totalBS = 0;
 
+  // Añadir filas de métodos de pago con sus montos
   orderedPaymentMethods.forEach(method => {
     currentRow++;
     reportSheet.getRange(currentRow, 1).setValue(method);
@@ -511,7 +519,7 @@ reportSheet.getRange(3, 1).setValue(weekRange);
     reportSheet.getRange(currentRow, 3).setValue(currency);
   });
 
-  // Add total rows for $ and Bs.
+  // Añadir filas de totales para $ y Bs.
   currentRow++;
   reportSheet.getRange(currentRow, 1).setValue("TOTAL ($)");
   reportSheet.getRange(currentRow, 2).setValue(totalUSD);
@@ -524,66 +532,66 @@ reportSheet.getRange(3, 1).setValue(weekRange);
   reportSheet.getRange(currentRow, 3).setValue("Bs.");
   reportSheet.getRange(currentRow, 1, 1, 3).setFontWeight("bold");
 
-  // Add new sections for cortesia and pendiente sales
-  currentRow += 2; // Add space between sections
+  // Añadir nuevas secciones para ventas de cortesía y pendientes
+  currentRow += 2; // Añadir espacio entre secciones
 
-// Section for cortesia sales
-const cortesiaSectionActualStartRow = currentRow; // Capture start row
-reportSheet.getRange(currentRow, 1).setValue("VENTAS POR CORTESÍA");
-reportSheet.getRange(currentRow, 1).setFontWeight("bold");
-reportSheet.getRange(currentRow, 1).setBackground("#ffcc00"); // Yellow background
-reportSheet.getRange(currentRow, 1, 1, 2).merge(); // Merge for "VENTAS POR CORTESÍA" title
-currentRow++;
-
-// Add headers for cortesia sales (only Fecha and Usuario)
-const cortesiaHeaders = ["Fecha", "Usuario"];
-cortesiaHeaders.forEach((header, index) => {
-  reportSheet.getRange(currentRow, index + 1).setValue(header);
-  reportSheet.getRange(currentRow, index + 1).setFontWeight("bold");
-  reportSheet.getRange(currentRow, index + 1).setBackground("#fcd5b4");
-});
-currentRow++;
-
-// Add cortesia sales data with validation (only Fecha and Usuario)
-if (cortesiaSales.length > 0) {
-  let cortesiaCount = 0;
-  cortesiaSales.forEach(sale => {
-    const fecha = Utilities.formatDate(new Date(sale[0]), ss.getSpreadsheetTimeZone(), "dd/MM/yyyy"); // Fecha
-    const user = sale[1]; // Usuario
-
-    reportSheet.getRange(currentRow, 1).setValue(fecha);
-    reportSheet.getRange(currentRow, 2).setValue(user);
-
-    cortesiaCount++;
-    currentRow++;
-  });
-
-  // Add total for cortesia sales
-  reportSheet.getRange(currentRow, 1).setValue("TOTAL CORTESÍAS");
+  // Sección para ventas de cortesía
+  const cortesiaSectionActualStartRow = currentRow; // Capturar fila de inicio
+  reportSheet.getRange(currentRow, 1).setValue("VENTAS POR CORTESÍA");
   reportSheet.getRange(currentRow, 1).setFontWeight("bold");
-  reportSheet.getRange(currentRow, 2).setValue(cortesiaCount);
-  reportSheet.getRange(currentRow, 2).setFontWeight("bold");
+  reportSheet.getRange(currentRow, 1).setBackground("#ffcc00"); // Fondo amarillo
+  reportSheet.getRange(currentRow, 1, 1, 2).merge(); // Fusionar para el título "VENTAS POR CORTESÍA"
   currentRow++;
-  
-  // Add merged blank row to separate sections
-  reportSheet.getRange(currentRow, 1, 1, 1 + (uniqueCategories.length * paymentMethods.length)).merge();
-  currentRow++;
-} else {
-  // Add a note if there are no cortesia sales
-  reportSheet.getRange(currentRow, 1).setValue("NO HAY VENTAS POR CORTESÍA");
-  currentRow += 2; // Add space between sections
-}
-const cortesiaSectionActualEndRow = currentRow - 1; // Capture end row (last row with content)
 
-  // Section for pendiente sales
-  const pendienteSectionActualStartRow = currentRow; // Capture start row
+  // Añadir encabezados para ventas de cortesía (solo Fecha y Usuario)
+  const cortesiaHeaders = ["Fecha", "Usuario"];
+  cortesiaHeaders.forEach((header, index) => {
+    reportSheet.getRange(currentRow, index + 1).setValue(header);
+    reportSheet.getRange(currentRow, index + 1).setFontWeight("bold");
+    reportSheet.getRange(currentRow, index + 1).setBackground("#fcd5b4");
+  });
+  currentRow++;
+
+  // Añadir datos de ventas de cortesía con validación (solo Fecha y Usuario)
+  if (cortesiaSales.length > 0) {
+    let cortesiaCount = 0;
+    cortesiaSales.forEach(sale => {
+      const fecha = Utilities.formatDate(new Date(sale[0]), ss.getSpreadsheetTimeZone(), "dd/MM/yyyy"); // Fecha
+      const user = sale[1]; // Usuario
+
+      reportSheet.getRange(currentRow, 1).setValue(fecha);
+      reportSheet.getRange(currentRow, 2).setValue(user);
+
+      cortesiaCount++;
+      currentRow++;
+    });
+
+    // Añadir total para ventas de cortesía
+    reportSheet.getRange(currentRow, 1).setValue("TOTAL CORTESÍAS");
+    reportSheet.getRange(currentRow, 1).setFontWeight("bold");
+    reportSheet.getRange(currentRow, 2).setValue(cortesiaCount);
+    reportSheet.getRange(currentRow, 2).setFontWeight("bold");
+    currentRow++;
+    
+    // Añadir fila en blanco fusionada para separar secciones
+    reportSheet.getRange(currentRow, 1, 1, 1 + (uniqueCategories.length * paymentMethods.length)).merge();
+    currentRow++;
+  } else {
+    // Añadir una nota si no hay ventas de cortesía
+    reportSheet.getRange(currentRow, 1).setValue("NO HAY VENTAS POR CORTESÍA");
+    currentRow += 2; // Añadir espacio entre secciones
+  }
+  const cortesiaSectionActualEndRow = currentRow - 1; // Capturar fila de fin (última fila con contenido)
+
+  // Sección para ventas pendientes
+  const pendienteSectionActualStartRow = currentRow; // Capturar fila de inicio
   reportSheet.getRange(currentRow, 1).setValue("VENTAS PENDIENTES");
   reportSheet.getRange(currentRow, 1).setFontWeight("bold");
-  reportSheet.getRange(currentRow, 1).setBackground("#ffcc00"); // Yellow background
+  reportSheet.getRange(currentRow, 1).setBackground("#ffcc00"); // Fondo amarillo
   reportSheet.getRange(currentRow, 1, 1, 3).merge();
   currentRow++;
 
-  // Add headers for pendiente sales
+  // Añadir encabezados para ventas pendientes
   const pendienteHeaders = ["Usuario", "Productos", "Nombre Cliente"];
   pendienteHeaders.forEach((header, index) => {
     reportSheet.getRange(currentRow, index + 1).setValue(header);
@@ -592,9 +600,9 @@ const cortesiaSectionActualEndRow = currentRow - 1; // Capture end row (last row
   });
   currentRow++;
 
-  // Add pendiente sales data with validation and sorting
+  // Añadir datos de ventas pendientes con validación y ordenamiento
   if (pendienteSales.length > 0) {
-    // Sort pendiente sales by date (most recent first)
+    // Ordenar ventas pendientes por fecha (más recientes primero)
     pendienteSales.sort((a, b) => new Date(b[0]) - new Date(a[0]));
 
     let pendienteCount = 0;
@@ -611,20 +619,20 @@ const cortesiaSectionActualEndRow = currentRow - 1; // Capture end row (last row
       currentRow++;
     });
 
-    // Add total for pendiente sales
+    // Añadir total para ventas pendientes
     reportSheet.getRange(currentRow, 1).setValue("TOTAL PENDIENTES");
     reportSheet.getRange(currentRow, 1).setFontWeight("bold");
     reportSheet.getRange(currentRow, 2).setValue(pendienteCount);
     reportSheet.getRange(currentRow, 2).setFontWeight("bold");
     currentRow++;
   } else {
-    // Add a note if there are no pendiente sales
+    // Añadir una nota si no hay ventas pendientes
     reportSheet.getRange(currentRow, 1).setValue("NO HAY VENTAS PENDIENTES");
     currentRow++;
   }
-  const pendienteSectionActualEndRow = currentRow - 1; // Capture end row (last row with content)
+  const pendienteSectionActualEndRow = currentRow - 1; // Capturar fila de fin (última fila con contenido)
 
-  // Format the report
+  // Formatear el reporte
   reportSheet.getRange(1, 1, 1, 1 + (uniqueCategories.length * paymentMethods.length)).merge();
   reportSheet.getRange(1, 1).setFontSize(14);
   reportSheet.getRange(1, 1).setFontWeight("bold");
@@ -648,7 +656,7 @@ const cortesiaSectionActualEndRow = currentRow - 1; // Capture end row (last row
   reportSheet.getRange(27, 1).setFontWeight("bold");
   reportSheet.getRange(27, 1).setHorizontalAlignment("center");
 
-  // Formatear fila 28 
+  // Formatear fila 28 - fusión dinámica para ventas de cortesía
   reportSheet.getRange(28, 3, cortesiaSales.length + 3, (uniqueCategories.length * paymentMethods.length) -1 ).merge();
   reportSheet.getRange(28, 1).setFontWeight("bold");
   reportSheet.getRange(28, 1).setHorizontalAlignment("center");
@@ -666,17 +674,15 @@ const cortesiaSectionActualEndRow = currentRow - 1; // Capture end row (last row
   dataRange.setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
 
   // Establecer un ancho fijo para todas las columnas
-    for (let i = 1; i <= reportSheet.getLastColumn(); i++) {
-      reportSheet.setColumnWidth(i, 100);
-    }
+  for (let i = 1; i <= reportSheet.getLastColumn(); i++) {
+    reportSheet.setColumnWidth(i, 100);
+  }
 
-
-
-  // Apply borders to the entire report table
+  // Aplicar bordes a toda la tabla del reporte
   const lastRow = reportSheet.getLastRow();
   const lastCol = reportSheet.getLastColumn();
 
-  Logger.log("Debugging border ranges:");
+  Logger.log("Depurando rangos de bordes:");
   Logger.log("lastRow: " + lastRow + ", lastCol: " + lastCol);
   Logger.log("totalIncomeTableStartRow: " + totalIncomeTableStartRow + ", currentRow: " + currentRow);
   Logger.log("cortesiaSectionActualStartRow: " + cortesiaSectionActualStartRow + ", cortesiaSectionActualEndRow: " + cortesiaSectionActualEndRow);
@@ -684,16 +690,14 @@ const cortesiaSectionActualEndRow = currentRow - 1; // Capture end row (last row
 
   reportSheet.getRange(4, 1, Math.max(1, lastRow - 3), lastCol).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
 
-  // Apply formatting to cortesia and pendiente sales sections
-  // Format cortesia sales section
-  // Use actual start and end rows
+  // Aplicar formato a las secciones de ventas de cortesía y pendientes
+  // Formatear sección de ventas de cortesía
+  // Usar filas de inicio y fin reales
   reportSheet.getRange(cortesiaSectionActualStartRow, 1, Math.max(1, cortesiaSectionActualEndRow - cortesiaSectionActualStartRow + 1), 6).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
 
-  // Format pendiente sales section
-  // Use actual start and end rows
+  // Formatear sección de ventas pendientes
+  // Usar filas de inicio y fin reales
   reportSheet.getRange(pendienteSectionActualStartRow, 1, Math.max(1, pendienteSectionActualEndRow - pendienteSectionActualStartRow + 1), 7).setBorder(true, true, true, true, true, true, null, SpreadsheetApp.BorderStyle.SOLID);
-
-
 
   Logger.log("Reporte semanal generado exitosamente.");
 }
