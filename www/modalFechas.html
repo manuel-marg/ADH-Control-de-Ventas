@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <style>
+      .container {
+        padding: 20px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        font-weight: bold;
+      }
+      input[type="date"] {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        background-color: #4285f4;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #357ae8;
+      }
+      #loading {
+        display: none;
+        text-align: center;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="form-group">
+        <label for="fecha-inicio">Fecha de Inicio</label>
+        <input type="date" id="fecha-inicio">
+      </div>
+      <div class="form-group">
+        <label for="fecha-fin">Fecha de Fin</label>
+        <input type="date" id="fecha-fin">
+      </div>
+      <button id="generar-btn">Generar Reporte</button>
+      <div id="loading">
+        <p>Generando reporte...</p>
+      </div>
+    </div>
+
+    <script>
+      document.getElementById('generar-btn').addEventListener('click', function() {
+        const fechaInicio = document.getElementById('fecha-inicio').value;
+        const fechaFin = document.getElementById('fecha-fin').value;
+
+        if (!fechaInicio || !fechaFin) {
+          alert('Por favor, seleccione ambas fechas.');
+          return;
+        }
+
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('generar-btn').style.display = 'none';
+
+        const fechas = { inicio: fechaInicio, fin: fechaFin };
+
+        google.script.run
+          .withSuccessHandler(function(response) {
+            google.script.host.close();
+            // En el siguiente paso, haremos que esto muestre el nuevo modal con el reporte.
+          })
+          .withFailureHandler(function(error) {
+            alert('Error: ' + error.message);
+            google.script.host.close();
+          })
+          .generarReporteHtml(fechas);
+      });
+    </script>
+  </body>
+</html>
