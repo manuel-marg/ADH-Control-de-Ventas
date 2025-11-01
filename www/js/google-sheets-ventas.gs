@@ -1,7 +1,7 @@
 /* Configuración
  * Reemplaza 'YOUR_SPREADSHEET_ID' con el ID de tu hoja de cálculo
  */
-const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID';
+const SPREADSHEET_ID = '10hKUdLlhUMESPrjjjDvXTmfN6A5HvR7h8hwOW4S5ksA';
 const SHEET_NAME = 'Ventas';
 
 /* Procesa todas las solicitudes GET

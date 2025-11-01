@@ -17,7 +17,7 @@ function abrirModalFechas() {
 }
 
 function generarReporteHtml(fechas) {
-  const SPREADSHEET_ID = '10hKUdLlhUMESPrjjjDvXTmfN6A5HvR7h8hwOW4S5ksA'; // ¡¡¡RECUERDA REEMPLAZAR ESTO!!!
+  
   const SHEET_NAME = 'Ventas';
 
   try {

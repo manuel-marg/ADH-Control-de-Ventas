@@ -67,9 +67,9 @@
             <tr>
               <td><?= ventas[i][0] ?></td>
               <td><?= ventas[i][1] ?></td>
-              <td><?= ventas[i][6] ?></td>
-              <td>$<?= ventas[i][7].toFixed(2) ?></td>
-              <td>Bs. <?= ventas[i][8].toFixed(2) ?></td>
+              <td><?= ventas[i][2] ?></td>
+              <td>$<?= parseFloat(ventas[i][3] || 0).toFixed(2) ?></td>
+              <td>Bs. <?= parseFloat(ventas[i][4] || 0).toFixed(2) ?></td>
             </tr>
           <? } ?>
         </table>
@@ -120,7 +120,7 @@
               <tr>
                 <td><?= cortesias[i][0] ?></td>
                 <td><?= cortesias[i][1] ?></td>
-                <td><?= cortesias[i][6] ?></td>
+                <td><?= cortesias[i][2] ?></td>
               </tr>
             <? } ?>
           </table>
@@ -135,9 +135,9 @@
             <? for (var i = 0; i < pendientes.length; i++) { ?>
               <tr>
                 <td><?= pendientes[i][0] ?></td>
-                <td><?= pendientes[i][10] ?></td>
-                <td><?= pendientes[i][6] ?></td>
-                <td>$<?= pendientes[i][7].toFixed(2) ?></td>
+                <td><?= pendientes[i][1] ?></td>
+                <td><?= pendientes[i][2] ?></td>
+                <td>$<?= parseFloat(pendientes[i][3] || 0).toFixed(2) ?></td>
               </tr>
             <? } ?>
           </table>
