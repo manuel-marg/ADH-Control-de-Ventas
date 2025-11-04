@@ -3,55 +3,46 @@
 <html>
   <head>
     <base target="_top">
-    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
     <style>
-      .container {
-        padding: 20px;
-      }
-      .form-group {
-        margin-bottom: 15px;
-      }
-      label {
-        font-weight: bold;
-      }
-      input[type="date"] {
-        width: 100%;
-        padding: 8px;
-        margin-top: 5px;
-      }
-      button {
-        width: 100%;
-        padding: 10px;
-        background-color: #4285f4;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-      }
-      button:hover {
-        background-color: #357ae8;
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0;
       }
       #loading {
         display: none;
-        text-align: center;
-        margin-top: 10px;
+        margin-top: 15px;
+      }
+      .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <div class="form-group">
-        <label for="fecha-inicio">Fecha de Inicio</label>
-        <input type="date" id="fecha-inicio">
-      </div>
-      <div class="form-group">
-        <label for="fecha-fin">Fecha de Fin</label>
-        <input type="date" id="fecha-fin">
-      </div>
-      <button id="generar-btn">Generar Reporte</button>
-      <div id="loading">
-        <p>Generando reporte...</p>
-      </div>
+    
+    
+    <label for="fecha-inicio">Fecha de Inicio</label>
+    <input type="date" id="fecha-inicio" required>
+    
+    <label for="fecha-fin">Fecha de Fin</label>
+    <input type="date" id="fecha-fin" required>
+    
+    <button id="generar-btn">Generar Reporte</button>
+    
+    <div id="loading">
+      <div class="loader"></div>
     </div>
 
     <script>
@@ -60,6 +51,8 @@
         const fechaFin = document.getElementById('fecha-fin').value;
 
         if (!fechaInicio || !fechaFin) {
+          // Water.css handles basic form validation with 'required', 
+          // but we can keep this as a fallback.
           alert('Por favor, seleccione ambas fechas.');
           return;
         }
@@ -70,9 +63,8 @@
         const fechas = { inicio: fechaInicio, fin: fechaFin };
 
         google.script.run
-          .withSuccessHandler(function(response) {
+          .withSuccessHandler(function() {
             google.script.host.close();
-            // En el siguiente paso, haremos que esto muestre el nuevo modal con el reporte.
           })
           .withFailureHandler(function(error) {
             alert('Error: ' + error.message);
