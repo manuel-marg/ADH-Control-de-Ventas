@@ -20,6 +20,15 @@
       table { width: 100%; border-collapse: collapse; margin-top: 15px; }
       th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
       th { background-color: #f2f2f2; }
+
+      @media print {
+        .tab-container, #export-btn, #loading-pdf {
+          display: none;
+        }
+        .tab-content {
+          display: block !important; /* Make all tabs visible for printing */
+        }
+      }
     </style>
   </head>
   <body>
@@ -51,6 +60,12 @@
         <div class="tab" onclick="openTab(event, 'categorias')">Por Categoría</div>
         <div class="tab" onclick="openTab(event, 'pagos')">Por Método de Pago</div>
         <div class="tab" onclick="openTab(event, 'otros')">Cortesías y Pendientes</div>
+      </div>
+
+      <!-- Botón de Exportar -->
+      <div style="text-align: right; margin-bottom: 20px;">
+        <button id="export-btn" class="action" onclick="exportarPDF()">Exportar a PDF</button>
+        <div id="loading-pdf" style="display: none; margin-top: 10px;">Generando PDF...</div>
       </div>
 
       <div id="resumen" class="tab-content active">
@@ -160,6 +175,25 @@
         }
         document.getElementById(tabName).style.display = "block";
         evt.currentTarget.className += " active";
+      }
+
+      function exportarPDF() {
+        document.getElementById('export-btn').style.display = 'none';
+        document.getElementById('loading-pdf').style.display = 'block';
+
+        const fechas = { 
+          inicio: '<?= fechas.inicio_raw ?>', 
+          fin: '<?= fechas.fin_raw ?>'
+        };
+
+        google.script.run
+          .withSuccessHandler(function(url) {
+            document.getElementById('loading-pdf').innerHTML = '<a href="' + url + '" target="_blank">PDF Generado. Haz clic para abrir.</a>';
+          })
+          .withFailureHandler(function(error) {
+            document.getElementById('loading-pdf').innerHTML = 'Error: ' + error.message;
+          })
+          .exportarReporteAPdf(fechas);
       }
     </script>
   </body>
