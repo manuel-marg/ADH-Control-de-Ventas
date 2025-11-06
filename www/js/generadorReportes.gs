@@ -78,7 +78,8 @@ function _procesarDatosDeVentas(fechas) {
   }
 
   const data = sheet.getDataRange().getValues();
-  data.shift(); // Extraer encabezados
+  const headers = data.shift(); // Extraer encabezados
+  Logger.log('Encabezados de la hoja de Ventas: ' + headers.join(', '));
 
   const fechaInicio = new Date(fechas.inicio);
   const fechaFin = new Date(fechas.fin);
@@ -120,17 +121,20 @@ function _procesarDatosDeVentas(fechas) {
         porCategoria[cat].total += totalUSD / categoriasEnVenta.length;
       });
 
-      const metodo1 = row[2];
-      if (metodo1) {
+      const metodo1 = row[2] ? row[2].trim() : null;
+      const monto1 = parseFloat(row[3]) || 0;
+      if (metodo1 && monto1 > 0) {
         if (!porMetodoPago[metodo1]) porMetodoPago[metodo1] = { count: 0, total: 0 };
         porMetodoPago[metodo1].count++;
-        porMetodoPago[metodo1].total += parseFloat(row[3]) || 0;
+        porMetodoPago[metodo1].total += monto1;
       }
-      const metodo2 = row[4];
-      if (metodo2) {
+      
+      const metodo2 = row[4] ? row[4].trim() : null;
+      const monto2 = parseFloat(row[5]) || 0;
+      if (metodo2 && monto2 > 0) {
         if (!porMetodoPago[metodo2]) porMetodoPago[metodo2] = { count: 0, total: 0 };
         porMetodoPago[metodo2].count++;
-        porMetodoPago[metodo2].total += parseFloat(row[5]) || 0;
+        porMetodoPago[metodo2].total += monto2;
       }
 
     } else if (estado === 'cortesia') {
