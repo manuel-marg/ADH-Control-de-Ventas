@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0;
+      }
+      #loading {
+        display: none;
+        margin-top: 15px;
+      }
+      .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    
+    
+    <label for="fecha-inicio">Fecha de Inicio</label>
+    <input type="date" id="fecha-inicio" required>
+    
+    <label for="fecha-fin">Fecha de Fin</label>
+    <input type="date" id="fecha-fin" required>
+    
+    <button id="generar-btn">Generar Reporte Semanal</button>
+    
+    <div id="loading">
+      <div class="loader"></div>
+    </div>
+
+    <script>
+      document.getElementById('generar-btn').addEventListener('click', function() {
+        const fechaInicio = document.getElementById('fecha-inicio').value;
+        const fechaFin = document.getElementById('fecha-fin').value;
+
+        if (!fechaInicio || !fechaFin) {
+          alert('Por favor, seleccione ambas fechas para el reporte semanal.');
+          return;
+        }
+
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('generar-btn').style.display = 'none';
+
+        const fechas = { inicio: fechaInicio, fin: fechaFin };
+
+        google.script.run
+          .withSuccessHandler(function() {
+            google.script.host.close();
+          })
+          .withFailureHandler(function(error) {
+            alert('Error: ' + error.message);
+            google.script.host.close();
+          })
+          .generarReporteSemanalHtml(fechas);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+  <style>
+    body { font-family: Arial, sans-serif; }
+    .container { padding: 20px; }
+    h2 { color: #4285f4; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+    .category-block { margin-top: 30px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    .total-row { font-weight: bold; background-color: #f2f2f2; }
+    .total-col { font-weight: bold; }
+    .grand-total { font-weight: bold; background-color: #e8e8e8; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Reporte Semanal de Ventas</h2>
+    <p><strong>Período:</strong> <?= fechas.inicio_str ?> - <?= fechas.fin_str ?></p>
+
+    <!-- Botón de Exportar -->
+    <div style="text-align: right; margin-bottom: 20px;">
+      <button id="export-btn" class="action" onclick="exportarPDF()">Exportar a PDF</button>
+      <div id="loading-pdf" style="display: none; margin-top: 10px;">Generando PDF...</div>
+    </div>
+
+    <? if (Object.keys(reporteData).length === 0) { ?>
+      <p>No hay datos de ventas para el período seleccionado.</p>
+    <? } else { ?>
+      <? for (var categoria in reporteData) { ?>
+        <div class="category-block">
+          <table>
+            <thead>
+              <tr>
+                <th colspan="<?= reporteData[categoria].metodosDePago.length + 1 ?>" style="background-color: #8ab4d7; text-align: center; font-weight: bold;"><?= categoria ?></th>
+              </tr>
+              <tr>
+                <th style="background-color: #fcd5b4; font-weight: bold;">Día de la Semana</th>
+                <? for (var i = 0; i < reporteData[categoria].metodosDePago.length; i++) { var metodo = reporteData[categoria].metodosDePago[i]; ?>
+                  <th style="background-color: #fcd5b4; font-weight: bold;"><?= metodo ?></th>
+                <? } ?>
+              </tr>
+            </thead>
+            <tbody>
+              <? for (var dia in reporteData[categoria].dias) { ?>
+                <tr>
+                  <td class="total-col"><?= dia ?></td>
+                  <? for (var i = 0; i < reporteData[categoria].metodosDePago.length; i++) { var metodo = reporteData[categoria].metodosDePago[i]; ?>
+                    <? if (metodo.includes('Bs') || metodo.includes('Punto de venta') || metodo.includes('Pago Movil') || metodo.includes('Efectivo en Bs.')) { ?>
+                      <td><?= (reporteData[categoria].dias[dia][metodo] || 0).toFixed(2) ?> Bs.</td>
+                    <? } else { ?>
+                      <td>$<?= (reporteData[categoria].dias[dia][metodo] || 0).toFixed(2) ?></td>
+                    <? } ?>
+                  <? } ?>
+                </tr>
+              <? } ?>
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td class="grand-total">Total por Método</td>
+                <? for (var i = 0; i < reporteData[categoria].metodosDePago.length; i++) { var metodo = reporteData[categoria].metodosDePago[i]; ?>
+                  <? if (metodo.includes('Bs') || metodo.includes('Punto de venta') || metodo.includes('Pago Movil') || metodo.includes('Efectivo en Bs.')) { ?>
+                    <td class="grand-total"><?= reporteData[categoria].totalesPorMetodo[metodo].toFixed(2) ?> Bs.</td>
+                  <? } else { ?>
+                    <td class="grand-total">$<?= reporteData[categoria].totalesPorMetodo[metodo].toFixed(2) ?></td>
+                  <? } ?>
+                <? } ?>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      <? } ?>
+    <? } ?>
+  </div>
+
+  <script>
+    function exportarPDF() {
+      document.getElementById('export-btn').style.display = 'none';
+      document.getElementById('loading-pdf').style.display = 'block';
+
+      const fechas = { 
+        inicio: '<?= fechas.inicio_raw ?>', 
+        fin: '<?= fechas.fin_raw ?>'
+      };
+
+      google.script.run
+        .withSuccessHandler(function(url) {
+          document.getElementById('loading-pdf').innerHTML = '<a href="' + url + '" target="_blank">PDF Generado. Haz clic para abrir.</a>';
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('loading-pdf').innerHTML = 'Error: ' + error.message;
+        })
+        .exportarReporteSemanalAPdf(fechas);
+    }
+  </script>
+</body>
+</html>
