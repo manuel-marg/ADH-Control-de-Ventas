@@ -42,6 +42,9 @@ function generarReporteSemanalHtml(fechas) {
 
     const template = HtmlService.createTemplateFromFile('reporteSemanal');
     template.reporteData = datosProcesados.reporteData;
+    template.totalesGeneralesPorMetodo = datosProcesados.totalesGeneralesPorMetodo;
+    template.metodosOrdenados = datosProcesados.metodosOrdenados;
+    template.totalesPorMoneda = datosProcesados.totalesPorMoneda;
     template.fechas = datosProcesados.fechas;
     template.fechas.inicio_raw = fechas.inicio;
     template.fechas.fin_raw = fechas.fin;
@@ -62,6 +65,9 @@ function exportarReporteSemanalAPdf(fechas) {
     const datosProcesados = _procesarDatosReporteSemanal(fechas);
     const template = HtmlService.createTemplateFromFile('reporteSemanal');
     template.reporteData = datosProcesados.reporteData;
+    template.totalesGeneralesPorMetodo = datosProcesados.totalesGeneralesPorMetodo;
+    template.metodosOrdenados = datosProcesados.metodosOrdenados;
+    template.totalesPorMoneda = datosProcesados.totalesPorMoneda;
     template.fechas = datosProcesados.fechas;
     template.fechas.inicio_raw = fechas.inicio;
     template.fechas.fin_raw = fechas.fin;
@@ -130,6 +136,9 @@ function _procesarDatosReporteSemanal(fechas) {
     Logger.log('No se encontraron ventas, devolviendo estructura vacía.');
     return { 
       reporteData: {}, 
+      totalesGeneralesPorMetodo: {},
+      metodosOrdenados: metodosOrdenados,
+      totalesPorMoneda: { USD: 0, BS: 0 },
       fechas: {
         inicio_str: fechaInicio.toLocaleDateString(),
         fin_str: fechaFin.toLocaleDateString(),
@@ -238,10 +247,41 @@ function _procesarDatosReporteSemanal(fechas) {
     reporteData[cat].totalGeneral = totalGeneralCat; 
   }
 
+  // Calcular totales generales por método de pago en todas las categorías
+  const totalesGeneralesPorMetodo = {};
+  metodosOrdenados.forEach(metodo => {
+    totalesGeneralesPorMetodo[metodo] = 0;
+  });
+
+  for (const cat in reporteData) {
+    for (const metodo in reporteData[cat].totalesPorMetodo) {
+      if (totalesGeneralesPorMetodo.hasOwnProperty(metodo)) {
+        totalesGeneralesPorMetodo[metodo] += reporteData[cat].totalesPorMetodo[metodo];
+      }
+    }
+  }
+
+  // Calcular totales por moneda
+  const totalesPorMoneda = { USD: 0, BS: 0 };
+  const metodosBs = ['Punto de venta (Bs)', 'Pago Movil', 'Transferencia en Bs.', 'Efectivo en Bs.'];
+
+  for (const metodo in totalesGeneralesPorMetodo) {
+    if (metodosBs.includes(metodo)) {
+      totalesPorMoneda.BS += totalesGeneralesPorMetodo[metodo];
+    } else {
+      totalesPorMoneda.USD += totalesGeneralesPorMetodo[metodo];
+    }
+  }
+
   Logger.log('Reporte final procesado: ' + JSON.stringify(reporteData));
+  Logger.log('Totales generales por método: ' + JSON.stringify(totalesGeneralesPorMetodo));
+  Logger.log('Totales por moneda: ' + JSON.stringify(totalesPorMoneda));
 
   return {
     reporteData,
+    totalesGeneralesPorMetodo,
+    metodosOrdenados,
+    totalesPorMoneda,
     fechas: {
       inicio_str: fechaInicio.toLocaleDateString(),
       fin_str: fechaFin.toLocaleDateString(),

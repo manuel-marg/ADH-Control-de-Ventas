@@ -8,12 +8,19 @@
     .container { padding: 20px; }
     h2 { color: #4285f4; border-bottom: 1px solid #eee; padding-bottom: 5px; }
     .category-block { margin-top: 30px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; table-layout: fixed; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; word-wrap: break-word; }
     th { background-color: #f2f2f2; }
     .total-row { font-weight: bold; background-color: #f2f2f2; }
     .total-col { font-weight: bold; }
     .grand-total { font-weight: bold; background-color: #e8e8e8; }
+    .category-header {
+      background-color: #8ab4d7;
+      text-align: center;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 1.1em;
+    }
   </style>
 </head>
 <body>
@@ -35,7 +42,7 @@
           <table>
             <thead>
               <tr>
-                <th colspan="<?= reporteData[categoria].metodosDePago.length + 1 ?>" style="background-color: #8ab4d7; text-align: center; font-weight: bold;"><?= categoria ?></th>
+                <th colspan="<?= reporteData[categoria].metodosDePago.length + 1 ?>" class="category-header"><?= categoria ?></th>
               </tr>
               <tr>
                 <th style="background-color: #fcd5b4; font-weight: bold;">Día de la Semana</th>
@@ -73,6 +80,54 @@
           </table>
         </div>
       <? } ?>
+
+      <!-- Grand Total Summary Table -->
+      <div class="category-block">
+        <h3>Resumen General de Métodos de Pago</h3>
+        <table style="width: 50%; margin-left: auto; margin-right: auto;">
+          <thead>
+            <tr>
+              <th style="background-color: #8ab4d7; font-weight: bold;">Método de Pago</th>
+              <th style="background-color: #8ab4d7; font-weight: bold;">Monto Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <? for (var i = 0; i < metodosOrdenados.length; i++) { var metodo = metodosOrdenados[i]; ?>
+              <tr>
+                <td class="total-col"><?= metodo ?></td>
+                <? if (metodo.includes('Bs') || metodo.includes('Punto de venta') || metodo.includes('Pago Movil') || metodo.includes('Efectivo en Bs.')) { ?>
+                  <td><?= (totalesGeneralesPorMetodo[metodo] || 0).toFixed(2) ?> Bs.</td>
+                <? } else { ?>
+                  <td>$<?= (totalesGeneralesPorMetodo[metodo] || 0).toFixed(2) ?></td>
+                <? } ?>
+              </tr>
+            <? } ?>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Totals by Currency Table -->
+      <div class="category-block">
+        <h3>Resumen General por Moneda</h3>
+        <table style="width: 50%; margin-left: auto; margin-right: auto;">
+          <thead>
+            <tr>
+              <th style="background-color: #8ab4d7; font-weight: bold;">Moneda</th>
+              <th style="background-color: #8ab4d7; font-weight: bold;">Monto Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="total-col">Dólares (USD)</td>
+              <td>$<?= (totalesPorMoneda.USD || 0).toFixed(2) ?></td>
+            </tr>
+            <tr>
+              <td class="total-col">Bolívares (Bs)</td>
+              <td><?= (totalesPorMoneda.BS || 0).toFixed(2) ?> Bs.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     <? } ?>
   </div>
 

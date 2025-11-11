@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Reporte Semanal de Ventas</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3b82f6", // Blue-500 from Tailwind as a modern primary blue
+                        "background-light": "#f8fafc", // Cool Gray 50
+                        "background-dark": "#1e293b", // Slate 800
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem", // 8px
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200">
+<div class="container mx-auto p-4 sm:p-6 lg:p-8">
+<header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+<div>
+<h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Reporte Semanal de Ventas</h1>
+<p class="mt-1 text-slate-500 dark:text-slate-400">Período: 2/11/2025 - 8/11/2025</p>
+</div>
+<button class="bg-primary hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 mt-4 sm:mt-0 transition-colors duration-200">
+<span class="material-icons-outlined text-xl">picture_as_pdf</span>
+                Exportar a PDF
+            </button>
+</header>
+<main class="space-y-12">
+<section>
+<div class="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-sm text-left">
+<thead class="text-xs uppercase">
+<tr class="bg-blue-400 dark:bg-blue-600">
+<th class="px-6 py-3 text-center text-base font-semibold text-white" colspan="8">
+                                        ROPA
+                                    </th>
+</tr>
+<tr class="bg-orange-200 dark:bg-orange-800 text-orange-800 dark:text-orange-200">
+<th class="px-6 py-3" scope="col">Día de la Semana</th>
+<th class="px-6 py-3 text-right" scope="col">Punto de venta (Bs)</th>
+<th class="px-6 py-3 text-right" scope="col">Efectivo ($)</th>
+<th class="px-6 py-3 text-right" scope="col">Pago Movil</th>
+<th class="px-6 py-3 text-right" scope="col">Transferencia en Bs.</th>
+<th class="px-6 py-3 text-right" scope="col">Efectivo en Bs.</th>
+<th class="px-6 py-3 text-right" scope="col">Zelle</th>
+<th class="px-6 py-3 text-right" scope="col">Transferencia en $</th>
+</tr>
+</thead>
+<tbody class="text-slate-700 dark:text-slate-300">
+<tr class="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+<td class="px-6 py-4 font-medium whitespace-nowrap text-slate-900 dark:text-white">Lunes</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+</tr>
+<tr class="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+<td class="px-6 py-4 font-medium whitespace-nowrap text-slate-900 dark:text-white">Martes</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">$25.00</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+</tr>
+<tr class="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+<td class="px-6 py-4 font-medium whitespace-nowrap text-slate-900 dark:text-white">Miércoles</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+</tr>
+<tr class="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+<td class="px-6 py-4 font-medium whitespace-nowrap text-slate-900 dark:text-white">Jueves</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+</tr>
+<tr class="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+<td class="px-6 py-4 font-medium whitespace-nowrap text-slate-900 dark:text-white">Viernes</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+</tr>
+<tr class="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+<td class="px-6 py-4 font-medium whitespace-nowrap text-slate-900 dark:text-white">Sábado</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+<td class="px-6 py-4 font-medium whitespace-nowrap text-slate-900 dark:text-white">Domingo</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+</tr>
+</tbody>
+<tfoot>
+<tr class="bg-slate-100 dark:bg-slate-900/50 font-bold text-slate-900 dark:text-white">
+<td class="px-6 py-3">Total por Método</td>
+<td class="px-6 py-3 text-right">0.00 Bs.</td>
+<td class="px-6 py-3 text-right">$25.00</td>
+<td class="px-6 py-3 text-right">0.00 Bs.</td>
+<td class="px-6 py-3 text-right">0.00 Bs.</td>
+<td class="px-6 py-3 text-right">0.00 Bs.</td>
+<td class="px-6 py-3 text-right">$0.00</td>
+<td class="px-6 py-3 text-right">$0.00</td>
+</tr>
+</tfoot>
+</table>
+</div>
+</div>
+</section>
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<div>
+<h2 class="text-xl font-semibold mb-4 text-slate-900 dark:text-white">Resumen General de Métodos de Pago</h2>
+<div class="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden">
+<table class="w-full text-sm text-left">
+<thead class="text-xs text-white uppercase bg-blue-400 dark:bg-blue-600">
+<tr>
+<th class="px-6 py-3" scope="col">Método de Pago</th>
+<th class="px-6 py-3 text-right" scope="col">Monto Total</th>
+</tr>
+</thead>
+<tbody class="text-slate-700 dark:text-slate-300">
+<tr class="border-b border-slate-200 dark:border-slate-700">
+<td class="px-6 py-4">Punto de venta (Bs)</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+</tr>
+<tr class="border-b border-slate-200 dark:border-slate-700">
+<td class="px-6 py-4 font-medium text-slate-900 dark:text-white">Efectivo ($)</td>
+<td class="px-6 py-4 text-right font-medium text-slate-900 dark:text-white">$25.00</td>
+</tr>
+<tr class="border-b border-slate-200 dark:border-slate-700">
+<td class="px-6 py-4">Pago Movil</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+</tr>
+<tr class="border-b border-slate-200 dark:border-slate-700">
+<td class="px-6 py-4">Transferencia en Bs.</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+</tr>
+<tr class="border-b border-slate-200 dark:border-slate-700">
+<td class="px-6 py-4">Efectivo en Bs.</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+</tr>
+<tr class="border-b border-slate-200 dark:border-slate-700">
+<td class="px-6 py-4">Zelle</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+</tr>
+<tr>
+<td class="px-6 py-4">Transferencia en $</td>
+<td class="px-6 py-4 text-right">$0.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div>
+<h2 class="text-xl font-semibold mb-4 text-slate-900 dark:text-white">Resumen General por Moneda</h2>
+<div class="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden">
+<table class="w-full text-sm text-left">
+<thead class="text-xs text-white uppercase bg-blue-400 dark:bg-blue-600">
+<tr>
+<th class="px-6 py-3" scope="col">Moneda</th>
+<th class="px-6 py-3 text-right" scope="col">Monto Total</th>
+</tr>
+</thead>
+<tbody class="text-slate-700 dark:text-slate-300">
+<tr class="border-b border-slate-200 dark:border-slate-700">
+<td class="px-6 py-4 font-medium text-slate-900 dark:text-white">Dólares (USD)</td>
+<td class="px-6 py-4 text-right font-medium text-slate-900 dark:text-white">$25.00</td>
+</tr>
+<tr>
+<td class="px-6 py-4">Bolívares (Bs)</td>
+<td class="px-6 py-4 text-right">0.00 Bs.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+</main>
+</div>
+
+</body></html>
