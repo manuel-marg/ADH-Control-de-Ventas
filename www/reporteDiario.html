@@ -1,89 +1,141 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <base target="_top">
-  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
-  <style>
-    body { font-family: Arial, sans-serif; }
-    .container { padding: 20px; }
-    h2 { color: #4285f4; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-    .category-block { margin-top: 30px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
-    .total-row { font-weight: bold; background-color: #f2f2f2; }
-    .total-col { font-weight: bold; }
-    .grand-total { font-weight: bold; background-color: #e8e8e8; }
-  </style>
+    <base target="_top">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Reporte Diario de Ventas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3b82f6", // Blue-500
+                        "background-light": "#f8fafc", // Cool Gray 50
+                        "background-dark": "#1e293b", // Slate 800
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem", // 8px
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Simple loader for PDF generation */
+        #loading-pdf {
+            display: none;
+            margin-top: 10px;
+        }
+    </style>
 </head>
-<body>
-  <div class="container">
-    <h2>Reporte Diario de Ventas</h2>
-    <p><strong>Fecha:</strong> <?= fechas.fecha_str ?></p>
-
-    <!-- Botón de Exportar -->
-    <div style="text-align: right; margin-bottom: 20px;">
-      <button id="export-btn" class="action" onclick="exportarPDF()">Exportar a PDF</button>
-      <div id="loading-pdf" style="display: none; margin-top: 10px;">Generando PDF...</div>
-    </div>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200">
+<div class="mx-auto p-4 sm:p-6 lg:p-8">
+    <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Reporte Diario de Ventas</h1>
+            <p class="mt-1 text-slate-500 dark:text-slate-400">Fecha: <?= fechas.fecha_str ?></p>
+        </div>
+        <div>
+            <button id="export-btn" onclick="exportarPDF()" class="bg-primary hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 mt-4 sm:mt-0 transition-colors duration-200">
+                <span class="material-icons-outlined text-xl">picture_as_pdf</span>
+                Exportar Reporte Diario a PDF
+            </button>
+            <div id="loading-pdf" class="mt-2 text-sm text-slate-600 dark:text-slate-300">Generando PDF...</div>
+        </div>
+    </header>
 
     <? if (Object.keys(reporteData).length === 0) { ?>
-      <p>No hay datos de ventas para la fecha seleccionada.</p>
-    <? } else { ?>
-      <? for (var categoria in reporteData) { ?>
-        <div class="category-block">
-          <table>
-            <thead>
-              <tr>
-                <th colspan="<?= reporteData[categoria].metodosDePago.length + 1 ?>" style="background-color: #8ab4d7; text-align: center;"><?= categoria ?></th>
-              </tr>
-              <tr>
-                <th style="background-color: #fcd5b4;">Método de Pago</th>
-                <? for (var i = 0; i < reporteData[categoria].metodosDePago.length; i++) { var metodo = reporteData[categoria].metodosDePago[i]; ?>
-                  <th style="background-color: #fcd5b4;"><?= metodo ?></th>
-                <? } ?>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="total-col">Monto</td>
-                <? for (var i = 0; i < reporteData[categoria].metodosDePago.length; i++) { var metodo = reporteData[categoria].metodosDePago[i]; ?>
-                  <td>$<?= (reporteData[categoria].totalesPorMetodo[metodo] || 0).toFixed(2) ?></td>
-                <? } ?>
-              </tr>
-            </tbody>
-            <tfoot>
-              <tr class="total-row">
-                <td class="grand-total">Total General</td>
-                <? for (var i = 0; i < reporteData[categoria].metodosDePago.length; i++) { var metodo = reporteData[categoria].metodosDePago[i]; ?>
-                  <td class="grand-total">$<?= reporteData[categoria].totalesPorMetodo[metodo].toFixed(2) ?></td>
-                <? } ?>
-              </tr>
-            </tfoot>
-          </table>
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-md p-8 text-center">
+            <p class="text-slate-500 dark:text-slate-400">No hay datos de ventas para la fecha seleccionada.</p>
         </div>
-      <? } ?>
+    <? } else { ?>
+        <main class="space-y-8">
+            <!-- Sección de Tablas por Categoría -->
+            <? for (var categoria in reporteData) { ?>
+            <section>
+                <div class="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left table-fixed">
+                            <thead class="text-xs uppercase">
+                                <tr class="bg-blue-400 dark:bg-blue-600">
+                                    <th class="px-2 py-1 text-center text-base font-semibold text-white" colspan="<?= reporteData[categoria].metodosDePago.length + 1 ?>">
+                                        <?= categoria ?>
+                                    </th>
+                                </tr>
+                                <tr class="bg-orange-200 dark:bg-orange-800 text-orange-800 dark:text-orange-200">
+                                    <th class="px-2 py-1" scope="col">Método de Pago</th>
+                                    <? for (var i = 0; i < reporteData[categoria].metodosDePago.length; i++) { var metodo = reporteData[categoria].metodosDePago[i]; ?>
+                                        <th class="px-2 py-1 text-right" scope="col"><?= metodo ?></th>
+                                    <? } ?>
+                                </tr>
+                            </thead>
+                            <tbody class="text-slate-700 dark:text-slate-300">
+                                <tr class="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                                    <td class="px-2 py-1 font-medium whitespace-nowrap text-slate-900 dark:text-white">Total</td>
+                                    <? for (var i = 0; i < reporteData[categoria].metodosDePago.length; i++) { var metodo = reporteData[categoria].metodosDePago[i]; ?>
+                                        <td class="px-2 py-1 text-right">
+                                            <? if (metodo.includes('Bs') || metodo.includes('Punto de venta') || metodo.includes('Pago Movil') || metodo.includes('Efectivo en Bs.')) { ?>
+                                                <?= (reporteData[categoria].totalesPorMetodo[metodo] || 0).toFixed(2) ?> Bs.
+                                            <? } else { ?>
+                                                $<?= (reporteData[categoria].totalesPorMetodo[metodo] || 0).toFixed(2) ?>
+                                            <? } ?>
+                                        </td>
+                                    <? } ?>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr class="bg-slate-100 dark:bg-slate-900/50 font-bold text-slate-900 dark:text-white">
+                                    <td class="px-2 py-1">Total General</td>
+                                    <? for (var i = 0; i < reporteData[categoria].metodosDePago.length; i++) { var metodo = reporteData[categoria].metodosDePago[i]; ?>
+                                        <td class="px-2 py-1 text-right">
+                                            <? if (metodo.includes('Bs') || metodo.includes('Punto de venta') || metodo.includes('Pago Movil') || metodo.includes('Efectivo en Bs.')) { ?>
+                                                <?= reporteData[categoria].totalesPorMetodo[metodo].toFixed(2) ?> Bs.
+                                            <? } else { ?>
+                                                $<?= reporteData[categoria].totalesPorMetodo[metodo].toFixed(2) ?>
+                                            <? } ?>
+                                        </td>
+                                    <? } ?>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            <? } ?>
+        </main>
     <? } ?>
-  </div>
+</div>
 
-  <script>
+<script>
     function exportarPDF() {
-      document.getElementById('export-btn').style.display = 'none';
-      document.getElementById('loading-pdf').style.display = 'block';
+        document.getElementById('export-btn').style.display = 'none';
+        document.getElementById('loading-pdf').style.display = 'block';
 
-      const fechas = { 
-        fecha: '<?= fechas.fecha_raw ?>'
-      };
+        const fechas = { 
+            fecha: '<?= fechas.fecha_raw ?>'
+        };
 
-      google.script.run
-        .withSuccessHandler(function(url) {
-          document.getElementById('loading-pdf').innerHTML = '<a href="' + url + '" target="_blank">PDF Generado. Haz clic para abrir.</a>';
-        })
-        .withFailureHandler(function(error) {
-          document.getElementById('loading-pdf').innerHTML = 'Error: ' + error.message;
-        })
-        .exportarReporteDiarioAPdf(fechas);
+        google.script.run
+            .withSuccessHandler(function(url) {
+                document.getElementById('loading-pdf').innerHTML = '<a href="' + url + '" target="_blank" class="text-primary hover:underline">PDF Generado. Haz clic para abrir.</a>';
+            })
+            .withFailureHandler(function(error) {
+                document.getElementById('loading-pdf').innerHTML = '<span class="text-red-500">Error: ' + error.message + '</span>';
+            })
+            .exportarReporteDiarioAPdf(fechas);
     }
-  </script>
+</script>
 </body>
 </html>
