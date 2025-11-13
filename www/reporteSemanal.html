@@ -50,7 +50,7 @@
         <div>
             <button id="export-btn" onclick="exportarPDF()" class="bg-primary hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 mt-4 sm:mt-0 transition-colors duration-200">
                 <span class="material-icons-outlined text-xl">picture_as_pdf</span>
-                Exportar a PDF
+                Exportar Reporte Semanal a PDF
             </button>
             <div id="loading-pdf" class="mt-2 text-sm text-slate-600 dark:text-slate-300">Generando PDF...</div>
         </div>
@@ -62,7 +62,7 @@
         </div>
     <? } else { ?>
         <main class="space-y-12">
-            <!-- Category Tables Section -->
+            <!-- Sección de Tablas por Categoría -->
             <? for (var categoria in reporteData) { ?>
             <section>
                 <div class="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden">
@@ -117,7 +117,7 @@
             </section>
             <? } ?>
 
-            <!-- Summary Tables Section -->
+            <!-- Sección de Tablas de Resumen -->
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div>
                     <h2 class="text-xl font-semibold mb-4 text-slate-900 dark:text-white">Resumen General de Métodos de Pago</h2>

@@ -23,7 +23,7 @@ function abrirModalFechas() {
 function abrirModalFechasSemanal() {
   const html = HtmlService.createHtmlOutputFromFile('modalFechasSemanal')
       .setWidth(400)
-      .setHeight(250);
+      .setHeight(300);
   SpreadsheetApp.getUi().showModalDialog(html, 'Seleccione la Semana del Reporte');
 }
 
@@ -81,8 +81,8 @@ function exportarReporteSemanalAPdf(fechas) {
     return archivoPdf.getUrl();
 
   } catch (e) {
-    Logger.log('Error al exportar a PDF semanal: ' + e.toString());
-    throw new Error('Error al exportar a PDF semanal: ' + e.message);
+    Logger.log('Error al exportar reporte semanal a PDF: ' + e.toString());
+    throw new Error('Error al exportar reporte semanal a PDF: ' + e.message);
   }
 }
 
@@ -120,7 +120,7 @@ function _procesarDatosReporteSemanal(fechas) {
     return fechaVentaAjustada >= fechaInicioAjustada && fechaVentaAjustada <= fechaFinAjustada && row[9] === 'completada';
   });
   
-  Logger.log('Número de ventas completadas en el rango: ' + ventasFiltradas.length);
+  Logger.log('Número de ventas completadas en el rango semanal: ' + ventasFiltradas.length);
 
   const metodosOrdenados = [
     'Punto de venta (Bs)',
@@ -133,15 +133,15 @@ function _procesarDatosReporteSemanal(fechas) {
   ];
 
   if (ventasFiltradas.length === 0) {
-    Logger.log('No se encontraron ventas, devolviendo estructura vacía.');
+    Logger.log('No se encontraron ventas en la semana seleccionada, devolviendo estructura vacía.');
     return { 
       reporteData: {}, 
       totalesGeneralesPorMetodo: {},
       metodosOrdenados: metodosOrdenados,
       totalesPorMoneda: { USD: 0, BS: 0 },
       fechas: {
-        inicio_str: fechaInicio.toLocaleDateString(),
-        fin_str: fechaFin.toLocaleDateString(),
+        inicio_str: fechaInicio.toLocaleDateString('es-ES', {day: '2-digit', month: '2-digit', year: 'numeric'}),
+        fin_str: fechaFin.toLocaleDateString('es-ES', {day: '2-digit', month: '2-digit', year: 'numeric'}),
         inicio_filename: Utilities.formatDate(fechaInicio, Session.getScriptTimeZone(), "yyyy-MM-dd"),
         fin_filename: Utilities.formatDate(fechaFin, Session.getScriptTimeZone(), "yyyy-MM-dd")
       }
@@ -151,16 +151,16 @@ function _procesarDatosReporteSemanal(fechas) {
   const reporteData = {};
   const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
-  // Procesar cada venta y organizar los datos
+  // Procesar cada venta y organizar los datos según día de la semana
   ventasFiltradas.forEach(row => {
     const fechaVenta = new Date(row[0]);
     const diaSemana = diasSemana[fechaVenta.getDay()];
     
-    // Mejorar el manejo de categorías de productos
+    // Manejar las categorías de productos de la venta
     const productosStr = row[6] || '';
     let categoriasEnVenta = [];
     
-    // Validar que la cadena de productos no esté vacía antes de procesarla
+    // Verificar que la cadena de productos exista antes de procesarla
     if (productosStr && typeof productosStr === 'string') {
       // Extraer categorías entre paréntesis
       categoriasEnVenta = [...productosStr.matchAll(/\(([^)]+)\)/g)].map(match => match[1].trim());
@@ -168,7 +168,7 @@ function _procesarDatosReporteSemanal(fechas) {
       categoriasEnVenta = categoriasEnVenta.filter(cat => cat && cat.length > 0);
     }
     
-    // Si no hay categorías válidas, usar una categoría por defecto
+    // Si no hay categorías válidas, usar una categoría genérica
     const numCategorias = categoriasEnVenta.length || 1;
 
     // Procesar los dos métodos de pago posibles
@@ -177,13 +177,13 @@ function _procesarDatosReporteSemanal(fechas) {
       { metodo: row[4] ? row[4].toString().trim() : null, monto: parseFloat(row[5]) || 0 }
     ];
 
-    // Validar que los métodos de pago sean válidos antes de procesar
+    // Procesar solo métodos de pago válidos
     pagos.forEach(pago => {
       if (pago.metodo && pago.monto > 0 && metodosOrdenados.includes(pago.metodo)) {
         // Distribuir el pago entre las categorías
         const montoPorCategoria = pago.monto / numCategorias;
         
-        // Si no hay categorías específicas, crear una genérica
+        // Si no hay categorías específicas, usar una genérica
         if (categoriasEnVenta.length === 0) {
           categoriasEnVenta = ['Ventas Generales'];
         }
@@ -213,12 +213,12 @@ function _procesarDatosReporteSemanal(fechas) {
 
   const diasOrdenados = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
-  // Finalizar el procesamiento organizando los datos por categorías
+  // Finalizar el procesamiento organizando los datos por categorías y días
   for (const cat in reporteData) {
     reporteData[cat].metodosDePago = metodosOrdenados;
     const diasTemp = {};
 
-    // Organizar los días en orden correcto
+    // Organizar los días en orden lógico (lunes a domingo)
     diasOrdenados.forEach(dia => {
       diasTemp[dia] = reporteData[cat].dias[dia] || {};
       metodosOrdenados.forEach(metodo => {
@@ -273,7 +273,7 @@ function _procesarDatosReporteSemanal(fechas) {
     }
   }
 
-  Logger.log('Reporte final procesado: ' + JSON.stringify(reporteData));
+  Logger.log('Reporte semanal final procesado: ' + JSON.stringify(reporteData));
   Logger.log('Totales generales por método: ' + JSON.stringify(totalesGeneralesPorMetodo));
   Logger.log('Totales por moneda: ' + JSON.stringify(totalesPorMoneda));
 
@@ -283,8 +283,8 @@ function _procesarDatosReporteSemanal(fechas) {
     metodosOrdenados,
     totalesPorMoneda,
     fechas: {
-      inicio_str: fechaInicio.toLocaleDateString(),
-      fin_str: fechaFin.toLocaleDateString(),
+      inicio_str: fechaInicio.toLocaleDateString('es-ES', {day: '2-digit', month: '2-digit', year: 'numeric'}),
+      fin_str: fechaFin.toLocaleDateString('es-ES', {day: '2-digit', month: '2-digit', year: 'numeric'}),
       inicio_filename: Utilities.formatDate(fechaInicio, Session.getScriptTimeZone(), "yyyy-MM-dd"),
       fin_filename: Utilities.formatDate(fechaFin, Session.getScriptTimeZone(), "yyyy-MM-dd")
     }
