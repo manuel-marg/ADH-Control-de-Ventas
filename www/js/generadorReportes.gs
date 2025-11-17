@@ -351,34 +351,33 @@ function _procesarDatosReporteDiario(fechas) {
   const headers = data.shift(); // Quitar encabezados y guardarlos
   Logger.log('Encabezados de la hoja de Ventas: ' + headers.join(', '));
 
+  // Crear un objeto Date que evite problemas de zona horaria
+  // al interpretar 'YYYY-MM-DD' como UTC.
+  const [year, month, day] = fechas.fecha.split('-').map(Number);
+  // Usamos new Date(year, month-1, day) para construir la fecha en la zona horaria del script,
+  // lo que previene el desfase de un día.
+  const fechaSeleccionada = new Date(year, month - 1, day);
+
   // Función para crear una clave de fecha consistente para comparación
   function createFechaKey(fecha) {
     let date;
-    if (typeof fecha === 'string') {
-      // Crear fecha asumiendo que la cadena YYYY-MM-DD representa la fecha local
-      // Dividir la cadena por guiones y extraer los componentes
-      const [year, month, day] = fecha.split('-').map(Number);
-      date = new Date(year, month - 1, day); // month está 0-indexado en JS
-    } else if (fecha instanceof Date) {
+    if (fecha instanceof Date) {
       date = fecha;
     } else {
+      // Fallback para strings u otros tipos, aunque la mayoría de las fechas de la hoja son objetos Date
       date = new Date(fecha);
     }
     
-    // Extraer componentes de la fecha para evitar problemas de zona horaria
+    // Extraer componentes de la fecha para evitar problemas de zona horaria en la comparación
     const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0'); // month está 0-indexado
+    const m = String(date.getMonth() + 1).padStart(2, '0');
     const d = String(date.getDate()).padStart(2, '0');
     
     return `${y}-${m}-${d}`;
   }
 
-  // Crear la fecha objetivo para comparación
-  const fechaObjetivo = createFechaKey(fechas.fecha);
+  const fechaObjetivo = createFechaKey(fechaSeleccionada);
   
-  // Mantener la variable fechaSeleccionada para su uso posterior en la devolución
-  const fechaSeleccionada = new Date(fechas.fecha);
-
   const ventasFiltradas = data.filter(row => {
     // La columna 0 contiene la fecha de la venta
     const fechaVentaKey = createFechaKey(row[0]);
@@ -397,14 +396,16 @@ function _procesarDatosReporteDiario(fechas) {
     'Transferencia en $'
   ];
 
+  const fechasParaReporte = {
+      fecha_str: fechaSeleccionada.toLocaleDateString('es-ES', {day: '2-digit', month: '2-digit', year: 'numeric'}),
+      fecha_filename: Utilities.formatDate(fechaSeleccionada, Session.getScriptTimeZone(), "yyyy-MM-dd")
+  };
+
   if (ventasFiltradas.length === 0) {
     Logger.log('No se encontraron ventas, devolviendo estructura vacía.');
     return { 
       reporteData: {}, 
-      fechas: {
-        fecha_str: fechaSeleccionada.toLocaleDateString('es-ES', {day: '2-digit', month: '2-digit', year: 'numeric'}),
-        fecha_filename: Utilities.formatDate(fechaSeleccionada, Session.getScriptTimeZone(), "yyyy-MM-dd")
-      }
+      fechas: fechasParaReporte
     };
   }
 
@@ -483,12 +484,8 @@ function _procesarDatosReporteDiario(fechas) {
 
   return {
     reporteData,
-    fechas: {
-      fecha_str: _formatearFechaComoCadena(fechas.fecha),
-      fecha_filename: fechas.fecha  // Mantener el formato YYYY-MM-DD original
-    }
+    fechas: fechasParaReporte
   };
-}
 }
 
 // --- Fin de Funciones para el Reporte Diario ---
