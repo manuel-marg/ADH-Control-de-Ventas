@@ -4,7 +4,7 @@
     <base target="_top">
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Seleccionar Semana para Reporte</title>
+    <title>Seleccionar Semana y Categorías para Reporte</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script>
@@ -45,47 +45,104 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+
+        .categorias-container {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            background-color: white;
+        }
+
+        .categorias-container.dark {
+            border-color: #4b5563;
+            background-color: #374151;
+        }
     </style>
   </head>
   <body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200 p-6">
     <div class="w-full max-w-md mx-auto">
-      <h1 class="text-xl font-bold text-slate-900 dark:text-white mb-6">Seleccione la Semana para el Reporte</h1>
-      
+      <h1 class="text-xl font-bold text-slate-900 dark:text-white mb-6">Seleccione la Semana y Categorías para el Reporte</h1>
+
       <div class="space-y-4">
         <div>
           <label for="fecha-semana" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Fecha dentro de la semana</label>
-          <input 
-            type="date" 
-            id="fecha-semana" 
+          <input
+            type="date"
+            id="fecha-semana"
             required
             class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-slate-700 dark:text-white"
           >
         </div>
-        
-        <button 
-          id="seleccionar-semana-btn" 
+
+        <button
+          id="seleccionar-semana-btn"
           class="w-full bg-primary hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
         >
           Seleccionar Semana
         </button>
       </div>
-      
+
       <div id="fechas-seleccionadas" class="mt-6 space-y-4" style="display:none;">
         <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4">
           <p class="text-slate-700 dark:text-slate-300">
             Reporte para la semana del: <span id="fecha-inicio-display" class="font-medium"></span> al <span id="fecha-fin-display" class="font-medium"></span>
           </p>
         </div>
-        <button 
-          id="generar-btn" 
+
+        <button
+          id="cargar-categorias-btn"
+          class="w-full bg-primary hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
+        >
+          Cargar Categorías Disponibles
+        </button>
+      </div>
+
+      <div id="seleccion-categorias" class="mt-4 space-y-4" style="display:none;">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Seleccione las Categorías</label>
+          <div id="categorias-container" class="categorias-container dark:bg-slate-700 dark:border-slate-600">
+            <!-- Las categorías se cargarán aquí dinámicamente -->
+          </div>
+        </div>
+
+        <div class="flex space-x-3">
+          <button
+            id="seleccionar-todas-btn"
+            class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-1 px-3 rounded-md transition-colors duration-200 text-sm"
+          >
+            Seleccionar Todas
+          </button>
+          <button
+            id="deseleccionar-todas-btn"
+            class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-1 px-3 rounded-md transition-colors duration-200 text-sm"
+          >
+            Deseleccionar Todas
+          </button>
+        </div>
+
+        <button
+          id="generar-btn"
           class="w-full bg-primary hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
         >
           Generar Reporte Semanal
         </button>
       </div>
-      
+
       <div id="loading" class="mt-6 flex justify-center" style="display:none;">
         <div class="loader"></div>
+        <span class="ml-2">Cargando categorías...</span>
       </div>
     </div>
 
@@ -94,12 +151,12 @@
       function getWeekRange(fecha) {
         // Dividir la fecha en partes para manejarla como fecha local
         const [year, month, day] = fecha.split('-').map(Number);
-        
+
         // Crear una fecha en el huso horario local para evitar desplazamientos
         const date = new Date(year, month - 1, day); // month - 1 porque en JS los meses van de 0-11
-        
+
         const dayOfWeek = date.getDay(); // 0 = domingo, 1 = lunes, ..., 6 = sábado
-        
+
         // Calcular cuántos días retroceder para llegar al lunes de la misma semana
         let diffToMonday;
         if (dayOfWeek === 0) { // Es domingo
@@ -107,12 +164,12 @@
         } else {
           diffToMonday = 1 - dayOfWeek; // Retroceder (dayOfWeek - 1) días para llegar al lunes
         }
-        
+
         const monday = new Date(year, month - 1, day + diffToMonday);
-        
+
         const sunday = new Date(monday);
         sunday.setDate(monday.getDate() + 6);
-        
+
         return { lunes: monday, domingo: sunday };
       }
 
@@ -149,23 +206,116 @@
         document.getElementById('seleccionar-semana-btn').style.display = 'none';
         document.getElementById('fecha-semana').style.display = 'none';
 
-        // Agregar evento al botón de generar reporte
-        document.getElementById('generar-btn').addEventListener('click', function() {
+        // Agregar evento al botón de cargar categorías
+        document.getElementById('cargar-categorias-btn').addEventListener('click', function() {
           document.getElementById('loading').style.display = 'flex';
-          document.getElementById('generar-btn').style.display = 'none';
+          document.getElementById('cargar-categorias-btn').style.display = 'none';
 
-          const fechas = { inicio: fechaInicio, fin: fechaFin };
-
+          // Llamar a la función de Google Apps Script para obtener categorías
           google.script.run
-            .withSuccessHandler(function() {
-              google.script.host.close();
+            .withSuccessHandler(function(categorias) {
+              document.getElementById('loading').style.display = 'none';
+              document.getElementById('seleccion-categorias').style.display = 'block';
+
+              const container = document.getElementById('categorias-container');
+              container.innerHTML = '';
+
+              if (categorias && categorias.length > 0) {
+                categorias.forEach(function(categoria) {
+                  const div = document.createElement('div');
+                  div.className = 'checkbox-container';
+
+                  const checkbox = document.createElement('input');
+                  checkbox.type = 'checkbox';
+                  checkbox.id = 'cat-' + categoria;
+                  checkbox.value = categoria;
+                  checkbox.checked = true; // Seleccionar todas por defecto
+                  checkbox.className = 'rounded text-blue-600 border-gray-300 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700';
+
+                  const label = document.createElement('label');
+                  label.htmlFor = 'cat-' + categoria;
+                  label.textContent = categoria;
+                  label.className = 'text-sm text-slate-700 dark:text-slate-300';
+
+                  div.appendChild(checkbox);
+                  div.appendChild(label);
+                  container.appendChild(div);
+                });
+              } else {
+                container.innerHTML = '<p class="text-sm text-slate-500 dark:text-slate-400">No hay categorías disponibles para esta semana.</p>';
+              }
             })
             .withFailureHandler(function(error) {
-              alert('Error: ' + error.message);
-              google.script.host.close();
+              document.getElementById('loading').style.display = 'none';
+              document.getElementById('cargar-categorias-btn').style.display = 'block';
+              alert('Error al cargar categorías: ' + error.message);
             })
-            .generarReporteSemanalHtml(fechas);
+            .getCategoriasDisponibles(fechaInicio, fechaFin);
         });
+      });
+
+      document.getElementById('seleccionar-todas-btn').addEventListener('click', function() {
+        const checkboxes = document.querySelectorAll('#categorias-container input[type="checkbox"]');
+        checkboxes.forEach(function(checkbox) {
+          checkbox.checked = true;
+        });
+      });
+
+      document.getElementById('deseleccionar-todas-btn').addEventListener('click', function() {
+        const checkboxes = document.querySelectorAll('#categorias-container input[type="checkbox"]');
+        checkboxes.forEach(function(checkbox) {
+          checkbox.checked = false;
+        });
+      });
+
+      document.getElementById('generar-btn').addEventListener('click', function() {
+        // Obtener fechas desde los elementos HTML donde se mostraron
+        const fechaInicioDisplay = document.getElementById('fecha-inicio-display').textContent;
+        const fechaFinDisplay = document.getElementById('fecha-fin-display').textContent;
+
+        // Convertir fechas de DD/MM/YYYY a YYYY-MM-DD
+        // Ambas fechas ya están en formato DD/MM/YYYY gracias al script anterior
+        const fechaInicioArray = fechaInicioDisplay.split('/');
+        const fechaFinArray = fechaFinDisplay.split('/');
+
+        const fechaInicioFormato = `${fechaInicioArray[2]}-${fechaInicioArray[1]}-${fechaInicioArray[0]}`;
+        const fechaFinFormato = `${fechaFinArray[2]}-${fechaFinArray[1]}-${fechaFinArray[0]}`;
+
+        // Obtener categorías seleccionadas
+        const categoriasSeleccionadas = [];
+        const checkboxes = document.querySelectorAll('#categorias-container input[type="checkbox"]:checked');
+        checkboxes.forEach(function(checkbox) {
+          categoriasSeleccionadas.push(checkbox.value);
+        });
+
+        // Si no hay categorías seleccionadas y hay categorías disponibles, mostrar advertencia
+        const allCheckboxes = document.querySelectorAll('#categorias-container input[type="checkbox"]');
+        if (allCheckboxes.length > 0 && categoriasSeleccionadas.length === 0) {
+          if (!confirm('No ha seleccionado ninguna categoría. ¿Desea generar el reporte sin categorías?')) {
+            return;
+          }
+        }
+
+        document.getElementById('loading').style.display = 'flex';
+        document.getElementById('generar-btn').style.display = 'none';
+
+        const fechas = {
+          inicio: fechaInicioFormato,
+          fin: fechaFinFormato,
+          categoriasSeleccionadas: categoriasSeleccionadas
+        };
+
+        google.script.run
+          .withSuccessHandler(function() {
+            google.script.host.close();
+          })
+          .withFailureHandler(function(error) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('generar-btn').style.display = 'block';
+            alert('Error: ' + error.message);
+            google.script.host.close();
+          })
+          .generarReporteSemanalHtml(fechas);
       });
     </script>
   </body>
