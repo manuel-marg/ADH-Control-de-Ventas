@@ -5,17 +5,9 @@
 function onOpen() {
   SpreadsheetApp.getUi()
       .createMenu('Reportes')
-      .addItem('Generar Reporte Personalizado', 'abrirModalFechas')
       .addItem('Generar Reporte Semanal', 'abrirModalFechasSemanal')
-      .addItem('Generar Reporte Diario', 'abrirModalFechasDiario')
+      .addItem('Generar Reporte de un Día', 'abrirModalFechasDiario')
       .addToUi();
-}
-
-function abrirModalFechas() {
-  const html = HtmlService.createHtmlOutputFromFile('modalFechas')
-      .setWidth(400)
-      .setHeight(250);
-  SpreadsheetApp.getUi().showModalDialog(html, 'Seleccione las Fechas del Reporte');
 }
 
 // --- Funciones para el Reporte Semanal ---
@@ -115,11 +107,11 @@ function _procesarDatosReporteSemanal(fechas) {
     fechaInicioAjustada.setHours(0, 0, 0, 0);
     const fechaFinAjustada = new Date(fechaFin);
     fechaFinAjustada.setHours(0, 0, 0, 0);
-    
+
     // Comparar solo la parte de la fecha (no la hora)
     return fechaVentaAjustada >= fechaInicioAjustada && fechaVentaAjustada <= fechaFinAjustada && row[9] === 'completada';
   });
-  
+
   Logger.log('Número de ventas completadas en el rango semanal: ' + ventasFiltradas.length);
 
   const metodosOrdenados = [
@@ -134,8 +126,8 @@ function _procesarDatosReporteSemanal(fechas) {
 
   if (ventasFiltradas.length === 0) {
     Logger.log('No se encontraron ventas en la semana seleccionada, devolviendo estructura vacía.');
-    return { 
-      reporteData: {}, 
+    return {
+      reporteData: {},
       totalesGeneralesPorMetodo: {},
       metodosOrdenados: metodosOrdenados,
       totalesPorMoneda: { USD: 0, BS: 0 },
@@ -155,11 +147,11 @@ function _procesarDatosReporteSemanal(fechas) {
   ventasFiltradas.forEach(row => {
     const fechaVenta = new Date(row[0]);
     const diaSemana = diasSemana[fechaVenta.getDay()];
-    
+
     // Manejar las categorías de productos de la venta
     const productosStr = row[6] || '';
     let categoriasEnVenta = [];
-    
+
     // Verificar que la cadena de productos exista antes de procesarla
     if (productosStr && typeof productosStr === 'string') {
       // Extraer categorías entre paréntesis
@@ -167,7 +159,7 @@ function _procesarDatosReporteSemanal(fechas) {
       // Filtrar categorías vacías
       categoriasEnVenta = categoriasEnVenta.filter(cat => cat && cat.length > 0);
     }
-    
+
     // Si no hay categorías válidas, usar una categoría genérica
     const numCategorias = categoriasEnVenta.length || 1;
 
@@ -182,12 +174,12 @@ function _procesarDatosReporteSemanal(fechas) {
       if (pago.metodo && pago.monto > 0 && metodosOrdenados.includes(pago.metodo)) {
         // Distribuir el pago entre las categorías
         const montoPorCategoria = pago.monto / numCategorias;
-        
+
         // Si no hay categorías específicas, usar una genérica
         if (categoriasEnVenta.length === 0) {
           categoriasEnVenta = ['Ventas Generales'];
         }
-        
+
         categoriasEnVenta.forEach(cat => {
           // Inicializar la estructura de datos para la categoría si no existe
           if (!reporteData[cat]) {
@@ -203,7 +195,7 @@ function _procesarDatosReporteSemanal(fechas) {
           if (!reporteData[cat].dias[diaSemana][pago.metodo]) {
             reporteData[cat].dias[diaSemana][pago.metodo] = 0;
           }
-          
+
           // Sumar el monto al método de pago correspondiente
           reporteData[cat].dias[diaSemana][pago.metodo] += montoPorCategoria;
         });
@@ -230,7 +222,7 @@ function _procesarDatosReporteSemanal(fechas) {
     // Calcular totales por método de pago
     reporteData[cat].totalesPorMetodo = {};
     metodosOrdenados.forEach(metodo => reporteData[cat].totalesPorMetodo[metodo] = 0);
-    let totalGeneralCat = 0; 
+    let totalGeneralCat = 0;
 
     // Sumar los montos por método de pago para obtener totales
     diasOrdenados.forEach(dia => {
@@ -239,12 +231,12 @@ function _procesarDatosReporteSemanal(fechas) {
         reporteData[cat].totalesPorMetodo[metodo] += valor;
       });
     });
-    
+
     // Calcular total general por categoría sumando los totales por método
     metodosOrdenados.forEach(metodo => {
       totalGeneralCat += reporteData[cat].totalesPorMetodo[metodo];
     });
-    reporteData[cat].totalGeneral = totalGeneralCat; 
+    reporteData[cat].totalGeneral = totalGeneralCat;
   }
 
   // Calcular totales generales por método de pago en todas las categorías
@@ -293,7 +285,7 @@ function _procesarDatosReporteSemanal(fechas) {
 
 // --- Fin de Funciones para el Reporte Semanal ---
 
-// --- Funciones para el Reporte Diario ---
+// --- Funciones para el Reporte Diario (de un día específico) ---
 
 function generarReporteDiarioHtml(fechas) {
   Logger.log('Iniciando generarReporteDiarioHtml con fechas: ' + JSON.stringify(fechas));
@@ -303,17 +295,20 @@ function generarReporteDiarioHtml(fechas) {
 
     const template = HtmlService.createTemplateFromFile('reporteDiario');
     template.reporteData = datosProcesados.reporteData;
+    template.totalesGeneralesPorMetodo = datosProcesados.totalesGeneralesPorMetodo;
+    template.metodosOrdenados = datosProcesados.metodosOrdenados;
+    template.totalesPorMoneda = datosProcesados.totalesPorMoneda;
     template.fechas = datosProcesados.fechas;
     template.fechas.fecha_raw = fechas.fecha;
 
     const htmlOutput = template.evaluate().setWidth(1000).setHeight(700);
-    SpreadsheetApp.getUi().showModalDialog(htmlOutput, `Reporte Diario de Ventas (${template.fechas.fecha_str})`);
+    SpreadsheetApp.getUi().showModalDialog(htmlOutput, `Reporte de Ventas de un Día (${template.fechas.fecha_str})`);
 
   } catch (e) {
     Logger.log('--- ERROR CATCHED en generarReporteDiarioHtml ---');
     Logger.log(e);
     Logger.log('---------------------------------------------');
-    SpreadsheetApp.getUi().alert('Error al generar el reporte diario: ' + e.message);
+    SpreadsheetApp.getUi().alert('Error al generar el reporte de un día: ' + e.message);
   }
 }
 
@@ -322,20 +317,23 @@ function exportarReporteDiarioAPdf(fechas) {
     const datosProcesados = _procesarDatosReporteDiario(fechas);
     const template = HtmlService.createTemplateFromFile('reporteDiario');
     template.reporteData = datosProcesados.reporteData;
+    template.totalesGeneralesPorMetodo = datosProcesados.totalesGeneralesPorMetodo;
+    template.metodosOrdenados = datosProcesados.metodosOrdenados;
+    template.totalesPorMoneda = datosProcesados.totalesPorMoneda;
     template.fechas = datosProcesados.fechas;
     template.fechas.fecha_raw = fechas.fecha;
 
     const htmlParaPdf = template.evaluate().getContent();
 
-    const blob = Utilities.newBlob(htmlParaPdf, 'text/html', 'Reporte Diario.html').getAs('application/pdf');
-    const nombreArchivo = `Reporte Diario (${datosProcesados.fechas.fecha_filename}).pdf`;
+    const blob = Utilities.newBlob(htmlParaPdf, 'text/html', 'Reporte de un Dia.html').getAs('application/pdf');
+    const nombreArchivo = `Reporte de un Dia (${datosProcesados.fechas.fecha_filename}).pdf`;
     const archivoPdf = DriveApp.createFile(blob).setName(nombreArchivo);
 
     return archivoPdf.getUrl();
 
   } catch (e) {
-    Logger.log('Error al exportar a PDF diario: ' + e.toString());
-    throw new Error('Error al exportar a PDF diario: ' + e.message);
+    Logger.log('Error al exportar reporte de un día a PDF: ' + e.toString());
+    throw new Error('Error al exportar reporte de un día a PDF: ' + e.message);
   }
 }
 
@@ -367,17 +365,17 @@ function _procesarDatosReporteDiario(fechas) {
       // Fallback para strings u otros tipos, aunque la mayoría de las fechas de la hoja son objetos Date
       date = new Date(fecha);
     }
-    
+
     // Extraer componentes de la fecha para evitar problemas de zona horaria en la comparación
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');
     const d = String(date.getDate()).padStart(2, '0');
-    
+
     return `${y}-${m}-${d}`;
   }
 
   const fechaObjetivo = createFechaKey(fechaSeleccionada);
-  
+
   const ventasFiltradas = data.filter(row => {
     // La columna 0 contiene la fecha de la venta
     const fechaVentaKey = createFechaKey(row[0]);
@@ -403,8 +401,11 @@ function _procesarDatosReporteDiario(fechas) {
 
   if (ventasFiltradas.length === 0) {
     Logger.log('No se encontraron ventas, devolviendo estructura vacía.');
-    return { 
-      reporteData: {}, 
+    return {
+      reporteData: {},
+      totalesGeneralesPorMetodo: {},
+      metodosOrdenados: metodosOrdenados,
+      totalesPorMoneda: { USD: 0, BS: 0 },
       fechas: fechasParaReporte
     };
   }
@@ -415,7 +416,7 @@ function _procesarDatosReporteDiario(fechas) {
     // Manejar las categorías de productos de la venta
     const productosStr = row[6] || '';
     let categoriasEnVenta = [];
-    
+
     // Validar que la cadena de productos exista antes de procesarla
     if (productosStr && typeof productosStr === 'string') {
       // Extraer categorías entre paréntesis
@@ -423,7 +424,7 @@ function _procesarDatosReporteDiario(fechas) {
       // Filtrar categorías vacías
       categoriasEnVenta = categoriasEnVenta.filter(cat => cat && cat.length > 0);
     }
-    
+
     // Si no hay categorías válidas, usar una categoría genérica
     const numCategorias = categoriasEnVenta.length || 1;
 
@@ -438,12 +439,12 @@ function _procesarDatosReporteDiario(fechas) {
       if (pago.metodo && pago.monto > 0 && metodosOrdenados.includes(pago.metodo)) {
         // Distribuir el pago entre las categorías
         const montoPorCategoria = pago.monto / numCategorias;
-        
+
         // Si no hay categorías específicas, usar una genérica
         if (categoriasEnVenta.length === 0) {
           categoriasEnVenta = ['Ventas Generales'];
         }
-        
+
         categoriasEnVenta.forEach(cat => {
           // Inicializar la estructura de datos para la categoría si no existe
           if (!reporteData[cat]) {
@@ -454,7 +455,7 @@ function _procesarDatosReporteDiario(fechas) {
           if (!reporteData[cat].totalesPorMetodo[pago.metodo]) {
             reporteData[cat].totalesPorMetodo[pago.metodo] = 0;
           }
-          
+
           // Sumar el monto al método de pago correspondiente
           reporteData[cat].totalesPorMetodo[pago.metodo] += montoPorCategoria;
         });
@@ -464,7 +465,7 @@ function _procesarDatosReporteDiario(fechas) {
 
   for (const cat in reporteData) {
     reporteData[cat].metodosDePago = metodosOrdenados;
-    
+
     // Asegurar que todos los métodos de pago estén presentes aunque tengan valor 0
     metodosOrdenados.forEach(metodo => {
       if (!reporteData[cat].totalesPorMetodo[metodo]) {
@@ -480,158 +481,43 @@ function _procesarDatosReporteDiario(fechas) {
     reporteData[cat].totalGeneral = totalGeneralCat;
   }
 
+  // Calcular totales generales por método de pago en todas las categorías
+  const totalesGeneralesPorMetodo = {};
+  metodosOrdenados.forEach(metodo => {
+    totalesGeneralesPorMetodo[metodo] = 0;
+  });
+
+  for (const cat in reporteData) {
+    for (const metodo in reporteData[cat].totalesPorMetodo) {
+      if (totalesGeneralesPorMetodo.hasOwnProperty(metodo)) {
+        totalesGeneralesPorMetodo[metodo] += reporteData[cat].totalesPorMetodo[metodo];
+      }
+    }
+  }
+
+  // Calcular totales por moneda
+  const totalesPorMoneda = { USD: 0, BS: 0 };
+  const metodosBs = ['Punto de venta (Bs)', 'Pago Movil', 'Transferencia en Bs.', 'Efectivo en Bs.'];
+
+  for (const metodo in totalesGeneralesPorMetodo) {
+    if (metodosBs.includes(metodo)) {
+      totalesPorMoneda.BS += totalesGeneralesPorMetodo[metodo];
+    } else {
+      totalesPorMoneda.USD += totalesGeneralesPorMetodo[metodo];
+    }
+  }
+
   Logger.log('Reporte diario final procesado: ' + JSON.stringify(reporteData));
+  Logger.log('Totales generales por método: ' + JSON.stringify(totalesGeneralesPorMetodo));
+  Logger.log('Totales por moneda: ' + JSON.stringify(totalesPorMoneda));
 
   return {
     reporteData,
+    totalesGeneralesPorMetodo,
+    metodosOrdenados,
+    totalesPorMoneda,
     fechas: fechasParaReporte
   };
 }
 
 // --- Fin de Funciones para el Reporte Diario ---
-
-function generarReporteHtml(fechas) {
-  
-  try {    
-    const datosProcesados = _procesarDatosDeVentas(fechas);
-
-    const template = HtmlService.createTemplateFromFile('modalReporte');
-    template.fechas = datosProcesados.fechas;
-    template.fechas.inicio_raw = fechas.inicio;
-    template.fechas.fin_raw = fechas.fin;
-    template.kpis = datosProcesados.kpis;
-    template.ventas = datosProcesados.ventasCompletadas.map(v => [new Date(v[0]).toLocaleString(), v[1], v[6], v[7], v[8]]);
-    template.porCategoria = datosProcesados.porCategoria;
-    template.porMetodoPago = datosProcesados.porMetodoPago;
-    template.cortesias = datosProcesados.cortesias.map(c => [new Date(c[0]).toLocaleString(), c[1], c[6]]);
-    template.pendientes = datosProcesados.pendientes.map(p => [new Date(p[0]).toLocaleString(), p[10], p[6], p[7]]);
-
-    const htmlOutput = template.evaluate().setWidth(800).setHeight(600);
-    SpreadsheetApp.getUi().showModalDialog(htmlOutput, `Reporte de Ventas (${template.fechas.inicio_str} - ${template.fechas.fin_str})`);
-
-  } catch (e) {
-    Logger.log('Error: ' + e.toString());
-    SpreadsheetApp.getUi().alert('Error al generar el reporte: ' + e.message);
-  }
-}
-
-function exportarReporteAPdf(fechas) {
-  try {
-    const datosProcesados = _procesarDatosDeVentas(fechas);
-    const template = HtmlService.createTemplateFromFile('modalReporte');
-    template.fechas = datosProcesados.fechas;
-    template.fechas.inicio_raw = fechas.inicio;
-    template.fechas.fin_raw = fechas.fin;
-    template.kpis = datosProcesados.kpis;
-    template.ventas = datosProcesados.ventasCompletadas.map(v => [new Date(v[0]).toLocaleString(), v[1], v[6], v[7], v[8]]);
-    template.porCategoria = datosProcesados.porCategoria;
-    template.porMetodoPago = datosProcesados.porMetodoPago;
-    template.cortesias = datosProcesados.cortesias.map(c => [new Date(c[0]).toLocaleString(), c[1], c[6]]);
-    template.pendientes = datosProcesados.pendientes.map(p => [new Date(p[0]).toLocaleString(), p[10], p[6], p[7]]);
-
-    const htmlParaPdf = template.evaluate().getContent();
-
-    const blob = Utilities.newBlob(htmlParaPdf, 'text/html', `Reporte de Ventas.html`).getAs('application/pdf');
-    const nombreArchivo = `Reporte de Ventas (${datosProcesados.fechas.inicio_filename} - ${datosProcesados.fechas.fin_filename}).pdf`;
-    const archivoPdf = DriveApp.createFile(blob).setName(nombreArchivo);
-
-    return archivoPdf.getUrl();
-
-  } catch (e) {
-    Logger.log('Error al exportar a PDF: ' + e.toString());
-    throw new Error('Error al exportar a PDF: ' + e.message);
-  }
-}
-
-function _procesarDatosDeVentas(fechas) {
-  const SHEET_NAME = 'Ventas';
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName(SHEET_NAME);
-  if (!sheet) {
-    throw new Error(`No se encuentra la hoja "${SHEET_NAME}"`);
-  }
-
-  const data = sheet.getDataRange().getValues();
-  const headers = data.shift(); // Extraer encabezados
-  Logger.log('Encabezados de la hoja de Ventas: ' + headers.join(', '));
-
-  const fechaInicio = new Date(fechas.inicio);
-  const fechaFin = new Date(fechas.fin);
-  fechaFin.setHours(23, 59, 59, 999); // Incluir todo el día de fin
-
-  let ventasFiltradas = data.filter(row => {
-    const fechaVenta = new Date(row[0]);
-    return fechaVenta >= fechaInicio && fechaVenta <= fechaFin;
-  });
-
-  let kpis = {
-    totalUSD: 0,
-    numVentas: 0,
-    numCortesias: 0,
-    numPendientes: 0
-  };
-
-  let ventasCompletadas = [];
-  let cortesias = [];
-  let pendientes = [];
-  let porCategoria = {};
-  let porMetodoPago = {};
-
-  ventasFiltradas.forEach(row => {
-    const estado = row[9];
-    const totalUSD = parseFloat(row[7]) || 0;
-
-    if (estado === 'completada') {
-      kpis.numVentas++;
-      kpis.totalUSD += totalUSD;
-      ventasCompletadas.push(row);
-
-      const productosStr = row[6] || '';
-      const categoriasEnVenta = [...productosStr.matchAll(/\(([^)]+)\)/g)].map(match => match[1]);
-      
-      categoriasEnVenta.forEach(cat => {
-        if (!porCategoria[cat]) porCategoria[cat] = { count: 0, total: 0 };
-        porCategoria[cat].count++;
-        porCategoria[cat].total += totalUSD / categoriasEnVenta.length;
-      });
-
-      const metodo1 = row[2] ? row[2].trim() : null;
-      const monto1 = parseFloat(row[3]) || 0;
-      if (metodo1 && monto1 > 0) {
-        if (!porMetodoPago[metodo1]) porMetodoPago[metodo1] = { count: 0, total: 0 };
-        porMetodoPago[metodo1].count++;
-        porMetodoPago[metodo1].total += monto1;
-      }
-      
-      const metodo2 = row[4] ? row[4].trim() : null;
-      const monto2 = parseFloat(row[5]) || 0;
-      if (metodo2 && monto2 > 0) {
-        if (!porMetodoPago[metodo2]) porMetodoPago[metodo2] = { count: 0, total: 0 };
-        porMetodoPago[metodo2].count++;
-        porMetodoPago[metodo2].total += monto2;
-      }
-
-    } else if (estado === 'cortesia') {
-      kpis.numCortesias++;
-      cortesias.push(row);
-    } else if (estado === 'pendiente') {
-      kpis.numPendientes++;
-      pendientes.push(row);
-    }
-  });
-
-  return {
-    fechas: {
-      inicio_str: fechaInicio.toLocaleDateString(),
-      fin_str: fechaFin.toLocaleDateString(),
-      inicio_filename: Utilities.formatDate(fechaInicio, Session.getScriptTimeZone(), "yyyy-MM-dd"),
-      fin_filename: Utilities.formatDate(fechaFin, Session.getScriptTimeZone(), "yyyy-MM-dd")
-    },
-    kpis,
-    ventasCompletadas,
-    cortesias,
-    pendientes,
-    porCategoria,
-    porMetodoPago
-  };
-}
