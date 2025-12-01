@@ -1,5 +1,19 @@
 document.addEventListener('deviceready', onDeviceReadyGestionarInventario, false);
 
+// URL del Google Apps Script para manejo de inventario
+// Importante: Reemplazar con la URL real de tu despliegue de Google Apps Script
+// Para desplegar:
+// 1. Ir a script.google.com y crear un nuevo proyecto
+// 2. Pegar el contenido del archivo google-sheets-inventario.gs
+// 3. Ir a "Deploy" > "New deployment"
+// 4. Seleccionar "Web app" como tipo de despliegue
+// 5. Configurar como:
+//    - "Execute as": Me (o cualquiera)
+//    - "Who has access": Anyone (u opcionalmente "Anyone with Google account")
+// 6. Hacer click en "Deploy" y copiar la URL generada
+// Ejemplo: 'https://script.google.com/macros/s/abcdefghijklmnopqrstuvwxyz/exec'
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwYyXpBj_sVhVggTTC5J3zi2k416rg0dgv7_7jGmn0a8mQTApHVLH5lBOBm9RHfLYTT/exec';
+
 function onDeviceReadyGestionarInventario() {
     console.log('Running cordova for gestionar_inventario.html');
     if (!localStorage.getItem('currentUser')) {
@@ -8,8 +22,179 @@ function onDeviceReadyGestionarInventario() {
     // Se moverá la llamada a cargarGestionarInventarioPage para asegurar que los datos estén listos.
 }
 
-// Inicializar productos desde localStorage o como array vacío
-let gestionarProductosDisponibles = JSON.parse(localStorage.getItem('productos')) || [];
+// Inicializar productos desde Google Sheets en lugar de localStorage
+let gestionarProductosDisponibles = [];
+
+// Función para insertar un producto en Google Sheets
+function insertarProductoEnSheet(producto) {
+    return new Promise((resolve, reject) => {
+        const parametros = {
+            action: 'insert',
+            nombre: producto.nombre,
+            precioUSD: producto.precioUSD,
+            inventario: producto.inventario,
+            categoria: producto.categoria,
+            fotoBase64: producto.fotoBase64,
+            idProducto: producto.id
+        };
+
+        const url = `${GOOGLE_SCRIPT_URL}?${Object.keys(parametros).map(key =>
+            encodeURIComponent(key) + '=' + encodeURIComponent(parametros[key])).join('&')}`;
+
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status) {
+                    console.log('Producto insertado exitosamente en Google Sheets');
+                    resolve(data);
+                } else {
+                    console.error('Error al insertar producto:', data.message);
+                    reject(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error en la solicitud a Google Sheets:', error);
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    reject('Error de conexión: Verifique su conexión a internet y la URL del Google Apps Script');
+                } else if (error.message.includes('404') || error.message.includes('Failed to fetch')) {
+                    reject('No se pudo conectar con Google Sheets: Verifique que el despliegue del Google Apps Script sea correcto');
+                } else {
+                    reject(error.message);
+                }
+            });
+    });
+}
+
+// Función para obtener todos los productos de Google Sheets
+function obtenerProductosDeSheet() {
+    return new Promise((resolve, reject) => {
+        const parametros = {
+            action: 'readAll'
+        };
+
+        const url = `${GOOGLE_SCRIPT_URL}?${Object.keys(parametros).map(key =>
+            encodeURIComponent(key) + '=' + encodeURIComponent(parametros[key])).join('&')}`;
+
+        fetch(url)
+            .then(response => {
+                // Verificar si la respuesta es exitosa antes de intentar leer JSON
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status) {
+                    console.log('Productos obtenidos exitosamente de Google Sheets');
+                    resolve(data.records);
+                } else {
+                    console.error('Error al obtener productos:', data.message);
+                    reject(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error en la solicitud a Google Sheets:', error);
+                // Proporcionar un mensaje más descriptivo para diferentes tipos de error
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    reject('Error de conexión: Verifique su conexión a internet y la URL del Google Apps Script');
+                } else if (error.message.includes('404') || error.message.includes('Failed to fetch')) {
+                    reject('No se pudo conectar con Google Sheets: Verifique que el despliegue del Google Apps Script sea correcto');
+                } else {
+                    reject(error.message);
+                }
+            });
+    });
+}
+
+// Función para actualizar un producto en Google Sheets
+function actualizarProductoEnSheet(idProducto, productoActualizado) {
+    return new Promise((resolve, reject) => {
+        const parametros = {
+            action: 'update',
+            idProducto: idProducto,
+            nombre: productoActualizado.nombre,
+            precioUSD: productoActualizado.precioUSD,
+            inventario: productoActualizado.inventario,
+            categoria: productoActualizado.categoria,
+            fotoBase64: productoActualizado.fotoBase64
+        };
+
+        const url = `${GOOGLE_SCRIPT_URL}?${Object.keys(parametros).map(key =>
+            encodeURIComponent(key) + '=' + encodeURIComponent(parametros[key])).join('&')}`;
+
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status) {
+                    console.log('Producto actualizado exitosamente en Google Sheets');
+                    resolve(data);
+                } else {
+                    console.error('Error al actualizar producto:', data.message);
+                    reject(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error en la solicitud a Google Sheets:', error);
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    reject('Error de conexión: Verifique su conexión a internet y la URL del Google Apps Script');
+                } else if (error.message.includes('404') || error.message.includes('Failed to fetch')) {
+                    reject('No se pudo conectar con Google Sheets: Verifique que el despliegue del Google Apps Script sea correcto');
+                } else {
+                    reject(error.message);
+                }
+            });
+    });
+}
+
+// Función para eliminar un producto de Google Sheets
+function eliminarProductoDeSheet(idProducto) {
+    return new Promise((resolve, reject) => {
+        const parametros = {
+            action: 'delete',
+            idProducto: idProducto
+        };
+
+        const url = `${GOOGLE_SCRIPT_URL}?${Object.keys(parametros).map(key =>
+            encodeURIComponent(key) + '=' + encodeURIComponent(parametros[key])).join('&')}`;
+
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status) {
+                    console.log('Producto eliminado exitosamente de Google Sheets');
+                    resolve(data);
+                } else {
+                    console.error('Error al eliminar producto:', data.message);
+                    reject(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error en la solicitud a Google Sheets:', error);
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    reject('Error de conexión: Verifique su conexión a internet y la URL del Google Apps Script');
+                } else if (error.message.includes('404') || error.message.includes('Failed to fetch')) {
+                    reject('No se pudo conectar con Google Sheets: Verifique que el despliegue del Google Apps Script sea correcto');
+                } else {
+                    reject(error.message);
+                }
+            });
+    });
+}
 
 // Llamar a cargarGestionarInventarioPage después de que el DOM esté completamente cargado
 // y después de que gestionarProductosDisponibles se haya inicializado.
@@ -136,6 +321,34 @@ function cargarGestionarInventarioPage() {
         });
     }
 
+    // Cargar productos desde Google Sheets
+    obtenerProductosDeSheet()
+        .then(productos => {
+            gestionarProductosDisponibles = productos.map(p => ({
+                id: p.ID_Producto,
+                nombre: p.Nombre_Producto,
+                precioUSD: parseFloat(p.Precio_USD),
+                inventario: parseInt(p.Stock),
+                categoria: p.Categor_a, // Nota: Google Sheets reemplaza espacios con guiones bajos
+                fotoBase64: p.Foto_Base64
+            }));
+
+            renderizarProductos();
+        })
+        .catch(error => {
+            console.error('Error al cargar productos desde Google Sheets:', error);
+            // Si falla la carga desde Google Sheets, mostrar un mensaje amigable
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudieron cargar los productos desde Google Sheets. Detalles: ' + error.message,
+                confirmButtonColor: '#20429a'
+            });
+        });
+}
+
+function renderizarProductos() {
+    const listaGestionarInventarioDivPage = document.getElementById('lista-gestionar-inventario');
     if (!listaGestionarInventarioDivPage) return;
     listaGestionarInventarioDivPage.innerHTML = ''; // Clear previous content
 
@@ -281,16 +494,27 @@ function eliminarProductoPage(productoId) {
         cancelButtonText: 'Cancelar'
     }).then((result) => {
         if (result.isConfirmed) {
-            gestionarProductosDisponibles = gestionarProductosDisponibles.filter(p => p.id !== productoId);
-            localStorage.setItem('productos', JSON.stringify(gestionarProductosDisponibles));
-            cargarGestionarInventarioPage();
-            Swal.fire({
-                icon: 'success',
-                title: 'Eliminado',
-                text: 'El producto ha sido eliminado.',
-                confirmButtonColor: '#20429a',
-                confirmButtonText: "Aceptar"
-            });
+            // Eliminar producto de Google Sheets
+            eliminarProductoDeSheet(productoId)
+                .then(data => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Eliminado',
+                        text: 'El producto ha sido eliminado.',
+                        confirmButtonColor: '#20429a',
+                        confirmButtonText: "Aceptar"
+                    });
+                    cargarGestionarInventarioPage();
+                })
+                .catch(error => {
+                    console.error('Error al eliminar producto de Google Sheets:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo eliminar el producto de Google Sheets. Detalles: ' + error.message,
+                        confirmButtonColor: '#20429a'
+                    });
+                });
         }
     });
 }
@@ -340,38 +564,60 @@ if (guardarProductoButtonPage) {
         }
 
         const guardarProductoConFoto = (fotoBase64 = null) => {
-            let mensajeExito = '';
+            const producto = {
+                id: id || Date.now().toString(), // Si es nuevo, generar ID único
+                nombre: nombre,
+                precioUSD: precio,
+                inventario: stock,
+                categoria: categoria,
+                fotoBase64: fotoBase64
+            };
+
             if (id) { // Editing existing product
-                const productoIndex = gestionarProductosDisponibles.findIndex(p => p.id === id);
-                if (productoIndex > -1) {
-                    if (gestionarProductosDisponibles.find(p => p.nombre.toLowerCase() === nombre.toLowerCase() && p.id !== id)) {
-                        Swal.fire({ icon: 'error', title: 'Error', text: 'Un producto con este nombre ya existe.', confirmButtonColor: '#20429a' });
-                        return;
-                    }
-                    const productoExistente = gestionarProductosDisponibles[productoIndex];
-                    gestionarProductosDisponibles[productoIndex] = {
-                        ...productoExistente,
-                        nombre,
-                        precioUSD: precio,
-                        inventario: stock,
-                        categoria: categoria,
-                        fotoBase64: fotoBase64 || productoExistente.fotoBase64
-                    };
-                    mensajeExito = 'Producto actualizado exitosamente.';
-                }
+                // Actualizar producto existente en Google Sheets
+                actualizarProductoEnSheet(id, producto)
+                    .then(data => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Éxito!',
+                            text: 'Producto actualizado exitosamente.',
+                            confirmButtonColor: '#20429a'
+                        });
+                        cargarGestionarInventarioPage();
+                        limpiarFormularioProductoPage();
+                    })
+                    .catch(error => {
+                        console.error('Error al actualizar producto en Google Sheets:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudo actualizar el producto en Google Sheets. Detalles: ' + error.message,
+                            confirmButtonColor: '#20429a'
+                        });
+                    });
             } else { // Adding new product
-                const nuevoId = gestionarProductosDisponibles.length > 0 ? Math.max(...gestionarProductosDisponibles.map(p => p.id)) + 1 : 1;
-                if (gestionarProductosDisponibles.find(p => p.nombre.toLowerCase() === nombre.toLowerCase())) {
-                    Swal.fire({ icon: 'error', title: 'Error', text: 'Un producto con este nombre ya existe.', confirmButtonColor: '#20429a' });
-                    return;
-                }
-                gestionarProductosDisponibles.push({ id: nuevoId, nombre, precioUSD: precio, inventario: stock, categoria: categoria, fotoBase64 });
-                mensajeExito = 'Producto agregado exitosamente.';
+                // Insertar nuevo producto en Google Sheets
+                insertarProductoEnSheet(producto)
+                    .then(data => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Éxito!',
+                            text: 'Producto agregado exitosamente.',
+                            confirmButtonColor: '#20429a'
+                        });
+                        cargarGestionarInventarioPage();
+                        limpiarFormularioProductoPage();
+                    })
+                    .catch(error => {
+                        console.error('Error al insertar producto en Google Sheets:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudo guardar el producto en Google Sheets. Detalles: ' + error.message,
+                            confirmButtonColor: '#20429a'
+                        });
+                    });
             }
-            localStorage.setItem('productos', JSON.stringify(gestionarProductosDisponibles));
-            Swal.fire({ icon: 'success', title: '¡Éxito!', text: mensajeExito, confirmButtonColor: '#20429a' });
-            cargarGestionarInventarioPage();
-            limpiarFormularioProductoPage();
         };
 
         const resizeImage = (base64, maxWidth = 100, maxHeight = 100) => {
